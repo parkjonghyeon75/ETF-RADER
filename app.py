@@ -11,9 +11,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 
 # ============================================================
-# ETF Technical Radar v2
-# 자동 지지/저항 + 매물대 + 종합점수 100점
-# 눌림목 + 돌파 + 추격위험 + 매매 시나리오 + 모바일 UI
+# ETF Technical Radar v3 (가독성 개선 + 쉬운 매매 안내)
 # ============================================================
 
 st.set_page_config(
@@ -23,29 +21,60 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# 🎨 시각적 가독성 개선 CSS (고대비 텍스트 적용)
 st.markdown("""
 <style>
-.stApp {max-width: 1000px; margin: 0 auto;}
+.stApp {max-width: 1000px; margin: 0 auto; background-color: #0e1117;}
 .block-container {padding-top: 1rem; padding-bottom: 2rem; padding-left: .8rem; padding-right: .8rem;}
-div[data-testid="stMetric"] {background:#1e222d; border:1px solid #2a2e39; border-radius:10px; padding:8px;}
+
+/* 고대비 카드 및 글자색 설정 */
+div[data-testid="stMetric"] {
+    background: #1e222d; 
+    border: 1px solid #363c4e; 
+    border-radius: 10px; 
+    padding: 10px;
+}
+div[data-testid="stMetricLabel"] {
+    color: #cbd5e1 !important; /* 명확한 밝은 회색/백색 계열 */
+    font-size: 0.95rem !important;
+    font-weight: 600;
+}
+div[data-testid="stMetricValue"] {
+    color: #ffffff !important; /* 선명한 흰색 */
+    font-weight: 700;
+}
+
 .radar-card {
-    background:#1e222d; border:1px solid #303542; border-radius:12px;
-    padding:14px; margin-bottom:10px;
+    background: #1e222d; 
+    border: 1px solid #363c4e; 
+    border-radius: 12px;
+    padding: 16px; 
+    margin-bottom: 12px;
+    color: #ffffff;
 }
-.small-muted {color:#9aa4b2; font-size:0.85rem;}
-.big-score {font-size:2.0rem; font-weight:800;}
-.signal-green {color:#35d07f;}
-.signal-yellow {color:#f2c94c;}
-.signal-red {color:#ff6b6b;}
+
+/* 텍스트 가독성 강화 */
+.text-bright {color: #ffffff !important; font-size: 0.95rem; line-height: 1.5;}
+.text-sub {color: #cbd5e1 !important; font-size: 0.88rem;}
+.highlight-green {color: #35d07f; font-weight: bold;}
+.highlight-red {color: #ff6b6b; font-weight: bold;}
+.highlight-yellow {color: #f2c94c; font-weight: bold;}
+
 .price-zone {
-    border-radius:10px; padding:10px 12px; margin:5px 0;
-    border:1px solid #303542; background:#191d26;
+    border-radius: 10px; 
+    padding: 12px; 
+    margin: 6px 0;
+    border: 1px solid #363c4e; 
+    background: #161922;
+    color: #ffffff;
+    font-size: 0.95rem;
 }
+
 @media (max-width: 600px) {
-    .block-container {padding-left:.55rem; padding-right:.55rem;}
-    h1 {font-size:1.55rem;}
-    h2 {font-size:1.25rem;}
-    h3 {font-size:1.05rem;}
+    .block-container {padding-left: .55rem; padding-right: .55rem;}
+    h1 {font-size: 1.55rem;}
+    h2 {font-size: 1.25rem;}
+    h3 {font-size: 1.05rem;}
 }
 </style>
 """, unsafe_allow_html=True)
@@ -258,7 +287,6 @@ def get_support_resistance(df):
     supports = [x for x in low_clusters if x["price"] < current]
     resistances = [x for x in high_clusters if x["price"] > current]
 
-    # 이동평균도 보조 레벨로 추가
     for col in ["MA20", "MA60", "MA120"]:
         if col in df.columns and pd.notna(df[col].iloc[-1]):
             p = float(df[col].iloc[-1])
@@ -267,7 +295,6 @@ def get_support_resistance(df):
             elif p > current:
                 resistances.append({"price": p, "strength": 2})
 
-    # 최근 고점/저점
     recent20 = df.iloc[-20:]
     recent60 = df.iloc[-60:] if len(df) >= 60 else df
 
@@ -297,9 +324,6 @@ def get_support_resistance(df):
 
     return supports, resistances
 
-# -----------------------------
-# 거래량 매물대
-# -----------------------------
 def volume_profile(df, bins=24):
     data = df.iloc[-120:] if len(df) >= 120 else df
     low = float(data["Low"].min())
@@ -324,26 +348,13 @@ def volume_profile(df, bins=24):
 
     return vp.sort_values("volume", ascending=False).reset_index(drop=True)
 
-def get_volume_zones(vp, current, n=3):
-    if vp.empty:
-        return [], []
-
-    above = vp[vp["price"] > current].sort_values("price")
-    below = vp[vp["price"] < current].sort_values("price", ascending=False)
-
-    resist = above.sort_values("volume", ascending=False).head(n)
-    support = below.sort_values("volume", ascending=False).head(n)
-
-    return support["price"].tolist(), resist["price"].tolist()
-
 # -----------------------------
-# 기술점수 100점
+# 기술점수 계산
 # -----------------------------
 def technical_score(df):
     x = df.iloc[-1]
     prev = df.iloc[-2]
     score = 0
-    reasons = []
 
     close = float(x["Close"])
     ma5, ma20, ma60 = x["MA5"], x["MA20"], x["MA60"]
@@ -351,224 +362,163 @@ def technical_score(df):
     macd, sig, hist = x["MACD"], x["MACD_Signal"], x["MACD_Hist"]
     vol_ratio = x["Vol_Ratio"]
 
-    # 25점: 추세
-    trend = 0
-    if pd.notna(ma5) and close > ma5: trend += 7
-    if pd.notna(ma20) and close > ma20: trend += 8
-    if pd.notna(ma60) and ma20 > ma60: trend += 5
-    if pd.notna(ma5) and pd.notna(ma20) and ma5 > ma20: trend += 5
-    score += trend
+    # 추세 (25점)
+    if pd.notna(ma5) and close > ma5: score += 7
+    if pd.notna(ma20) and close > ma20: score += 8
+    if pd.notna(ma60) and ma20 > ma60: score += 5
+    if pd.notna(ma5) and pd.notna(ma20) and ma5 > ma20: score += 5
 
-    # 15점: RSI
-    rsi_score = 0
+    # RSI (15점)
     if pd.notna(rsi):
-        if 55 <= rsi < 68: rsi_score = 15
-        elif 50 <= rsi < 55 or 68 <= rsi < 72: rsi_score = 12
-        elif 40 <= rsi < 50: rsi_score = 8
-        elif rsi >= 72: rsi_score = 5
-        else: rsi_score = 3
-    score += rsi_score
+        if 55 <= rsi < 68: score += 15
+        elif 50 <= rsi < 55 or 68 <= rsi < 72: score += 12
+        elif 40 <= rsi < 50: score += 8
+        elif rsi >= 72: score += 5
+        else: score += 3
 
-    # 15점: MACD
-    macd_score = 0
+    # MACD (15점)
     if pd.notna(macd) and pd.notna(sig):
-        if macd > sig and hist > 0: macd_score = 15
-        elif macd > sig: macd_score = 11
-        elif hist > prev["MACD_Hist"]: macd_score = 7
-        else: macd_score = 3
-    score += macd_score
+        if macd > sig and hist > 0: score += 15
+        elif macd > sig: score += 11
+        elif hist > prev["MACD_Hist"]: score += 7
+        else: score += 3
 
-    # 15점: 거래량
-    vol_score = 0
+    # 거래량 (15점)
     if pd.notna(vol_ratio):
-        if 1.2 <= vol_ratio <= 2.5 and close >= prev["Close"]: vol_score = 15
-        elif vol_ratio >= 1.5 and close < prev["Close"]: vol_score = 4
-        elif 0.8 <= vol_ratio < 1.5: vol_score = 10
-        elif vol_ratio < 0.8: vol_score = 7
-    score += vol_score
+        if 1.2 <= vol_ratio <= 2.5 and close >= prev["Close"]: score += 15
+        elif vol_ratio >= 1.5 and close < prev["Close"]: score += 4
+        elif 0.8 <= vol_ratio < 1.5: score += 10
+        elif vol_ratio < 0.8: score += 7
 
-    # 10점: 볼린저
-    bb_score = 0
+    # 볼린저 (10점)
     if pd.notna(x["BB_Upper"]) and pd.notna(x["BB_Lower"]):
         width = x["BB_Upper"] - x["BB_Lower"]
         if width > 0:
             pos = (close - x["BB_Lower"]) / width
-            if 0.45 <= pos <= 0.75: bb_score = 10
-            elif 0.25 <= pos < 0.45 or 0.75 < pos <= 0.90: bb_score = 8
-            elif pos > 0.90: bb_score = 4
-            else: bb_score = 6
-    score += bb_score
+            if 0.45 <= pos <= 0.75: score += 10
+            elif 0.25 <= pos < 0.45 or 0.75 < pos <= 0.90: score += 8
+            elif pos > 0.90: score += 4
+            else: score += 6
 
-    # 10점: 가격 위치/모멘텀
-    location_score = 0
+    # 모멘텀 (20점)
     ret5 = x["Return5"]
     if pd.notna(ret5):
-        if 0 <= ret5 <= 5: location_score = 10
-        elif ret5 > 8: location_score = 4
-        elif ret5 < -5: location_score = 3
-        else: location_score = 7
-    score += location_score
+        if 0 <= ret5 <= 5: score += 10
+        elif ret5 > 8: score += 4
+        elif ret5 < -5: score += 3
+        else: score += 7
 
-    # 10점: 최근 모멘텀
-    momentum_score = 0
     if pd.notna(x["Return20"]):
-        if x["Return20"] > 10: momentum_score = 10
-        elif x["Return20"] > 3: momentum_score = 8
-        elif x["Return20"] >= 0: momentum_score = 6
-        else: momentum_score = 3
-    score += momentum_score
+        if x["Return20"] > 10: score += 10
+        elif x["Return20"] > 3: score += 8
+        elif x["Return20"] >= 0: score += 6
+        else: score += 3
 
     score = int(max(0, min(100, score)))
 
-    if score >= 80:
-        label = "강한 상승"
-    elif score >= 65:
-        label = "상승 우위"
-    elif score >= 45:
-        label = "중립"
-    elif score >= 30:
-        label = "조정"
-    else:
-        label = "약세"
+    if score >= 80: label = "강한 상승세"
+    elif score >= 65: label = "상승 우세"
+    elif score >= 45: label = "중립/관망"
+    elif score >= 30: label = "조정 국면"
+    else: label = "약세/하락 위험"
 
     return score, label
 
-# -----------------------------
-# 패턴/시나리오
-# -----------------------------
-def detect_patterns(df, supports, resistances, vp):
+def detect_patterns(df, supports, resistances):
     x = df.iloc[-1]
-    prev = df.iloc[-2]
     close = float(x["Close"])
-
     ma20 = x["MA20"]
     ma60 = x["MA60"]
     rsi = x["RSI"]
     macd = x["MACD"]
     sig = x["MACD_Signal"]
-    hist = x["MACD_Hist"]
     vol = x["Vol_Ratio"]
-    atr = x["ATR14"]
 
     recent20_high = float(df.iloc[-21:-1]["High"].max()) if len(df) >= 22 else float(df["High"].max())
-    recent20_low = float(df.iloc[-21:-1]["Low"].min()) if len(df) >= 22 else float(df["Low"].min())
-
     patterns = []
 
     # 눌림목
-    pullback = (
-        pd.notna(ma20) and pd.notna(ma60) and pd.notna(rsi)
-        and close >= ma20 * 0.985
-        and close <= ma20 * 1.025
-        and ma20 > ma60
-        and 42 <= rsi <= 65
-        and vol < 1.3
-    )
-    if pullback:
-        patterns.append("눌림목 후보")
+    if pd.notna(ma20) and pd.notna(ma60) and pd.notna(rsi):
+        if close >= ma20 * 0.985 and close <= ma20 * 1.025 and ma20 > ma60 and 42 <= rsi <= 65 and vol < 1.3:
+            patterns.append("💡 눌림목 매수 적기")
 
-    # 저항 돌파
-    breakout = (
-        close > recent20_high
-        and vol >= 1.3
-        and pd.notna(macd) and macd > sig
-    )
-    if breakout:
-        patterns.append("거래량 동반 돌파")
-
-    # 돌파 실패
-    false_breakout = (
-        float(x["High"]) > recent20_high
-        and close < recent20_high
-        and vol >= 1.2
-    )
-    if false_breakout:
-        patterns.append("돌파 실패 경계")
+    # 강한 돌파
+    if close > recent20_high and vol >= 1.3 and pd.notna(macd) and macd > sig:
+        patterns.append("🚀 강력한 저항선 돌파")
 
     # 추격 위험
     bb_width = x["BB_Upper"] - x["BB_Lower"]
     bb_pos = ((close - x["BB_Lower"]) / bb_width) if pd.notna(bb_width) and bb_width > 0 else 0.5
-    chase = (
-        pd.notna(rsi) and rsi >= 70
-        and bb_pos >= 0.88
-        and pd.notna(x["Return5"]) and x["Return5"] >= 6
-    )
-    if chase:
-        patterns.append("단기 추격 위험")
+    if pd.notna(rsi) and rsi >= 70 and bb_pos >= 0.88:
+        patterns.append("⚠️ 단기 과열 (추격매수 위험)")
 
-    # 추세 훼손
-    breakdown = (
-        pd.notna(ma20) and pd.notna(ma60)
-        and close < ma20
-        and ma20 < ma60
-        and macd < sig
-    )
-    if breakdown:
-        patterns.append("추세 훼손")
-
-    # 지지 이탈
-    support_break = (
-        bool(supports)
-        and close < supports[0]["price"] * 0.99
-        and vol >= 1.2
-    )
-    if support_break:
-        patterns.append("지지선 이탈")
+    # 추세 훼손/이탈
+    if pd.notna(ma20) and close < ma20 and macd < sig:
+        patterns.append("🔻 단기 추세 약화")
 
     if not patterns:
-        if close > ma20 and ma20 > ma60:
-            patterns.append("상승 추세 유지")
-        elif close > ma20:
-            patterns.append("단기 우상향")
-        else:
-            patterns.append("관망/조정")
+        if close > ma20: patterns.append("📈 차분한 우상향 흐름")
+        else: patterns.append("💤 횡보/관망 구간")
 
     return patterns
 
-def scenario_text(df, score, supports, resistances, patterns):
+# -----------------------------
+# 명확하고 쉬운 매매 안내 생성기
+# -----------------------------
+def easy_action_scenario(df, score, supports, resistances, patterns):
     x = df.iloc[-1]
     close = float(x["Close"])
     rsi = float(x["RSI"]) if pd.notna(x["RSI"]) else 50
-    vol = float(x["Vol_Ratio"]) if pd.notna(x["Vol_Ratio"]) else 1
     ma20 = float(x["MA20"]) if pd.notna(x["MA20"]) else close
-    ma60 = float(x["MA60"]) if pd.notna(x["MA60"]) else close
 
     s1 = supports[0]["price"] if supports else ma20
-    s2 = supports[1]["price"] if len(supports) > 1 else ma60
+    s2 = supports[1]["price"] if len(supports) > 1 else ma20 * 0.97
     r1 = resistances[0]["price"] if resistances else close * 1.03
     r2 = resistances[1]["price"] if len(resistances) > 1 else close * 1.06
 
-    if "단기 추격 위험" in patterns:
-        title = "🟠 과열 구간 — 추격보다 눌림 확인"
-        body = f"RSI {rsi:.1f}, 단기 상승폭과 밴드 위치가 높습니다. {s1:,.0f}원 부근 지지 여부와 거래량 둔화를 확인하는 시나리오입니다."
-    elif "거래량 동반 돌파" in patterns:
-        title = "🟢 돌파 시나리오"
-        body = f"최근 저항을 종가 기준으로 넘어섰고 거래량이 {vol:.2f}배입니다. 돌파 가격을 다시 지지하는지 확인하면서 {r2:,.0f}원대까지 다음 저항을 관찰합니다."
-    elif "돌파 실패 경계" in patterns:
-        title = "🟠 돌파 실패 경계"
-        body = f"장중 저항을 넘었지만 종가가 되돌아왔습니다. {r1:,.0f}원 회복 여부와 거래량을 확인하고, {s1:,.0f}원 지지 여부를 함께 봅니다."
-    elif "눌림목 후보" in patterns:
-        title = "🟢 상승 추세 속 눌림목 후보"
-        body = f"20일선 {ma20:,.0f}원 부근에서 조정받는 구조입니다. 거래량이 과도하게 증가하지 않는 가운데 지지 후 RSI/MACD 반등 여부를 확인합니다."
-    elif "지지선 이탈" in patterns or "추세 훼손" in patterns:
-        title = "🔴 추세 훼손/관망"
-        body = f"주요 지지와 중기 추세가 약해진 상태입니다. {s2:,.0f}원 부근 회복과 거래량 감소 여부를 먼저 확인하는 시나리오입니다."
-    elif score >= 65:
-        title = "🟢 상승 추세 유지"
-        body = f"현재 기술점수 {score}/100입니다. {s1:,.0f}원 지지와 {r1:,.0f}원 저항을 기준으로 추세 지속 여부를 관찰합니다."
+    buy_guide = ""
+    sell_guide = ""
+    wait_guide = ""
+
+    if "⚠️ 단기 과열 (추격매수 위험)" in patterns:
+        status_title = "🟠 과열 구간 : 지금 바로 사지 말고 기다리세요!"
+        buy_guide = f"**지금 매수는 위험합니다.** 주가가 단기 폭등하여 RSI가 {rsi:.0f}로 과열되었습니다. 주가가 **{s1:,.0f}원 부근**까지 내려와서 숨고르기를 할 때 분할 매수로 접근하세요."
+        sell_guide = f"기존 보유자라면 **{r1:,.0f}원~{r2:,.0f}원 매물대 구간**에서 이익을 일부 실현(팔아서 현금화)하기 좋은 위치입니다."
+        wait_guide = f"**{s1:,.0f}원 지지선**이 무너지면 조정이 길어질 수 있으니 섣부른 추격 매수는 금물입니다."
+
+    elif "🚀 강력한 저항선 돌파" in patterns:
+        status_title = "🟢 강력한 저항 돌파 : 추가 상승 가능성이 높은 구간!"
+        buy_guide = f"위쪽 매물대를 거래량을 싣고 뚫어냈습니다! **현재 가격대 또는 {r1:,.0f}원 부근**으로 잠시 밀릴 때(돌파 후 지지) 매수 타이밍으로 잡을 수 있습니다."
+        sell_guide = f"다음 강한 저항선인 **{r2:,.0f}원 부근**까지 추가 상승을 노려보세요."
+        wait_guide = f"만약 다시 밀려 **{s1:,.0f}원 아래로 종가가 떨어지면** '가짜 돌파'일 수 있으니 손절/관망이 필요합니다."
+
+    elif "💡 눌림목 매수 적기" in patterns:
+        status_title = "🟢 눌림목 기회 : 차분히 모아가기 좋은 매수 타이밍!"
+        buy_guide = f"상승 추세 중에 잠시 쉬어가는 구간입니다. 20일 이동평균선 근처인 **{s1:,.0f}원~{close:,.0f}원 사이**는 매수하기에 매우 매력적인 가격대입니다."
+        sell_guide = f"상승 전환 시 전고점 및 저항대인 **{r1:,.0f}원**을 1차 목표가로 잡고 대응하세요."
+        wait_guide = f"주요 지지선인 **{s2:,.0f}원**을 하향 이탈하면 추세가 꺾일 수 있으니 이때는 손절(매도)로 대응하세요."
+
+    elif "🔻 단기 추세 약화" in patterns or score < 45:
+        status_title = "🔴 추세 약화 : 무리한 매수 금지, 관망이 필요한 때!"
+        buy_guide = f"지금은 힘이 빠지는 구간입니다. **매수를 멈추고 관망**하는 것이 안전합니다."
+        sell_guide = f"보유 중이라면 **{r1:,.0f}원** 근처로 반등할 때 비중을 줄이거나 팔아서 현금을 확보하세요."
+        wait_guide = f"하방 지지선인 **{s1:,.0f}원 및 {s2:,.0f}원**에서 주가가 멈추고 반등 신호가 나올 때까지 기다려야 합니다."
+
     else:
-        title = "🔵 중립/조정 구간"
-        body = f"현재 기술점수 {score}/100입니다. {s1:,.0f}원 지지와 {r1:,.0f}원 저항 중 어느 쪽을 이탈·돌파하는지가 다음 방향의 핵심입니다."
+        status_title = "🔵 중립 흐름 : 뚜렷한 방향성을 찾는 중"
+        buy_guide = f"안전하게 사려면 주가가 **{s1:,.0f}원 지지선**까지 내려오거나, 반대로 **{r1:,.0f}원 저항선**을 확실하게 뚫어줄 때 매수하세요."
+        sell_guide = f"상승 시 **{r1:,.0f}원 부근**에 매물(팔려는 물량)이 몰려있으니 이 가격대에 오면 익절을 고려하세요."
+        wait_guide = f"{s1:,.0f}원~{r1:,.0f}원 박스권 안에서 주가가 어느 방향으로 튈지 지켜보는 구간입니다."
 
-    return title, body, s1, s2, r1, r2
+    return status_title, buy_guide, sell_guide, wait_guide, s1, s2, r1, r2
 
 # -----------------------------
-# 차트
+# 차트 생성
 # -----------------------------
-def make_chart(df, supports, resistances, vp):
+def make_chart(df, supports, resistances):
     fig = make_subplots(
         rows=4, cols=1, shared_xaxes=True,
-        vertical_spacing=0.025,
+        vertical_spacing=0.03,
         row_heights=[0.50, 0.16, 0.17, 0.17]
     )
 
@@ -580,79 +530,67 @@ def make_chart(df, supports, resistances, vp):
     )
 
     line_defs = [
-        ("MA5", "yellow"), ("MA20", "orange"),
-        ("MA60", "green"), ("MA120", "purple")
+        ("MA5", "#f2c94c"), ("MA20", "#ff9f43"),
+        ("MA60", "#2ecc71"), ("MA120", "#a55eea")
     ]
     for col, color in line_defs:
         if col in df:
             fig.add_trace(
                 go.Scatter(
                     x=df.index, y=df[col],
-                    line=dict(color=color, width=1),
+                    line=dict(color=color, width=1.2),
                     name=col
                 ), row=1, col=1
             )
 
-    fig.add_trace(
-        go.Scatter(x=df.index, y=df["BB_Upper"],
-                   line=dict(color="gray", dash="dot"), name="BB Upper"),
-        row=1, col=1
-    )
-    fig.add_trace(
-        go.Scatter(x=df.index, y=df["BB_Lower"],
-                   line=dict(color="gray", dash="dot"), name="BB Lower"),
-        row=1, col=1
-    )
-
-    # 지지/저항선
-    for i, item in enumerate(supports[:3]):
+    # 지지/저항 표시
+    for i, item in enumerate(supports[:2]):
         fig.add_hline(
             y=item["price"], row=1, col=1,
-            line_dash="dot", line_width=1,
-            annotation_text=f"S{i+1} {item['price']:,.0f}",
-            annotation_position="bottom left"
+            line_dash="dot", line_color="#35d07f", line_width=1.5,
+            annotation_text=f"지지 S{i+1} ({item['price']:,.0f}원)",
+            annotation_position="bottom left",
+            annotation_font_color="#35d07f"
         )
 
-    for i, item in enumerate(resistances[:3]):
+    for i, item in enumerate(resistances[:2]):
         fig.add_hline(
             y=item["price"], row=1, col=1,
-            line_dash="dash", line_width=1,
-            annotation_text=f"R{i+1} {item['price']:,.0f}",
-            annotation_position="top left"
+            line_dash="dash", line_color="#ff6b6b", line_width=1.5,
+            annotation_text=f"저항 R{i+1} ({item['price']:,.0f}원)",
+            annotation_position="top left",
+            annotation_font_color="#ff6b6b"
         )
 
-    vol_colors = ["red" if c >= o else "blue" for c, o in zip(df["Close"], df["Open"])]
+    vol_colors = ["#ff6b6b" if c >= o else "#4bc0c0" for c, o in zip(df["Close"], df["Open"])]
     fig.add_trace(
-        go.Bar(x=df.index, y=df["Volume"], marker_color=vol_colors, name="Volume"),
+        go.Bar(x=df.index, y=df["Volume"], marker_color=vol_colors, name="거래량"),
         row=2, col=1
     )
 
     fig.add_trace(
-        go.Scatter(x=df.index, y=df["RSI"],
-                   line=dict(color="white", width=1.5), name="RSI"),
+        go.Scatter(x=df.index, y=df["RSI"], line=dict(color="#ffffff", width=1.5), name="RSI"),
         row=3, col=1
     )
-    fig.add_hline(y=70, row=3, col=1, line_dash="dot")
-    fig.add_hline(y=30, row=3, col=1, line_dash="dot")
+    fig.add_hline(y=70, row=3, col=1, line_dash="dot", line_color="#ff6b6b")
+    fig.add_hline(y=30, row=3, col=1, line_dash="dot", line_color="#35d07f")
 
     fig.add_trace(
-        go.Bar(x=df.index, y=df["MACD_Hist"], name="MACD Hist"),
+        go.Bar(x=df.index, y=df["MACD_Hist"], name="MACD 히스토그램"),
         row=4, col=1
     )
     fig.add_trace(
-        go.Scatter(x=df.index, y=df["MACD"],
-                   line=dict(color="blue"), name="MACD"),
+        go.Scatter(x=df.index, y=df["MACD"], line=dict(color="#54a0ff"), name="MACD"),
         row=4, col=1
     )
     fig.add_trace(
-        go.Scatter(x=df.index, y=df["MACD_Signal"],
-                   line=dict(color="red"), name="Signal"),
+        go.Scatter(x=df.index, y=df["MACD_Signal"], line=dict(color="#ff6b6b"), name="Signal"),
         row=4, col=1
     )
 
     fig.update_layout(
-        height=720,
-        margin=dict(l=5, r=5, t=5, b=5),
+        height=700,
+        margin=dict(l=5, r=5, t=10, b=5),
         xaxis_rangeslider_visible=False,
         template="plotly_dark",
         showlegend=False,
@@ -663,25 +601,24 @@ def make_chart(df, supports, resistances, vp):
     return fig
 
 # ============================================================
-# UI
+# UI 메인 화면
 # ============================================================
-st.title("📈 ETF Technical Radar")
-st.caption("기술적 조건을 종합해 현재 추세·지지/저항·눌림·돌파 상황을 보여줍니다.")
+st.title("📈 ETF 매매 레이더 (쉬운 매매 안내)")
 
 watchlist = st.session_state.watchlist
 options = list(watchlist.values()) + ["➕ 종목코드로 관심종목 추가"]
 
 c1, c2 = st.columns([2.1, 1])
 with c1:
-    selected = st.selectbox("⭐ 관심 ETF", options)
+    selected = st.selectbox("⭐ 관심 ETF 선택", options)
 with c2:
-    period = st.selectbox("분석기간", ["6m", "1y", "2y"], index=1)
+    period = st.selectbox("분석 기간", ["6m", "1y", "2y"], index=1)
 
 if selected == "➕ 종목코드로 관심종목 추가":
     st.subheader("종목코드 등록")
     a, b = st.columns([2, 1])
     with a:
-        new_code = st.text_input("종목코드", placeholder="예: 395160", label_visibility="collapsed")
+        new_code = st.text_input("종목코드 6자리", placeholder="예: 395160", label_visibility="collapsed")
     with b:
         add = st.button("⭐ 추가", use_container_width=True)
 
@@ -702,30 +639,26 @@ symbol_input = next(k for k, v in watchlist.items() if v == selected)
 
 delete_col, _ = st.columns([1, 3])
 with delete_col:
-    if st.button("🗑 삭제", use_container_width=True):
+    if st.button("🗑 목록에서 삭제", use_container_width=True):
         del st.session_state.watchlist[symbol_input]
         save_watchlist(st.session_state.watchlist)
         st.rerun()
 
-with st.spinner("ETF 기술적 분석 중..."):
+with st.spinner("최신 데이터 및 매매 신호 분석 중..."):
     raw_df, code = load_etf_data(symbol_input, period)
 
 if raw_df is None:
     st.error(f"데이터를 불러오지 못했습니다. 종목코드 {symbol_input}을 확인해주세요.")
     st.stop()
 
-df = calculate_indicators(raw_df)
-
-# 최소 데이터 확보
-df = df.dropna(subset=["Close"]).copy()
+df = calculate_indicators(raw_df).dropna(subset=["Close"]).copy()
 
 score, score_label = technical_score(df)
 supports, resistances = get_support_resistance(df)
 vp = volume_profile(df)
-vp_support, vp_resist = get_volume_zones(vp, float(df["Close"].iloc[-1]))
 
-patterns = detect_patterns(df, supports, resistances, vp)
-scenario_title, scenario_body, s1, s2, r1, r2 = scenario_text(
+patterns = detect_patterns(df, supports, resistances)
+status_title, buy_guide, sell_guide, wait_guide, s1, s2, r1, r2 = easy_action_scenario(
     df, score, supports, resistances, patterns
 )
 
@@ -739,148 +672,150 @@ vol_ratio = float(x["Vol_Ratio"]) if pd.notna(x["Vol_Ratio"]) else 1
 macd = float(x["MACD"]) if pd.notna(x["MACD"]) else 0
 macd_sig = float(x["MACD_Signal"]) if pd.notna(x["MACD_Signal"]) else 0
 
-# ============================================================
-# 모바일 핵심 카드
-# ============================================================
-st.markdown("### 현재 상태")
+# -----------------------------
+# 1. 핵심 요약 카드
+# -----------------------------
+st.markdown("### 📊 현재 주가 및 종합 점수")
 
 m1, m2 = st.columns(2)
 with m1:
     st.metric("현재가", f"{price:,.0f}원", f"{change:+.2f}%")
 with m2:
-    st.metric("기술점수", f"{score}/100", score_label)
-
-m3, m4, m5 = st.columns(3)
-with m3:
-    st.metric("RSI", f"{rsi:.1f}")
-with m4:
-    st.metric("거래량", f"{vol_ratio:.2f}x")
-with m5:
-    st.metric("MACD", "상승" if macd > macd_sig else "하락")
+    st.metric("종합 점수", f"{score}점 / 100점", score_label)
 
 pattern_text = " · ".join(patterns)
 st.markdown(
-    f'<div class="radar-card"><b>🎯 현재 시그널</b><br>'
-    f'<span style="font-size:1.05rem">{pattern_text}</span></div>',
+    f'<div class="radar-card">'
+    f'<b style="font-size:1.05rem; color:#f2c94c;">🎯 핵심 신호: {pattern_text}</b>'
+    f'</div>',
     unsafe_allow_html=True
 )
 
-# 가격대
-st.markdown("### 📍 핵심 가격대")
+# -----------------------------
+# 2. 명확한 매매 안내 (사용자 요청 핵심!)
+# -----------------------------
+st.markdown("### 💡 쉽게 풀어쓴 매매 대응 전략")
 
-p1, p2, p3 = st.columns(3)
-with p1:
-    st.markdown(f"**🟢 S2**<br>{s2:,.0f}원", unsafe_allow_html=True)
-with p2:
-    st.markdown(f"**🟡 현재**<br>{price:,.0f}원", unsafe_allow_html=True)
-with p3:
-    st.markdown(f"**🔴 R1**<br>{r1:,.0f}원", unsafe_allow_html=True)
-
-st.markdown(
-    f'<div class="price-zone">🟢 <b>1차 지지</b> {s1:,.0f}원 '
-    f'　→　🟢 <b>2차 지지</b> {s2:,.0f}원</div>'
-    f'<div class="price-zone">🔴 <b>1차 저항</b> {r1:,.0f}원 '
-    f'　→　🔴 <b>2차 저항</b> {r2:,.0f}원</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown("### 🎯 분석 시나리오")
-if scenario_title.startswith("🟢"):
-    st.success(f"**{scenario_title}**\n\n{scenario_body}")
-elif scenario_title.startswith("🟠"):
-    st.warning(f"**{scenario_title}**\n\n{scenario_body}")
-elif scenario_title.startswith("🔴"):
-    st.error(f"**{scenario_title}**\n\n{scenario_body}")
+if "🟢" in status_title:
+    st.success(f"### {status_title}")
+elif "🔴" in status_title:
+    st.error(f"### {status_title}")
+elif "🟠" in status_title:
+    st.warning(f"### {status_title}")
 else:
-    st.info(f"**{scenario_title}**\n\n{scenario_body}")
+    st.info(f"### {status_title}")
 
-tab_chart, tab_zones, tab_score, tab_detail = st.tabs(
-    ["📊 차트", "📍 지지/저항", "💯 점수", "🔍 지표"]
+col_a, col_b = st.columns(2)
+with col_a:
+    st.markdown(
+        f'<div class="price-zone">'
+        f'<b class="highlight-green">🛒 언제 사나요? (매수 전략)</b><br>{buy_guide}'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        f'<div class="price-zone">'
+        f'<b class="highlight-red">💰 어디서 파나요? (익절/매도)</b><br>{sell_guide}'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+
+with col_b:
+    st.markdown(
+        f'<div class="price-zone">'
+        f'<b class="highlight-yellow">🛑 어디서 손절/관망 하나요?</b><br>{wait_guide}'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        f'<div class="price-zone">'
+        f'<b>📍 핵심 가격 요약</b><br>'
+        f'• <b>2차 저항 (최종 목표)</b>: <span class="highlight-red">{r2:,.0f}원</span><br>'
+        f'• <b>1차 저항 (매물대/벽)</b>: <span class="highlight-red">{r1:,.0f}원</span><br>'
+        f'• <b>현재 가격</b>: <b>{price:,.0f}원</b><br>'
+        f'• <b>1차 지지 (1차 바닥)</b>: <span class="highlight-green">{s1:,.0f}원</span><br>'
+        f'• <b>2차 지지 (손절 마지노선)</b>: <span class="highlight-green">{s2:,.0f}원</span>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+
+# -----------------------------
+# 3. 탭별 상세 내용 (차트, 지지저항, 지표 설명서)
+# -----------------------------
+tab_chart, tab_zones, tab_guide = st.tabs(
+    ["📊 차트 보기", "📍 매물대 & 지지/저항", "📖 보조지표 쉬운 설명서"]
 )
 
 with tab_chart:
-    st.caption("가격 / 이동평균 / 거래량 / RSI / MACD")
-    fig = make_chart(df, supports, resistances, vp)
+    st.caption("캔들차트 / 이동평균선 / 거래량 / RSI / MACD")
+    fig = make_chart(df, supports, resistances)
     st.plotly_chart(
         fig,
         use_container_width=True,
-        config={
-            "responsive": True,
-            "scrollZoom": False,
-            "displayModeBar": False,
-            "doubleClick": False
-        },
+        config={"responsive": True, "displayModeBar": False},
         key=f"chart_{symbol_input}_{period}"
     )
 
 with tab_zones:
-    st.subheader("자동 지지/저항")
-    if supports:
-        for i, item in enumerate(supports[:3], 1):
-            st.success(f"S{i}  {item['price']:,.0f}원  · 강도 {item['strength']}")
-    else:
-        st.info("확인 가능한 지지 레벨이 부족합니다.")
+    st.subheader("📍 지지선과 저항선이란?")
+    st.markdown("""
+    - **저항선 (R)**: 매물(물린 사람들의 팔려는 물량)이 몰려있어서 **주가가 올라가다 막히는 벽**입니다. 뚫으면 급등하지만, 못 뚫으면 밀립니다.
+    - **지지선 (S)**: 살려는 사람들의 대기 물량이 많아 **주가가 떨어지다 튕겨 올라가는 바닥**입니다. 깨지면 추가 하락합니다.
+    """)
 
-    if resistances:
-        for i, item in enumerate(resistances[:3], 1):
-            st.warning(f"R{i}  {item['price']:,.0f}원  · 강도 {item['strength']}")
-    else:
-        st.info("확인 가능한 저항 레벨이 부족합니다.")
+    col_s, col_r = st.columns(2)
+    with col_s:
+        st.markdown("**🟢 아래를 받쳐주는 지지 가격 (바닥)**")
+        if supports:
+            for i, item in enumerate(supports[:3], 1):
+                st.success(f"S{i} 지지선: **{item['price']:,.0f}원** (신뢰도: {item['strength']})")
+        else:
+            st.info("지점 데이터 부족")
 
-    st.subheader("거래량 매물대")
+    with col_r:
+        st.markdown("**🔴 위를 막고 있는 저항 가격 (벽)**")
+        if resistances:
+            for i, item in enumerate(resistances[:3], 1):
+                st.warning(f"R{i} 저항선: **{item['price']:,.0f}원** (신뢰도: {item['strength']})")
+        else:
+            st.info("지점 데이터 부족")
+
+    st.subheader("🧱 매물대 분포 (거래가 가장 많이 터진 구간)")
     if not vp.empty:
         vp_show = vp.head(5)[["price", "volume", "ratio"]].copy()
-        vp_show["가격"] = vp_show["price"].map(lambda x: f"{x:,.0f}원")
-        vp_show["거래량 비중"] = vp_show["ratio"].map(lambda x: f"{x*100:.0f}%")
+        vp_show["가격대"] = vp_show["price"].map(lambda x: f"{x:,.0f}원 부근")
+        vp_show["매물 집중도"] = vp_show["ratio"].map(lambda x: f"{x*100:.0f}%")
         st.dataframe(
-            vp_show[["가격", "거래량 비중"]],
+            vp_show[["가격대", "매물 집중도"]],
             use_container_width=True,
             hide_index=True
         )
 
-with tab_score:
-    st.subheader(f"기술점수 {score}/100")
-    st.progress(score / 100)
-    st.markdown(f"### {score_label}")
+with tab_guide:
+    st.subheader("❓ 각종 보조지표, 어쩌라는 건가요? (초보자 해설)")
 
-    score_table = pd.DataFrame({
-        "항목": ["추세", "RSI", "MACD", "거래량", "볼린저", "가격위치", "20일 모멘텀"],
-        "배점": [25, 15, 15, 15, 10, 10, 10]
-    })
-    st.table(score_table)
+    st.markdown(f"""
+    #### 1. RSI (상대강도지수) : 현재 값 **{rsi:.1f}**
+    - **의미**: 주가가 너무 과열되었는지, 아니면 너무 소외되어 싸졌는지 나타냅니다.
+    - **해석 방법**:
+        - **70 이상**: <span class="highlight-red">과열 상태</span> (남들이 다 산 상태, 지금 사면 상투 잡을 위험 높음!)
+        - **30 이하**: <span class="highlight-green">침체 상태</span> (너무 많이 빠진 상태, 반등 기대 매수 구간)
+        - **50 부근**: 정상적인 흐름
 
-    st.caption(
-        "점수는 현재 기술적 조건을 수치화한 참고 지표이며, 미래 수익이나 투자 결과를 보장하지 않습니다."
-    )
+    #### 2. MACD (추세 방향) : 현재 **{"상승 우세" if macd > macd_sig else "하락/조정 우세"}**
+    - **의미**: 주가의 단기 방향성과 에너지를 알려줍니다.
+    - **해석 방법**:
+        - **파란선이 빨간선 위로 올라탈 때**: <span class="highlight-green">상승 신호 (매수 고려)</span>
+        - **파란선이 빨간선 아래로 꺾일 때**: <span class="highlight-red">하락 신호 (매도/관망 고려)</span>
 
-with tab_detail:
-    bb_width = float(x["BB_Upper"] - x["BB_Lower"]) if pd.notna(x["BB_Upper"]) and pd.notna(x["BB_Lower"]) else 0
-    bb_pos = ((price - float(x["BB_Lower"])) / bb_width * 100) if bb_width > 0 else 50
+    #### 3. 거래량 비율 : 평소의 **{vol_ratio:.2f}배**
+    - **의미**: 주가 움직임이 '진짜'인지 '가짜'인지 판가름합니다.
+    - **해석 방법**:
+        - **저항선을 뚫을 때 거래량이 1.5~2배 이상 터지면**: <span class="highlight-green">진짜 폭등 시작!</span>
+        - **거래량 없이 슬금슬금 오르면**: 언제든 다시 무너질 수 있는 약한 상승.
 
-    details = pd.DataFrame({
-        "지표": [
-            "이동평균",
-            "RSI(14)",
-            "MACD",
-            "볼린저밴드",
-            "거래량",
-            "5일 수익률",
-            "20일 수익률"
-        ],
-        "현재값": [
-            f"MA5 {x['MA5']:,.0f} / MA20 {x['MA20']:,.0f} / MA60 {x['MA60']:,.0f}",
-            f"{rsi:.1f}",
-            f"{macd:+.2f} / Signal {macd_sig:+.2f}",
-            f"{bb_pos:.0f}% 위치",
-            f"{vol_ratio:.2f}x",
-            f"{x['Return5']:+.2f}%",
-            f"{x['Return20']:+.2f}%"
-        ]
-    })
-    st.dataframe(details, use_container_width=True, hide_index=True)
+    #### 4. 이동평균선 (MA)
+    - **20일선 (주황색)**: 생명선입니다. 주가가 20일선 위에 있어야 안전한 상승장입니다.
+    """, unsafe_allow_html=True)
 
-    st.markdown("### 패턴 감지")
-    for p in patterns:
-        st.write(f"• {p}")
-
-st.caption("ETF Technical Radar · 기술적 분석 참고용")
+st.caption("ETF Technical Radar · 가독성 및 매매 가이드 강화 버전")
