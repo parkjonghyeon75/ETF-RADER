@@ -11,7 +11,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 
 # ============================================================
-# ETF Technical Radar v3 (가독성 개선 + 쉬운 매매 안내)
+# ETF Technical Radar v3 (밝은 라이트 테마 적용)
 # ============================================================
 
 st.set_page_config(
@@ -21,53 +21,56 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🎨 시각적 가독성 개선 CSS (고대비 텍스트 적용)
+# 🎨 시각적 가독성 개선 CSS (밝고 화사한 라이트 모드 테마)
 st.markdown("""
 <style>
-.stApp {max-width: 1000px; margin: 0 auto; background-color: #0e1117;}
+.stApp {max-width: 1000px; margin: 0 auto; background-color: #f8fafc;}
 .block-container {padding-top: 1rem; padding-bottom: 2rem; padding-left: .8rem; padding-right: .8rem;}
 
-/* 고대비 카드 및 글자색 설정 */
+/* 밝은 고대비 카드 및 글자색 설정 */
 div[data-testid="stMetric"] {
-    background: #1e222d; 
-    border: 1px solid #363c4e; 
+    background: #ffffff; 
+    border: 1px solid #e2e8f0; 
     border-radius: 10px; 
     padding: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 div[data-testid="stMetricLabel"] {
-    color: #cbd5e1 !important; /* 명확한 밝은 회색/백색 계열 */
+    color: #475569 !important; /* 명확한 다크 회색 */
     font-size: 0.95rem !important;
     font-weight: 600;
 }
 div[data-testid="stMetricValue"] {
-    color: #ffffff !important; /* 선명한 흰색 */
+    color: #0f172a !important; /* 선명한 다크 슬레이트 */
     font-weight: 700;
 }
 
 .radar-card {
-    background: #1e222d; 
-    border: 1px solid #363c4e; 
+    background: #ffffff; 
+    border: 1px solid #e2e8f0; 
     border-radius: 12px;
     padding: 16px; 
     margin-bottom: 12px;
-    color: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 /* 텍스트 가독성 강화 */
-.text-bright {color: #ffffff !important; font-size: 0.95rem; line-height: 1.5;}
-.text-sub {color: #cbd5e1 !important; font-size: 0.88rem;}
-.highlight-green {color: #35d07f; font-weight: bold;}
-.highlight-red {color: #ff6b6b; font-weight: bold;}
-.highlight-yellow {color: #f2c94c; font-weight: bold;}
+.text-bright {color: #0f172a !important; font-size: 0.95rem; line-height: 1.5;}
+.text-sub {color: #475569 !important; font-size: 0.88rem;}
+.highlight-green {color: #16a34a; font-weight: bold;}
+.highlight-red {color: #dc2626; font-weight: bold;}
+.highlight-yellow {color: #d97706; font-weight: bold;}
 
 .price-zone {
     border-radius: 10px; 
     padding: 12px; 
     margin: 6px 0;
-    border: 1px solid #363c4e; 
-    background: #161922;
-    color: #ffffff;
+    border: 1px solid #e2e8f0; 
+    background: #ffffff;
+    color: #0f172a;
     font-size: 0.95rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
 @media (max-width: 600px) {
@@ -513,7 +516,7 @@ def easy_action_scenario(df, score, supports, resistances, patterns):
     return status_title, buy_guide, sell_guide, wait_guide, s1, s2, r1, r2
 
 # -----------------------------
-# 차트 생성
+# 차트 생성 (라이트 모드 고대비 설정)
 # -----------------------------
 def make_chart(df, supports, resistances):
     fig = make_subplots(
@@ -530,61 +533,61 @@ def make_chart(df, supports, resistances):
     )
 
     line_defs = [
-        ("MA5", "#f2c94c"), ("MA20", "#ff9f43"),
-        ("MA60", "#2ecc71"), ("MA120", "#a55eea")
+        ("MA5", "#d97706"), ("MA20", "#ea580c"),
+        ("MA60", "#16a34a"), ("MA120", "#7c3aed")
     ]
     for col, color in line_defs:
         if col in df:
             fig.add_trace(
                 go.Scatter(
                     x=df.index, y=df[col],
-                    line=dict(color=color, width=1.2),
+                    line=dict(color=color, width=1.4),
                     name=col
                 ), row=1, col=1
             )
 
-    # 지지/저항 표시
+    # 지지/저항 표시 (라이트 테마 대비 보정)
     for i, item in enumerate(supports[:2]):
         fig.add_hline(
             y=item["price"], row=1, col=1,
-            line_dash="dot", line_color="#35d07f", line_width=1.5,
+            line_dash="dot", line_color="#16a34a", line_width=1.5,
             annotation_text=f"지지 S{i+1} ({item['price']:,.0f}원)",
             annotation_position="bottom left",
-            annotation_font_color="#35d07f"
+            annotation_font_color="#16a34a"
         )
 
     for i, item in enumerate(resistances[:2]):
         fig.add_hline(
             y=item["price"], row=1, col=1,
-            line_dash="dash", line_color="#ff6b6b", line_width=1.5,
+            line_dash="dash", line_color="#dc2626", line_width=1.5,
             annotation_text=f"저항 R{i+1} ({item['price']:,.0f}원)",
             annotation_position="top left",
-            annotation_font_color="#ff6b6b"
+            annotation_font_color="#dc2626"
         )
 
-    vol_colors = ["#ff6b6b" if c >= o else "#4bc0c0" for c, o in zip(df["Close"], df["Open"])]
+    vol_colors = ["#dc2626" if c >= o else "#2563eb" for c, o in zip(df["Close"], df["Open"])]
     fig.add_trace(
         go.Bar(x=df.index, y=df["Volume"], marker_color=vol_colors, name="거래량"),
         row=2, col=1
     )
 
     fig.add_trace(
-        go.Scatter(x=df.index, y=df["RSI"], line=dict(color="#ffffff", width=1.5), name="RSI"),
+        go.Scatter(x=df.index, y=df["RSI"], line=dict(color="#2563eb", width=1.5), name="RSI"),
         row=3, col=1
     )
-    fig.add_hline(y=70, row=3, col=1, line_dash="dot", line_color="#ff6b6b")
-    fig.add_hline(y=30, row=3, col=1, line_dash="dot", line_color="#35d07f")
+    fig.add_hline(y=70, row=3, col=1, line_dash="dot", line_color="#dc2626")
+    fig.add_hline(y=30, row=3, col=1, line_dash="dot", line_color="#16a34a")
 
     fig.add_trace(
         go.Bar(x=df.index, y=df["MACD_Hist"], name="MACD 히스토그램"),
         row=4, col=1
     )
     fig.add_trace(
-        go.Scatter(x=df.index, y=df["MACD"], line=dict(color="#54a0ff"), name="MACD"),
+        go.Scatter(x=df.index, y=df["MACD"], line=dict(color="#2563eb"), name="MACD"),
         row=4, col=1
     )
     fig.add_trace(
-        go.Scatter(x=df.index, y=df["MACD_Signal"], line=dict(color="#ff6b6b"), name="Signal"),
+        go.Scatter(x=df.index, y=df["MACD_Signal"], line=dict(color="#dc2626"), name="Signal"),
         row=4, col=1
     )
 
@@ -592,7 +595,7 @@ def make_chart(df, supports, resistances):
         height=700,
         margin=dict(l=5, r=5, t=10, b=5),
         xaxis_rangeslider_visible=False,
-        template="plotly_dark",
+        template="plotly_white",
         showlegend=False,
         dragmode=False
     )
@@ -686,7 +689,7 @@ with m2:
 pattern_text = " · ".join(patterns)
 st.markdown(
     f'<div class="radar-card">'
-    f'<b style="font-size:1.05rem; color:#f2c94c;">🎯 핵심 신호: {pattern_text}</b>'
+    f'<b style="font-size:1.05rem; color:#b45309;">🎯 핵심 신호: {pattern_text}</b>'
     f'</div>',
     unsafe_allow_html=True
 )
@@ -818,4 +821,4 @@ with tab_guide:
     - **20일선 (주황색)**: 생명선입니다. 주가가 20일선 위에 있어야 안전한 상승장입니다.
     """, unsafe_allow_html=True)
 
-st.caption("ETF Technical Radar · 가독성 및 매매 가이드 강화 버전")
+st.caption("ETF Technical Radar · 라이트 테마 가독성 강화 버전")
