@@ -29,7 +29,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2. 관심종목 파일 저장/불러오기 기능 (영구 보존)
+# 2. 관심종목 파일 저장/불러오기 기능
 WATCHLIST_FILE = "watchlist.json"
 DEFAULT_WATCHLIST = {
     "069500": "KODEX 200 (069500)",
@@ -84,7 +84,7 @@ def calculate_indicators(df):
     df['Vol_MA20'] = df['Volume'].rolling(20).mean()
     return df
 
-# 4. 데이터 로드 (캐싱을 통해 차트 로딩 속도 최적화)
+# 4. 데이터 로드
 @st.cache_data(ttl=300, show_spinner=False)
 def load_etf_data(ticker_code, period="1y"):
     ticker = ticker_code.strip().upper()
@@ -92,7 +92,8 @@ def load_etf_data(ticker_code, period="1y"):
         ticker = f"{ticker}.KS"
     
     data = yf.download(ticker, period=period, progress=False)
-    if data.empty or len(data) < 30:
+    # 최소 데이터 개수 기준을 10개로 완화 (새로 상장된 종목 및 짧은 검증 기간 대응)
+    if data.empty or len(data) < 10:
         return None, ticker
     
     if isinstance(data.columns, pd.MultiIndex):
@@ -114,20 +115,20 @@ with col_sel:
 with col_pd:
     period = st.selectbox("기간", ["6m", "1y", "2y"], index=1)
 
-# 종목코드로 관심종목 신규 등록
+# 종목코드로 관심종목 신규 등록 화면
 if selected_option == "➕ 종목코드로 관심종목 추가":
     st.subheader("📝 종목코드 입력 등록")
     col_code, col_btn = st.columns([2, 1])
     
     with col_code:
-        new_code = st.text_input("종목코드 입력", placeholder="예: 466920", label_visibility="collapsed")
+        new_code = st.text_input("종목코드 입력", placeholder="예: 487240", label_visibility="collapsed")
     with col_btn:
         add_btn = st.button("⭐ 추가", use_container_width=True)
         
     if add_btn and new_code:
         clean_code = new_code.strip().upper()
-        # 데이터 유효성 검증
-        test_df, full_code = load_etf_data(clean_code, period="1mo")
+        # 데이터 유효성 검증 (6개월치 데이터로 확인)
+        test_df, full_code = load_etf_data(clean_code, period="6m")
         if test_df is not None:
             display_label = f"ETF {clean_code} ({clean_code})"
             st.session_state.watchlist[clean_code] = display_label
@@ -136,8 +137,11 @@ if selected_option == "➕ 종목코드로 관심종목 추가":
             st.rerun()
         else:
             st.error("유효하지 않은 종목코드이거나 데이터를 가져올 수 없습니다.")
+            
+    # 관심종목 추가 화면일 때는 아래의 차트를 렌더링하지 않고 멈춤 (NameError 방지)
+    st.stop()
 else:
-    # 선택된 종목코드 찾기
+    # 선택된 종목코드 추출
     symbol_input = [k for k, v in watchlist.items() if v == selected_option][0]
     
     # 삭제 버튼
@@ -209,7 +213,6 @@ else:
         fig.update_layout(height=550, margin=dict(l=10, r=10, t=10, b=10),
                           xaxis_rangeslider_visible=False, template="plotly_dark", showlegend=False)
         
-        # 고유 key 값을 부여하여 차트가 새로고침 시 깜빡이거나 튀는 현상 방지
         st.plotly_chart(fig, use_container_width=True, key=f"chart_{symbol_input}_{period}")
 
     with tab_scenario:
