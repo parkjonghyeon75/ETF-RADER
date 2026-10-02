@@ -904,12 +904,17 @@ with tab_analysis:
     """, unsafe_allow_html=True)
 
     pattern_main = patterns[0]
-    pattern_desc = (
-        "중단기 상승추세가 유지되는 가운데 20일선 부근에서 가격 지지를 확인하는 구간입니다." if "눌림목" in pattern_main else
-        ("최근 고점을 넘어선 상태입니다. 돌파 이후 거래량과 지지 여부를 함께 확인합니다." if "돌파" in pattern_main else
-         ("단기 상승 탄력이 강해진 구간입니다. 추격보다는 조정 시 지지 확인이 중요합니다." if "과열" in pattern_main else
-          ("가격이 단기 기준선 아래로 내려온 상태입니다. 다음 지지선의 반응을 확인할 필요가 있습니다." if "약화" in pattern_main else
-           "현재 이동평균과 모멘텀을 기준으로 단기 방향성을 확인하는 구간입니다.")))
+    
+    # [수정됨] 괄호 짝 에러가 발생하지 않도록 명확한 if-elif 분기로 수정
+    pattern_desc = "현재 이동평균과 모멘텀을 기준으로 단기 방향성을 확인하는 구간입니다."
+    if "눌림목" in pattern_main:
+        pattern_desc = "중단기 상승추세가 유지되는 가운데 20일선 부근에서 가격 지지를 확인하는 구간입니다."
+    elif "돌파" in pattern_main:
+        pattern_desc = "최근 고점을 넘어선 상태입니다. 돌파 이후 거래량과 지지 여부를 함께 확인합니다."
+    elif "과열" in pattern_main:
+        pattern_desc = "단기 상승 탄력이 강해진 구간입니다. 추격보다는 조정 시 지지 확인이 중요합니다."
+    elif "약화" in pattern_main:
+        pattern_desc = "가격이 단기 기준선 아래로 내려온 상태입니다. 다음 지지선의 반응을 확인할 필요가 있습니다."
 
     st.markdown(f"""
     <div class="pattern-box">
