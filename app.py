@@ -86,7 +86,18 @@ def calculate_indicators(df):
     df['Vol_MA20'] = df['Volume'].rolling(20).mean()
     return df
 
-# 네이버 금융 데이터 수집기 (국내 모든 종목 100% 연동)
+# 네이버 증권 API로 실제 종목명 가져오기
+def get_stock_name(code):
+    try:
+        url = f"https://m.stock.naver.com/api/stock/{code}/basic"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            return data.get('stockName', f'ETF {code}')
+    except Exception:
+        return f"ETF {code}"
+
+# 네이버 금융 주가 데이터 수집
 def fetch_from_naver(code, count=500):
     try:
         url = f"https://fchart.stock.naver.com/sise.nhn?symbol={code}&timeframe=day&count={count}&requestType=0"
@@ -118,17 +129,15 @@ def fetch_from_naver(code, count=500):
     except Exception:
         return None
 
-# 4. 데이터 통합 로드 (네이버 금융 우선 -> 야후 파이낸스 교차)
+# 4. 데이터 로드 (네이버 증권 우선)
 @st.cache_data(ttl=300, show_spinner=False)
 def load_etf_data(ticker_code, period="1y"):
     clean_code = ''.join(filter(str.isdigit, str(ticker_code)))
     if not clean_code:
         clean_code = str(ticker_code).strip()
 
-    # 1차: 네이버 증권 데이터 수집 시도 (국내 ETF 누락 문제 완벽 해결)
     df = fetch_from_naver(clean_code, count=500)
     
-    # 2차: 네이버 실패 시 야후 파이낸스 예비 시도
     if df is None or df.empty:
         for suffix in [".KS", ".KQ"]:
             ticker = f"{clean_code}{suffix}"
@@ -145,7 +154,6 @@ def load_etf_data(ticker_code, period="1y"):
     if df is None or df.empty or len(df) < 5:
         return None, clean_code
 
-    # 기간 필터링
     if period == "6m":
         df = df.iloc[-120:]
     elif period == "1y":
@@ -186,10 +194,13 @@ if selected_option == "➕ 종목코드로 관심종목 추가":
         else:
             test_df, _ = load_etf_data(clean_code, period="6m")
             if test_df is not None:
-                display_label = f"ETF {clean_code} ({clean_code})"
+                # 종목명 자동 조회
+                stock_name = get_stock_name(clean_code)
+                display_label = f"{stock_name} ({clean_code})"
+                
                 st.session_state.watchlist[clean_code] = display_label
                 save_watchlist(st.session_state.watchlist)
-                st.success(f"종목코드 '{clean_code}' 등록 완료!")
+                st.success(f"'{display_label}' 등록 완료!")
                 st.rerun()
             else:
                 st.error("유효하지 않은 종목코드이거나 데이터를 가져올 수 없습니다.")
@@ -200,7 +211,7 @@ else:
     
     col_space, col_del = st.columns([3, 1])
     with col_del:
-        if st.button("🗑️️ 목록에서 삭제", use_container_width=True):
+        if st.button("🗑 목록에서 삭제", use_container_width=True):
             del st.session_state.watchlist[symbol_input]
             save_watchlist(st.session_state.watchlist)
             st.toast("삭제되었습니다.")
