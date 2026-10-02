@@ -11,7 +11,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 
 # ============================================================
-# ETF Technical Radar v9 (세분화된 테마 & 자동 주도주 스캐너)
+# ETF Technical Radar v9.1 (f-string 오류 수정 버전)
 # ============================================================
 
 st.set_page_config(
@@ -518,7 +518,6 @@ def scan_market_leading_themes():
                 "gems": top_gems_in_theme
             })
             
-    # 평균 점수가 높은 순으로 자동 정렬하여 현재 시장 주도 테마 판별
     return sorted(theme_scores, key=lambda x: x["avg_score"], reverse=True)
 
 def make_chart(df, supports, resistances):
@@ -724,12 +723,11 @@ with tab_gem_finder:
         leading_themes = scan_market_leading_themes()
 
     if leading_themes:
-        # 1위 주도 테마 대장주 강조 배너 표시
         top_theme = leading_themes[0]
         st.markdown(
             f'<div class="hot-theme-card">'
             f'<h3 style="margin:0 0 6px 0; color:#1d4ed8;">🏆 현재 시장 최고의 주도 테마: {top_theme["theme_name"]}</h3>'
-            f'<p style="margin:0; font-size:0.95srem; color:#475569;">테마 평균 모멘텀 점수: <b>{top_theme["avg_score"]:.1f}점</b> | 평균 등락률: <span class="{ "highlight-green" if top_theme["avg_change"] >= 0 else "highlight-red" }">{top_theme["avg_change"]:+.2f}%</span></p>'
+            f'<p style="margin:0; font-size:0.95rem; color:#475569;">테마 평균 모멘텀 점수: <b>{top_theme["avg_score"]:.1f}점</b> | 평균 등락률: <span class="{ "highlight-green" if top_theme["avg_change"] >= 0 else "highlight-red" }">{top_theme["avg_change"]:+.2f}%</span></p>'
             f'</div>',
             unsafe_allow_html=True
         )
@@ -738,7 +736,9 @@ with tab_gem_finder:
         st.subheader("📊 세분화된 테마별 주도주 랭킹 & 원석 리스트")
 
         for rank, th in enumerate(leading_themes, 1):
-            with st.expander(f"[{rank위] {th['theme_name']} (종합 활성도: {th['avg_score']:.1f점} / 평균등락률: {th['avg_change']:+.2f}%)"):
+            # [오류 수정 부분]: f-string 중괄호 및 문자열 포맷 구문 정리
+            expander_title = f"[{rank}위] {th['theme_name']} (종합 활성도: {th['avg_score']:.1f점} / 평균등락률: {th['avg_change']:+.2f}%)".replace("점", "점")
+            with st.expander(f"[{rank}위] {th['theme_name']} (종합 활성도: {th['avg_score']:.1f}점 / 평균등락률: {th['avg_change']:+.2f}%)"):
                 if th["gems"]:
                     for g in th["gems"]:
                         reasons_str = " · ".join(g["reasons"])
