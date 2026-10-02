@@ -12,8 +12,7 @@ import xml.etree.ElementTree as ET
 
 
 # ============================================================
-# ETF RADAR v10.1
-# Premium Mobile Financial Dashboard
+# ETF RADAR v10.2 (글씨 크기 확대 및 디테일 강화 버전)
 # ============================================================
 
 st.set_page_config(
@@ -25,7 +24,7 @@ st.set_page_config(
 
 
 # ============================================================
-# PREMIUM MOBILE UI
+# PREMIUM MOBILE UI (Font Size Up & Detailed Readability)
 # ============================================================
 
 st.markdown("""
@@ -35,7 +34,7 @@ st.markdown("""
     --bg: #f4f6fa;
     --card: #ffffff;
     --text: #111827;
-    --muted: #64748b;
+    --muted: #475569;
     --line: #e5e7eb;
     --blue: #2563eb;
     --green: #16a34a;
@@ -56,11 +55,11 @@ st.markdown("""
 }
 
 .block-container {
-    max-width: 760px;
-    padding-top: 0.55rem;
-    padding-bottom: 3rem;
-    padding-left: 0.65rem;
-    padding-right: 0.65rem;
+    max-width: 780px;
+    padding-top: 0.8rem;
+    padding-bottom: 3.5rem;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
 }
 
 #MainMenu { visibility: hidden; }
@@ -77,48 +76,48 @@ html, body, [class*="css"] {
    ============================================================ */
 
 div[data-baseweb="tab-list"] {
-    gap: 4px;
-    background: #e8edf4;
-    padding: 4px;
-    border-radius: 15px;
-    margin-bottom: 10px;
+    gap: 6px;
+    background: #e2e8f0;
+    padding: 5px;
+    border-radius: 14px;
+    margin-bottom: 14px;
 }
 
 button[data-baseweb="tab"] {
-    border-radius: 11px !important;
-    font-size: 0.80rem !important;
+    border-radius: 10px !important;
+    font-size: 0.92rem !important;
     font-weight: 800 !important;
-    color: #64748b !important;
-    padding: 0.52rem 0.35rem !important;
+    color: #475569 !important;
+    padding: 0.6rem 0.5rem !important;
 }
 
 button[data-baseweb="tab"][aria-selected="true"] {
     background: #ffffff !important;
-    color: #111827 !important;
-    box-shadow: 0 2px 8px rgba(15,23,42,0.08);
+    color: #0f172a !important;
+    box-shadow: 0 3px 10px rgba(15,23,42,0.1);
 }
 
 
 /* ============================================================
-   COMMON CARD
+   COMMON CARD (글씨 크기 및 여백 개선)
    ============================================================ */
 
 .card {
-    background: rgba(255,255,255,0.97);
-    border: 1px solid #e2e8f0;
-    border-radius: 17px;
-    padding: 14px;
-    margin: 7px 0;
-    box-shadow: 0 4px 16px rgba(15,23,42,0.045);
+    background: rgba(255,255,255,0.98);
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 16px;
+    margin: 10px 0;
+    box-shadow: 0 4px 16px rgba(15,23,42,0.05);
 }
 
-.card-tight { padding: 11px 13px; }
+.card-tight { padding: 14px 16px; }
 
 .card-title {
-    color: #64748b;
-    font-size: 0.68rem;
+    color: #475569;
+    font-size: 0.78rem;
     font-weight: 850;
-    letter-spacing: 0.07em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
 }
 
@@ -127,10 +126,10 @@ button[data-baseweb="tab"][aria-selected="true"] {
    HEADER
    ============================================================ */
 
-.top-brand { padding: 0.35rem 0.1rem 0.55rem; }
-.brand-small { color: #2563eb; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.12em; }
-.brand-main { color: #0f172a; font-size: 1.52rem; font-weight: 900; letter-spacing: -0.055em; margin-top: 2px; }
-.brand-sub { color: #64748b; font-size: 0.70rem; margin-top: 2px; }
+.top-brand { padding: 0.4rem 0.1rem 0.7rem; }
+.brand-small { color: #2563eb; font-size: 0.8rem; font-weight: 900; letter-spacing: 0.1em; }
+.brand-main { color: #0f172a; font-size: 1.65rem; font-weight: 900; letter-spacing: -0.04em; margin-top: 2px; }
+.brand-sub { color: #475569; font-size: 0.82rem; margin-top: 4px; font-weight: 600; }
 
 
 /* ============================================================
@@ -138,32 +137,32 @@ button[data-baseweb="tab"][aria-selected="true"] {
    ============================================================ */
 
 .hero {
-    background: radial-gradient(circle at 100% 0%, rgba(37,99,235,0.14), transparent 38%), #ffffff;
-    border: 1px solid #dfe6ef;
-    border-radius: 21px;
-    padding: 16px;
-    margin: 8px 0;
-    box-shadow: 0 7px 24px rgba(15,23,42,0.06);
+    background: radial-gradient(circle at 100% 0%, rgba(37,99,235,0.12), transparent 40%), #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 18px;
+    padding: 18px;
+    margin: 10px 0;
+    box-shadow: 0 6px 20px rgba(15,23,42,0.06);
 }
 
 .hero-top { display: flex; align-items: flex-start; justify-content: space-between; }
-.hero-name { font-size: 0.92rem; font-weight: 850; color: #111827; line-height: 1.35; }
-.hero-code { font-size: 0.67rem; color: #94a3b8; margin-top: 2px; }
-.hero-price { font-size: 2.25rem; line-height: 1.0; font-weight: 900; letter-spacing: -0.065em; color: #0f172a; margin-top: 13px; }
-.hero-unit { font-size: 0.82rem; font-weight: 800; }
-.hero-change { font-size: 0.88rem; font-weight: 900; margin-top: 6px; }
+.hero-name { font-size: 1.05rem; font-weight: 900; color: #0f172a; line-height: 1.35; }
+.hero-code { font-size: 0.76rem; color: #64748b; margin-top: 3px; font-weight: 700; }
+.hero-price { font-size: 2.35rem; line-height: 1.0; font-weight: 950; letter-spacing: -0.05em; color: #0f172a; margin-top: 12px; }
+.hero-unit { font-size: 0.9rem; font-weight: 850; }
+.hero-change { font-size: 0.95rem; font-weight: 900; margin-top: 8px; }
 
 .hero-mini {
     background: #f8fafc;
-    border: 1px solid #edf1f5;
-    border-radius: 11px;
-    padding: 7px 9px;
-    min-width: 82px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 8px 12px;
+    min-width: 90px;
     text-align: center;
 }
 
-.hero-mini-label { font-size: 0.59rem; color: #94a3b8; font-weight: 800; }
-.hero-mini-value { font-size: 0.84rem; color: #111827; font-weight: 900; margin-top: 2px; }
+.hero-mini-label { font-size: 0.68rem; color: #64748b; font-weight: 850; }
+.hero-mini-value { font-size: 0.95rem; color: #0f172a; font-weight: 950; margin-top: 2px; }
 
 
 /* ============================================================
@@ -172,25 +171,25 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 .score-card {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 19px;
-    padding: 13px;
-    min-height: 156px;
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 14px;
+    min-height: 165px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 17px rgba(15,23,42,0.045);
+    box-shadow: 0 4px 15px rgba(15,23,42,0.05);
 }
 
-.score-number { font-size: 2rem; line-height: 1; font-weight: 950; color: #0f172a; }
-.score-denom { color: #94a3b8; font-size: 0.60rem; margin-top: 3px; }
-.score-label { margin-top: 8px; font-size: 0.76rem; font-weight: 900; color: #2563eb; text-align: center; }
+.score-number { font-size: 2.2rem; line-height: 1; font-weight: 950; color: #0f172a; }
+.score-denom { color: #64748b; font-size: 0.68rem; margin-top: 4px; font-weight: 700; }
+.score-label { margin-top: 8px; font-size: 0.85rem; font-weight: 900; color: #2563eb; text-align: center; }
 
-.signal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; margin-top: 7px; }
-.signal { background: #f8fafc; border: 1px solid #e7ebf0; border-radius: 12px; padding: 9px; }
-.signal-title { font-size: 0.62rem; color: #64748b; font-weight: 800; }
-.signal-value { font-size: 0.83rem; font-weight: 900; margin-top: 2px; }
+.signal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+.signal { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; }
+.signal-title { font-size: 0.72rem; color: #475569; font-weight: 800; }
+.signal-value { font-size: 0.9rem; font-weight: 950; margin-top: 3px; }
 .signal-good { color: #15803d; }
 .signal-warn { color: #d97706; }
 .signal-bad { color: #dc2626; }
@@ -200,57 +199,57 @@ button[data-baseweb="tab"][aria-selected="true"] {
    SECTION & PATTERN
    ============================================================ */
 
-.section-head { display: flex; align-items: center; justify-content: space-between; margin: 17px 2px 7px; }
-.section-title { font-size: 0.91rem; font-weight: 900; color: #0f172a; letter-spacing: -0.025em; }
-.section-caption { color: #94a3b8; font-size: 0.63rem; }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin: 18px 2px 8px; }
+.section-title { font-size: 1rem; font-weight: 900; color: #0f172a; letter-spacing: -0.02em; }
+.section-caption { color: #475569; font-size: 0.72rem; font-weight: 700; }
 
 .pattern-box {
     background: linear-gradient(135deg, #eef5ff, #f8fafc);
-    border: 1px solid #dbeafe;
-    border-radius: 17px;
-    padding: 13px;
+    border: 1px solid #bfdbfe;
+    border-radius: 16px;
+    padding: 15px;
 }
-.pattern-title { color: #1d4ed8; font-size: 0.63rem; font-weight: 900; letter-spacing: 0.08em; }
-.pattern-main { color: #0f172a; font-size: 0.98rem; font-weight: 900; margin-top: 4px; line-height: 1.35; }
-.pattern-desc { color: #64748b; font-size: 0.69rem; margin-top: 5px; line-height: 1.45; }
+.pattern-title { color: #1d4ed8; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.06em; }
+.pattern-main { color: #0f172a; font-size: 1.05rem; font-weight: 950; margin-top: 5px; line-height: 1.4; }
+.pattern-desc { color: #334155; font-size: 0.78rem; margin-top: 6px; line-height: 1.5; font-weight: 600; }
 
 
 /* ============================================================
    ACTION CARDS & PRICE MAP
    ============================================================ */
 
-.action-card { border-radius: 15px; padding: 12px; margin: 5px 0; border: 1px solid; }
-.action-buy { background: #f0fdf4; border-color: #bbf7d0; }
-.action-sell { background: #fff7f7; border-color: #fecaca; }
+.action-card { border-radius: 15px; padding: 14px; margin: 6px 0; border: 1px solid; }
+.action-buy { background: #f0fdf4; border-color: #86efac; }
+.action-sell { background: #fff1f2; border-color: #fecdd3; }
 .action-wait { background: #fffbeb; border-color: #fde68a; }
-.action-break { background: #eff6ff; border-color: #bfdbfe; }
+.action-break { background: #eff6ff; border-color: #93c5fd; }
 
-.action-label { font-size: 0.62rem; font-weight: 900; letter-spacing: 0.07em; }
-.action-price { font-size: 1.12rem; font-weight: 950; margin-top: 3px; color: #111827; }
-.action-desc { font-size: 0.66rem; color: #64748b; margin-top: 3px; line-height: 1.35; }
+.action-label { font-size: 0.72rem; font-weight: 900; letter-spacing: 0.05em; }
+.action-price { font-size: 1.2rem; font-weight: 950; margin-top: 4px; color: #111827; }
+.action-desc { font-size: 0.75rem; color: #334155; margin-top: 5px; line-height: 1.4; font-weight: 600; }
 
-.price-map { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 17px; padding: 12px 14px; }
-.price-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+.price-map { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 14px 16px; }
+.price-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #f1f5f9; }
 .price-row:last-child { border-bottom: none; }
-.price-name { font-size: 0.68rem; font-weight: 800; color: #64748b; }
-.price-number { font-size: 0.84rem; font-weight: 950; }
+.price-name { font-size: 0.78rem; font-weight: 800; color: #475569; }
+.price-number { font-size: 0.92rem; font-weight: 950; }
 
-.momentum-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 15px; padding: 11px; min-height: 88px; }
-.momentum-title { color: #64748b; font-size: 0.61rem; font-weight: 850; }
-.momentum-value { color: #0f172a; font-size: 1.15rem; font-weight: 950; margin-top: 4px; }
-.momentum-sub { color: #94a3b8; font-size: 0.63rem; margin-top: 2px; }
+.momentum-card { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 15px; padding: 13px; min-height: 95px; }
+.momentum-title { color: #475569; font-size: 0.72rem; font-weight: 850; }
+.momentum-value { color: #0f172a; font-size: 1.25rem; font-weight: 950; margin-top: 5px; }
+.momentum-sub { color: #64748b; font-size: 0.72rem; margin-top: 3px; font-weight: 600; }
 
-.score-breakdown { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 14px; padding: 11px; }
-.score-line { display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.67rem; }
-.score-line-label { color: #64748b; }
-.score-line-value { font-weight: 900; color: #111827; }
+.score-breakdown { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 13px; }
+.score-line { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.76rem; }
+.score-line-label { color: #475569; font-weight: 700; }
+.score-line-value { font-weight: 950; color: #111827; }
 
-.theme-card { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 14px; padding: 12px; }
-.theme-rank { color: #2563eb; font-size: 0.60rem; font-weight: 900; letter-spacing: 0.08em; }
-.theme-name { color: #111827; font-size: 0.91rem; font-weight: 900; margin-top: 3px; }
+.theme-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 14px; }
+.theme-rank { color: #2563eb; font-size: 0.68rem; font-weight: 900; letter-spacing: 0.06em; }
+.theme-name { color: #111827; font-size: 1rem; font-weight: 900; margin-top: 4px; }
 
-div[data-testid="stExpander"] { border: 1px solid #e2e8f0 !important; border-radius: 14px !important; background: #ffffff !important; overflow: hidden; }
-.stButton > button { border-radius: 11px !important; font-weight: 850 !important; min-height: 40px !important; }
+div[data-testid="stExpander"] { border: 1px solid #cbd5e1 !important; border-radius: 14px !important; background: #ffffff !important; overflow: hidden; }
+.stButton > button { border-radius: 12px !important; font-weight: 900 !important; min-height: 42px !important; font-size: 0.9rem !important; }
 button[kind="primary"] { background: #2563eb !important; }
 div[data-testid="stDataFrame"] { border-radius: 13px; overflow: hidden; }
 
@@ -259,7 +258,7 @@ div[data-testid="stDataFrame"] { border-radius: 13px; overflow: hidden; }
 
 
 # ============================================================
-# DATA & POOLS
+# DATA & POOLS (기존 유지)
 # ============================================================
 
 WATCHLIST_FILE = "watchlist.json"
@@ -396,7 +395,7 @@ if "theme_info" not in st.session_state:
 
 
 # ============================================================
-# NAVER & YFINANCE API
+# NAVER & YFINANCE API (기존 유지)
 # ============================================================
 
 def search_stock_code_by_keyword(keyword):
@@ -588,11 +587,11 @@ def technical_score(df):
     if pd.notna(vol_ratio) and 1.2 <= vol_ratio <= 3.0 and close >= float(prev["Close"]): score += 15
 
     score = int(max(0, min(100, score + 20)))
-    if score >= 80: label = "강한 상승세"
-    elif score >= 65: label = "상승 우세"
-    elif score >= 45: label = "중립 / 관망"
-    elif score >= 30: label = "조정 국면"
-    else: label = "약세 / 하락 위험"
+    if score >= 80: label = "강한 상승세 (매우 양호)"
+    elif score >= 65: label = "상승 우세 (관심 영역)"
+    elif score >= 45: label = "중립 및 관망 (박스권)"
+    elif score >= 30: label = "조정 국면 (지지 확인)"
+    else: label = "약세 및 하락 주의"
     return score, label
 
 def get_score_breakdown(df):
@@ -607,7 +606,7 @@ def get_score_breakdown(df):
     mc_p = 20 if (pd.notna(macd) and pd.notna(sig) and macd > sig and hist > 0) else (15 if (pd.notna(macd) and pd.notna(sig) and macd > sig) else 5)
     v_p = 15 if (pd.notna(vol) and 1.2 <= vol <= 3.0 and close >= float(prev["Close"])) else 0
 
-    return {"가격 > MA20": t_p, "MA20 > MA60": m_p, "RSI": r_p, "MACD": mc_p, "거래량": v_p, "기본점수": 20}
+    return {"가격 > MA20 (추세)": t_p, "MA20 > MA60 (정배열)": m_p, "RSI (모멘텀)": r_p, "MACD (수급신호)": mc_p, "거래량 (유입)": v_p, "기본점수": 20}
 
 def detect_patterns(df, supports, resistances):
     x = df.iloc[-1]
@@ -618,16 +617,16 @@ def detect_patterns(df, supports, resistances):
 
     if pd.notna(ma20) and pd.notna(ma60) and pd.notna(rsi):
         if ma20 * 0.985 <= close <= ma20 * 1.025 and ma20 > ma60 and 42 <= rsi <= 65:
-            patterns.append("💡 눌림목 매수 관심")
+            patterns.append("💡 눌림목 매수 관심 구간")
     if close > recent20_high and vol >= 1.3 and pd.notna(macd) and macd > sig:
-        patterns.append("🚀 강력한 저항선 돌파")
+        patterns.append("🚀 강력한 저항선 돌파 발생")
     if pd.notna(rsi) and rsi >= 70:
-        patterns.append("⚠️ 단기 과열")
+        patterns.append("⚠️ 단기 과열 구간 (주의 필요)")
     if pd.notna(ma20) and close < ma20 and pd.notna(macd) and macd < sig:
-        patterns.append("🔻 단기 추세 약화")
+        patterns.append("🔻 단기 추세 약화 및 조정")
 
     if not patterns:
-        patterns.append("📈 차분한 우상향" if (pd.notna(ma20) and close > ma20) else "💤 횡보 / 관망")
+        patterns.append("📈 차분한 우상향 안정세" if (pd.notna(ma20) and close > ma20) else "💤 방향성 없는 횡보 및 관망")
     return patterns
 
 def chase_risk(df):
@@ -635,14 +634,14 @@ def chase_risk(df):
     close, ma20, rsi, vol = float(x["Close"]), x["MA20"], x["RSI"], x["Vol_Ratio"]
     risk, reasons = 0, []
 
-    if pd.notna(rsi) and rsi >= 70: risk += 40; reasons.append("RSI 과열")
-    if pd.notna(ma20) and close > ma20 * 1.05: risk += 30; reasons.append("20일선과 거리 확대")
-    if pd.notna(vol) and vol >= 2.0: risk += 20; reasons.append("거래량 급증")
+    if pd.notna(rsi) and rsi >= 70: risk += 40; reasons.append("RSI 지표가 70을 넘는 과열권입니다.")
+    if pd.notna(ma20) and close > ma20 * 1.05: risk += 30; reasons.append("20일 이동평균선과 이격도가 너무 벌어졌습니다.")
+    if pd.notna(vol) and vol >= 2.0: risk += 20; reasons.append("평소 대비 거래량이 급증하여 변동성이 큽니다.")
 
     risk = min(100, risk)
-    if risk >= 60: label, cls = "높음", "signal-bad"
-    elif risk >= 30: label, cls = "주의", "signal-warn"
-    else: label, cls = "낮음", "signal-good"
+    if risk >= 60: label, cls = "높음 (추격 자제)", "signal-bad"
+    elif risk >= 30: label, cls = "주의 (분할 접근)", "signal-warn"
+    else: label, cls = "낮음 (안정적)", "signal-good"
     return risk, label, cls, reasons
 
 def easy_action_scenario(df, score, supports, resistances, patterns):
@@ -655,16 +654,16 @@ def easy_action_scenario(df, score, supports, resistances, patterns):
     r1 = resistances[0]["price"] if resistances else close * 1.03
     r2 = resistances[1]["price"] if len(resistances) > 1 else close * 1.06
 
-    if "⚠ 단기 과열" in patterns:
-        st_title, b_g, s_g, w_g = "과열 구간 · 추격보다 눌림 대기", f"{s1:,.0f}원 부근 지지 여부", f"{r1:,.0f}~{r2:,.0f}원 저항 구간", f"{s1:,.0f}원 지지선 확인"
+    if "⚠️ 단기 과열" in patterns:
+        st_title, b_g, s_g, w_g = "급등에 따른 과열 구간입니다. 무리한 추격 매수보다는 20일선 부근까지의 조정을 기다리세요.", f"지지선인 {s1:,.0f}원 부근 안착 여부를 확인하고 분할 매수를 고려합니다.", f"상단 {r1:,.0f}~{r2:,.0f}원 구간은 차익실현 압력이 강할 수 있습니다.", f"핵심 지지선인 {s1:,.0f}원이 이탈하는지 모니터링하세요."
     elif "🚀 강력한 저항선 돌파" in patterns:
-        st_title, b_g, s_g, w_g = "돌파 확인 · 거래량 유지 중요", f"{r1:,.0f}원 돌파 후 지지", f"{r2:,.0f}원 전후 저항 확인", f"{r1:,.0f}원 재이탈 확인"
+        st_title, b_g, s_g, w_g = "직전 고점 저항선을 거래량을 동반하여 강하게 돌파했습니다. 추세 연장 가능성이 높습니다.", f"돌파된 저항선이 새로운 지지선({r1:,.0f}원)으로 작용하는지 테스트합니다.", f"다음 주요 저항선인 {r2:,.0f}원 도달 시 흐름을 점검합니다.", f"돌파 후 다시 가격이 안으로 밀려 내려오는지(이탈 여부) 확인합니다."
     elif "💡 눌림목 매수 관심" in patterns:
-        st_title, b_g, s_g, w_g = "눌림목 구간 · 추세 확인", f"{s1:,.0f}~{close:,.0f}원", f"{r1:,.0f}원 1차 저항", f"{s2:,.0f}원 이탈 여부"
+        st_title, b_g, s_g, w_g = "상승 추세 속에서 자연스러운 가격 조정(눌림목)이 진행 중인 매력적인 구간입니다.", f"현재가 및 {s1:,.0f}원 부근에서 분할 관점의 접근이 유리합니다.", f"반등 시 {r1:,.0f}원이 단기 목표가이자 저항선이 됩니다.", f"지지선인 {s2:,.0f}가 무너지면 리스크 관리가 필요합니다."
     elif "🔻 단기 추세 약화" in patterns:
-        st_title, b_g, s_g, w_g = "단기 추세 약화 · 지지선 확인", f"{s1:,.0f}원 지지 확인", f"{r1:,.0f}원 반등 저항", f"{s2:,.0f}원 추가 조정 여부"
+        st_title, b_g, s_g, w_g = "단기 모멘텀이 둔화되면서 주요 이동평균선 아래로 내려온 조정 국면입니다.", f"하단 지지선({s1:,.0f}원)에서 매수세가 유입되는지 확인이 필요합니다.", f"반등 시 단기 이평선({r1:,.0f}원) 돌파 여부를 체크하세요.", f"추가 하락 시 {s2:,.0f}원 부근까지 열려있음에 유의하세요."
     else:
-        st_title, b_g, s_g, w_g = "추세 대응 구간", f"{s1:,.0f}원 지지 확인", f"{r1:,.0f}원 저항 확인", "박스권 흐름 모니터링"
+        st_title, b_g, s_g, w_g = "현재 뚜렷한 방향성 없이 박스권 내에서 등락을 거듭하고 있는 관망 구간입니다.", f"하단 지지 라인({s1:,.0f}원) 부근에서의 반등을 노립니다.", f"상단 저항 라인({r1:,.0f}원) 부근에서는 비중을 조절합니다.", f"박스권 이탈 여부를 차분히 지켜보세요."
 
     return st_title, b_g, s_g, w_g, s1, s2, r1, r2
 
@@ -672,10 +671,10 @@ def score_details(df):
     x = df.iloc[-1]
     close, ma20, ma60, rsi, macd, sig, vol = float(x["Close"]), x["MA20"], x["MA60"], x["RSI"], x["MACD"], x["MACD_Signal"], x["Vol_Ratio"]
     
-    trend = "강세" if (pd.notna(ma20) and pd.notna(ma60) and close > ma20 and ma20 > ma60) else "중립"
-    rsi_state = "과열" if (pd.notna(rsi) and rsi >= 70) else ("침체" if (pd.notna(rsi) and rsi <= 30) else ("상승" if (pd.notna(rsi) and rsi >= 50) else "약세"))
-    macd_state = "상승" if (pd.notna(macd) and pd.notna(sig) and macd > sig) else "약세"
-    volume_state = "확인중" if pd.isna(vol) else ("강한 유입" if vol >= 1.5 else ("평균 이상" if vol >= 1.0 else "조용함"))
+    trend = "강세 (정배열)" if (pd.notna(ma20) and pd.notna(ma60) and close > ma20 and ma20 > ma60) else "중립 및 혼조"
+    rsi_state = "과열권 (매도우위)" if (pd.notna(rsi) and rsi >= 70) else ("침체권 (저가메리트)" if (pd.notna(rsi) and rsi <= 30) else ("상승 탄력" if (pd.notna(rsi) and rsi >= 50) else "약세 흐름"))
+    macd_state = "상승 확장" if (pd.notna(macd) and pd.notna(sig) and macd > sig) else "하락 둔화"
+    volume_state = "데이터 부족" if pd.isna(vol) else ("거래량 대폭 유입" if vol >= 1.5 else ("평균 이상 거래" if vol >= 1.0 else "거래량 감소 (한산)"))
     return trend, rsi_state, macd_state, volume_state
 
 def make_main_chart(df, supports, resistances):
@@ -685,28 +684,28 @@ def make_main_chart(df, supports, resistances):
 
     for col, color in [("MA5", "#f59e0b"), ("MA20", "#2563eb"), ("MA60", "#16a34a"), ("MA120", "#7c3aed")]:
         if col in df:
-            fig.add_trace(go.Scatter(x=df.index, y=df[col], line=dict(color=color, width=1.35), name=col), row=1, col=1)
+            fig.add_trace(go.Scatter(x=df.index, y=df[col], line=dict(color=color, width=1.5), name=col), row=1, col=1)
 
     for i, item in enumerate(supports[:2], 1):
-        fig.add_hline(y=item["price"], row=1, col=1, line_dash="dot", line_color="#16a34a", annotation_text=f"S{i}", annotation_position="bottom left")
+        fig.add_hline(y=item["price"], row=1, col=1, line_dash="dot", line_color="#16a34a", annotation_text=f"지지 S{i}", annotation_position="bottom left")
     for i, item in enumerate(resistances[:2], 1):
-        fig.add_hline(y=item["price"], row=1, col=1, line_dash="dash", line_color="#dc2626", annotation_text=f"R{i}", annotation_position="top left")
+        fig.add_hline(y=item["price"], row=1, col=1, line_dash="dash", line_color="#dc2626", annotation_text=f"저항 R{i}", annotation_position="top left")
 
     volume_colors = ["#16a34a" if c >= o else "#dc2626" for c, o in zip(df["Close"], df["Open"])]
     fig.add_trace(go.Bar(x=df.index, y=df["Volume"], marker_color=volume_colors, name="거래량"), row=2, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df["RSI"], line=dict(color="#2563eb", width=1.7), name="RSI"), row=3, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df["RSI"], line=dict(color="#2563eb", width=1.8), name="RSI"), row=3, col=1)
 
     fig.add_hline(y=70, row=3, col=1, line_dash="dot", line_color="#dc2626")
     fig.add_hline(y=30, row=3, col=1, line_dash="dot", line_color="#16a34a")
 
     fig.update_layout(
-        height=650, margin=dict(l=4, r=4, t=8, b=8), template="plotly_white",
+        height=680, margin=dict(l=4, r=4, t=8, b=8), template="plotly_white",
         showlegend=False, xaxis_rangeslider_visible=False, dragmode=False,
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Arial", size=10, color="#64748b")
+        font=dict(family="Arial", size=11, color="#334155")
     )
     fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=True, gridcolor="#eef2f7", fixedrange=True)
+    fig.update_yaxes(showgrid=True, gridcolor="#e2e8f0", fixedrange=True)
     return fig
 
 def scan_market_leading_themes():
@@ -724,17 +723,17 @@ def scan_market_leading_themes():
 
             reasons, score_add = [], 0
             if pd.notna(x["MACD"]) and pd.notna(x["MACD_Signal"]) and prev["MACD"] <= prev["MACD_Signal"] and x["MACD"] > x["MACD_Signal"]:
-                reasons.append("MACD 골든크로스"); score_add += 35
+                reasons.append("MACD 골든크로스 발생"); score_add += 35
             if pd.notna(x["Vol_Ratio"]) and x["Vol_Ratio"] >= 1.3 and x["Close"] > prev["Close"]:
-                reasons.append("거래량 유입"); score_add += 30
+                reasons.append("거래량 동반 상승"); score_add += 30
             if pd.notna(x["MA20"]) and 0.98 <= x["Close"] / x["MA20"] <= 1.02:
-                reasons.append("20일선 지지"); score_add += 25
+                reasons.append("20일 이동평균선 지지"); score_add += 25
 
             item_score = min(100, 50 + score_add)
             theme_total_score += item_score
             top_gems.append({
                 "code": code, "name": name, "price": float(x["Close"]), "change": change,
-                "reasons": (reasons if reasons else ["안정적 흐름"]), "score": item_score
+                "reasons": (reasons if reasons else ["안정적인 우상향 흐름"]), "score": item_score
             })
 
         if valid_count > 0:
@@ -753,13 +752,13 @@ def scan_market_leading_themes():
 
 st.markdown("""
 <div class="top-brand">
-    <div class="brand-small">ETF RADAR</div>
-    <div class="brand-main">Technical Dashboard</div>
-    <div class="brand-sub">ETF Technical Analysis · Momentum · Support / Resistance</div>
+    <div class="brand-small">ETF RADAR v10.2</div>
+    <div class="brand-main">프리미엄 금융 대시보드</div>
+    <div class="brand-sub">정밀 기술적 분석 · 모멘텀 진단 · 지지/저항 실시간 매핑</div>
 </div>
 """, unsafe_allow_html=True)
 
-tab_analysis, tab_market = st.tabs(["📊 ETF RADAR", "🔥 MARKET RADAR"])
+tab_analysis, tab_market = st.tabs(["📊 개별 종목 분석 (ETF RADAR)", "🔥 시장 테마 스캔 (MARKET RADAR)"])
 
 # ------------------------------------------------------------
 # TAB 1 : ETF RADAR
@@ -769,12 +768,12 @@ with tab_analysis:
 
     search_col1, search_col2 = st.columns([3, 1])
     with search_col1:
-        keyword_input = st.text_input("종목 검색", placeholder="ETF명 또는 코드", label_visibility="collapsed", key="ind_search")
+        keyword_input = st.text_input("종목 검색", placeholder="ETF명 또는 종목코드 6자리 입력", label_visibility="collapsed", key="ind_search")
     with search_col2:
-        search_add_btn = st.button("＋ 저장", use_container_width=True, key="ind_save_btn")
+        search_add_btn = st.button("＋ 종목저장", use_container_width=True, key="ind_save_btn")
 
     if search_add_btn and keyword_input:
-        with st.spinner("ETF 검색 중..."):
+        with st.spinner("네이버 금융에서 ETF를 검색 중입니다..."):
             found_code, found_name = search_stock_code_by_keyword(keyword_input.strip())
             if not found_code:
                 clean_test = "".join(filter(str.isalnum, keyword_input.strip()))
@@ -787,38 +786,38 @@ with tab_analysis:
                 save_json_file(WATCHLIST_FILE, st.session_state.watchlist)
                 if found_code not in st.session_state.theme_info:
                     st.session_state.theme_info[found_code] = {
-                        "theme": "신규 등록 ETF", "cycle": "관찰 필요",
-                        "desc": f"{found_name} 관련 ETF", "long_view": "중장기 흐름 확인 필요"
+                        "theme": "신규 등록 종목", "cycle": "탐색 구간",
+                        "desc": f"{found_name} 실시간 추종 ETF", "long_view": "중장기 주가 흐름과 기초자산 모멘텀을 꾸준히 확인하세요."
                     }
                     save_json_file(THEME_FILE, st.session_state.theme_info)
-                st.success(f"{found_name} 저장 완료")
+                st.success(f"'{found_name}' 종목이 관심 목록에 저장되었습니다.")
                 st.rerun()
             else:
-                st.error("해당 ETF를 찾을 수 없습니다.")
+                st.error("입력하신 검색어에 해당하는 ETF를 찾지 못했습니다. 정확한 명칭이나 코드를 입력해주세요.")
 
     options = list(watchlist.values())
     if not options:
-        st.warning("관심종목을 먼저 추가해주세요.")
+        st.warning("등록된 관심종목이 없습니다. 위 검색창에서 종목을 추가해 주세요.")
         st.stop()
 
     c1, c2 = st.columns([2.2, 1])
     with c1:
-        selected = st.selectbox("관심 ETF", options, label_visibility="collapsed")
+        selected = st.selectbox("관심 ETF 선택", options, label_visibility="collapsed")
     with c2:
-        period = st.selectbox("기간", ["6m", "1y", "2y"], index=1, label_visibility="collapsed")
+        period = st.selectbox("분석 기간", ["6m", "1y", "2y"], index=1, label_visibility="collapsed")
 
     symbol_input = next(k for k, v in watchlist.items() if v == selected)
 
-    with st.spinner("시장 데이터를 분석하고 있습니다..."):
+    with st.spinner("선택된 종목의 시세 및 기술 지표를 계산 중입니다..."):
         raw_df, code = load_etf_data(symbol_input, period)
 
     if raw_df is None:
-        st.error("데이터를 불러오지 못했습니다.")
+        st.error("해당 종목의 데이터를 불러오는 데 실패했습니다. 네트워크 상태나 코드를 다시 확인해 주세요.")
         st.stop()
 
     df = calculate_indicators(raw_df).dropna(subset=["Close"]).copy()
     if len(df) < 20:
-        st.error("분석에 필요한 데이터가 부족합니다.")
+        st.error("분석을 수행하기에 데이터가 충분하지 않습니다.")
         st.stop()
 
     score, score_label = technical_score(df)
@@ -843,17 +842,17 @@ with tab_analysis:
         <div class="hero-top">
             <div>
                 <div class="hero-name">{selected.split(" (")[0]}</div>
-                <div class="hero-code">{code}</div>
+                <div class="hero-code">종목코드: {code}</div>
             </div>
             <div class="hero-mini">
-                <div class="hero-mini-label">SCORE</div>
-                <div class="hero-mini-value">{score}/100</div>
+                <div class="hero-mini-label">기술 점수</div>
+                <div class="hero-mini-value">{score}점</div>
             </div>
         </div>
         <div class="hero-price">{price:,.0f} <span class="hero-unit">원</span></div>
         <div class="hero-change" style="color:{change_color};">
-            {"▲" if change >= 0 else "▼"} {abs(change):.2f}%
-            <span style="color:#94a3b8; font-size:0.65rem; margin-left:5px;">최근 거래일 기준</span>
+            {"▲" if change >= 0 else "▼"} {abs(change):.2f}% 전일 대비
+            <span style="color:#64748b; font-size:0.75rem; margin-left:8px; font-weight:600;">최근 거래일 종가 기준</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -865,7 +864,7 @@ with tab_analysis:
         st.markdown(f"""
         <div class="score-card">
             <div class="score-number" style="color:{score_color};">{score}</div>
-            <div class="score-denom">/ 100</div>
+            <div class="score-denom">/ 100점 만점</div>
             <div class="score-label">{score_label}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -873,22 +872,22 @@ with tab_analysis:
     with signal_col:
         st.markdown(f"""
         <div class="card card-tight">
-            <div class="card-title">MARKET SIGNAL</div>
+            <div class="card-title">종합 시장 신호 진단</div>
             <div class="signal-grid">
                 <div class="signal">
-                    <div class="signal-title">추세</div>
-                    <div class="signal-value {'signal-good' if trend_state == '강세' else 'signal-warn'}">{trend_state}</div>
+                    <div class="signal-title">추세 방향</div>
+                    <div class="signal-value {'signal-good' if '강세' in trend_state else 'signal-warn'}">{trend_state}</div>
                 </div>
                 <div class="signal">
-                    <div class="signal-title">RSI</div>
+                    <div class="signal-title">상대강도 (RSI)</div>
                     <div class="signal-value">{rsi:.0f} · {rsi_state}</div>
                 </div>
                 <div class="signal">
-                    <div class="signal-title">MACD</div>
-                    <div class="signal-value {'signal-good' if macd_state == '상승' else 'signal-bad'}">{macd_state}</div>
+                    <div class="signal-title">수급 모멘텀</div>
+                    <div class="signal-value {'signal-good' if '확장' in macd_state else 'signal-bad'}">{macd_state}</div>
                 </div>
                 <div class="signal">
-                    <div class="signal-title">거래량</div>
+                    <div class="signal-title">거래량 동향</div>
                     <div class="signal-value">{vol_ratio:.1f}x · {volume_state}</div>
                 </div>
             </div>
@@ -898,38 +897,37 @@ with tab_analysis:
     # TODAY SIGNAL
     st.markdown("""
     <div class="section-head">
-        <div class="section-title">🎯 TODAY SIGNAL</div>
-        <div class="section-caption">Technical setup</div>
+        <div class="section-title">🎯 금일 핵심 투자 가이드 및 패턴 분석</div>
+        <div class="section-caption">Actionable Insight</div>
     </div>
     """, unsafe_allow_html=True)
 
     pattern_main = patterns[0]
     
-    # [수정됨] 괄호 짝 에러가 발생하지 않도록 명확한 if-elif 분기로 수정
-    pattern_desc = "현재 이동평균과 모멘텀을 기준으로 단기 방향성을 확인하는 구간입니다."
+    pattern_desc = "현재 이동평균선과 보조지표를 바탕으로 단기 추세의 지속 여부를 타진하는 구간입니다."
     if "눌림목" in pattern_main:
-        pattern_desc = "중단기 상승추세가 유지되는 가운데 20일선 부근에서 가격 지지를 확인하는 구간입니다."
+        pattern_desc = "중장기 상승 추세가 꺾이지 않은 채, 주가가 20일 이동평균선 부근까지 건전하게 조정을 받은 후 반등을 시도하는 유리한 맥락입니다."
     elif "돌파" in pattern_main:
-        pattern_desc = "최근 고점을 넘어선 상태입니다. 돌파 이후 거래량과 지지 여부를 함께 확인합니다."
+        pattern_desc = "직전 고점이나 강력한 저항 라인을 거래량 수반과 함께 상향 돌파했습니다. 매수세가 집중되고 있어 추가 상승 탄력이 기대됩니다."
     elif "과열" in pattern_main:
-        pattern_desc = "단기 상승 탄력이 강해진 구간입니다. 추격보다는 조정 시 지지 확인이 중요합니다."
+        pattern_desc = "단기간 가격이 가파르게 상승하여 RSI 등 지표가 과열 영역에 진입했습니다. 추격 매수보다는 충분한 가격 조정을 기다리는 것이 안전합니다."
     elif "약화" in pattern_main:
-        pattern_desc = "가격이 단기 기준선 아래로 내려온 상태입니다. 다음 지지선의 반응을 확인할 필요가 있습니다."
+        pattern_desc = "단기 상승 동력이 약화되면서 주요 지지선 테스트가 진행되고 있습니다. 리스크 관리에 무게를 두어야 하는 국면입니다."
 
     st.markdown(f"""
     <div class="pattern-box">
-        <div class="pattern-title">CURRENT SETUP</div>
+        <div class="pattern-title">현재 시장 패턴 해석</div>
         <div class="pattern-main">{pattern_main}</div>
         <div class="pattern-desc">{pattern_desc}</div>
-        <div style="margin-top:7px; color:#334155; font-size:0.69rem; font-weight:800;">{status_title}</div>
+        <div style="margin-top:10px; color:#1e3a8a; font-size:0.82rem; font-weight:800; border-top:1px solid #bfdbfe; padding-top:8px;">💡 대응 전략: {status_title}</div>
     </div>
     """, unsafe_allow_html=True)
 
     # PRICE ZONES
     st.markdown("""
     <div class="section-head">
-        <div class="section-title">📍 PRICE ZONES</div>
-        <div class="section-caption">Key levels</div>
+        <div class="section-title">📍 주요 가격대별 대응 전략 (Price Zones)</div>
+        <div class="section-caption">Support & Resistance Strategy</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -937,17 +935,17 @@ with tab_analysis:
     with z1:
         st.markdown(f"""
         <div class="action-card action-buy">
-            <div class="action-label" style="color:#15803d;">🟢 INTEREST ZONE</div>
+            <div class="action-label" style="color:#15803d;">🟢 1차 지지 / 관심 영역</div>
             <div class="action-price">{s1:,.0f}원</div>
-            <div class="action-desc">1차 지지 · {buy_guide}</div>
+            <div class="action-desc">{buy_guide}</div>
         </div>
         """, unsafe_allow_html=True)
     with z2:
         st.markdown(f"""
         <div class="action-card action-sell">
-            <div class="action-label" style="color:#dc2626;">🔴 RESISTANCE</div>
+            <div class="action-label" style="color:#dc2626;">🔴 1차 저항 / 차익실현</div>
             <div class="action-price">{r1:,.0f}원</div>
-            <div class="action-desc">1차 저항 · {sell_guide}</div>
+            <div class="action-desc">{sell_guide}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -955,70 +953,70 @@ with tab_analysis:
     with z3:
         st.markdown(f"""
         <div class="action-card action-wait">
-            <div class="action-label" style="color:#b45309;">🟡 SECOND SUPPORT</div>
+            <div class="action-label" style="color:#b45309;">🟡 2차 핵심 지지선</div>
             <div class="action-price">{s2:,.0f}원</div>
-            <div class="action-desc">핵심 지지 · {wait_guide}</div>
+            <div class="action-desc">{wait_guide}</div>
         </div>
         """, unsafe_allow_html=True)
     with z4:
         st.markdown(f"""
         <div class="action-card action-break">
-            <div class="action-label" style="color:#1d4ed8;">🔵 BREAKOUT</div>
+            <div class="action-label" style="color:#1d4ed8;">🔵 상단 돌파 목표가</div>
             <div class="action-price">{r2:,.0f}원+</div>
-            <div class="action-desc">2차 저항 돌파 확인 구간</div>
+            <div class="action-desc">해당 가격대 안착 시 추가 상승 랠리 가능성 열림</div>
         </div>
         """, unsafe_allow_html=True)
 
     # CHASE RISK
     st.markdown("""
     <div class="section-head">
-        <div class="section-title">⚠️ CHASE RISK</div>
-        <div class="section-caption">추격매수 위험</div>
+        <div class="section-title">⚠️ 추격 매수 위험도 진단 (Chase Risk)</div>
+        <div class="section-caption">Overheating Warning</div>
     </div>
     """, unsafe_allow_html=True)
 
-    risk_text = " · ".join(chase_reasons) if chase_reasons else "현재 가격 기준 추격 위험 요인이 크지 않습니다."
+    risk_text = " · ".join(chase_reasons) if chase_reasons else "현재 가격대에서는 단기 과열이나 이격도 확대에 따른 추격 매수 위험이 낮습니다. 안정적인 분할 접근이 가능합니다."
     risk_bg = "#fff1f2" if chase_score >= 60 else ("#fffbeb" if chase_score >= 30 else "#f0fdf4")
     risk_bd = "#fecdd3" if chase_score >= 60 else ("#fde68a" if chase_score >= 30 else "#bbf7d0")
 
     st.markdown(f"""
-    <div style="background:{risk_bg}; border:1px solid {risk_bd}; border-radius:15px; padding:12px;">
+    <div style="background:{risk_bg}; border:1px solid {risk_bd}; border-radius:16px; padding:15px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <div style="color:#64748b; font-size:0.63rem; font-weight:850;">CHASE RISK</div>
-                <div style="font-size:1rem; font-weight:900; margin-top:2px;">{chase_label}</div>
+                <div style="color:#475569; font-size:0.72rem; font-weight:850;">추격 매수 위험 평가</div>
+                <div style="font-size:1.1rem; font-weight:950; margin-top:3px; color:#111827;">위험도 수준: {chase_label}</div>
             </div>
-            <div style="font-size:1.25rem; font-weight:950;">{chase_score}</div>
+            <div style="font-size:1.4rem; font-weight:950; color:#0f172a;">{chase_score}점</div>
         </div>
-        <div style="color:#64748b; font-size:0.67rem; margin-top:6px;">{risk_text}</div>
+        <div style="color:#334155; font-size:0.78rem; margin-top:8px; line-height:1.4; font-weight:600;">진단 사유: {risk_text}</div>
     </div>
     """, unsafe_allow_html=True)
 
     # PRICE MAP
     st.markdown("""
     <div class="section-head">
-        <div class="section-title">🗺 PRICE MAP</div>
-        <div class="section-caption">Support / Resistance</div>
+        <div class="section-title">🗺 실시간 가격 맵핑 (Price Map)</div>
+        <div class="section-caption">Key Levels Reference</div>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown(f"""
     <div class="price-map">
-        <div class="price-row"><div class="price-name">R2 · 2차 저항</div><div class="price-number" style="color:#dc2626;">{r2:,.0f}원</div></div>
-        <div class="price-row"><div class="price-name">R1 · 1차 저항</div><div class="price-number" style="color:#dc2626;">{r1:,.0f}원</div></div>
-        <div class="price-row" style="background:#eff6ff; margin:0 -8px; padding-left:8px; padding-right:8px; border-radius:8px;">
-            <div class="price-name">NOW · 현재가</div><div class="price-number" style="color:#2563eb;">{price:,.0f}원</div>
+        <div class="price-row"><div class="price-name">R2 · 2차 상단 저항선</div><div class="price-number" style="color:#dc2626;">{r2:,.0f}원</div></div>
+        <div class="price-row"><div class="price-name">R1 · 1차 단기 저항선</div><div class="price-number" style="color:#dc2626;">{r1:,.0f}원</div></div>
+        <div class="price-row" style="background:#eff6ff; margin:0 -10px; padding-left:10px; padding-right:10px; border-radius:8px;">
+            <div class="price-name" style="font-weight:900; color:#1d4ed8;">NOW · 현재 종가</div><div class="price-number" style="color:#2563eb; font-size:1rem;">{price:,.0f}원</div>
         </div>
-        <div class="price-row"><div class="price-name">S1 · 1차 지지</div><div class="price-number" style="color:#16a34a;">{s1:,.0f}원</div></div>
-        <div class="price-row"><div class="price-name">S2 · 2차 지지</div><div class="price-number" style="color:#16a34a;">{s2:,.0f}원</div></div>
+        <div class="price-row"><div class="price-name">S1 · 1차 주요 지지선</div><div class="price-number" style="color:#16a34a;">{s1:,.0f}원</div></div>
+        <div class="price-row"><div class="price-name">S2 · 2차 핵심 지지선</div><div class="price-number" style="color:#16a34a;">{s2:,.0f}원</div></div>
     </div>
     """, unsafe_allow_html=True)
 
     # CHART
     st.markdown("""
     <div class="section-head">
-        <div class="section-title">📈 PRICE ACTION</div>
-        <div class="section-caption">Candle · MA · Volume · RSI</div>
+        <div class="section-title">📈 프리미엄 차트 분석 (Price Action)</div>
+        <div class="section-caption">Candlestick · MA · Volume · RSI</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1028,8 +1026,8 @@ with tab_analysis:
     # MOMENTUM
     st.markdown("""
     <div class="section-head">
-        <div class="section-title">📊 MOMENTUM</div>
-        <div class="section-caption">Current indicators</div>
+        <div class="section-title">📊 핵심 모멘텀 지표 요약</div>
+        <div class="section-caption">Technical Indicators</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1037,7 +1035,7 @@ with tab_analysis:
     with i1:
         st.markdown(f"""
         <div class="momentum-card">
-            <div class="momentum-title">RSI</div>
+            <div class="momentum-title">상대강도 (RSI)</div>
             <div class="momentum-value">{rsi:.1f}</div>
             <div class="momentum-sub">{rsi_state}</div>
         </div>
@@ -1045,85 +1043,91 @@ with tab_analysis:
     with i2:
         st.markdown(f"""
         <div class="momentum-card">
-            <div class="momentum-title">VOLUME</div>
+            <div class="momentum-title">거래량 비율</div>
             <div class="momentum-value">{vol_ratio:.1f}x</div>
-            <div class="momentum-sub">20일 평균 대비</div>
+            <div class="momentum-sub">20일 평균 거래량 대비</div>
         </div>
         """, unsafe_allow_html=True)
     with i3:
         macd_hist = float(x["MACD_Hist"])
-        macd_arrow = "↑" if macd_hist > 0 else "↓"
+        macd_arrow = "▲" if macd_hist > 0 else "▼"
         st.markdown(f"""
         <div class="momentum-card">
-            <div class="momentum-title">MACD</div>
-            <div class="momentum-value">{macd_arrow}</div>
-            <div class="momentum-sub">{macd_state}</div>
+            <div class="momentum-title">MACD 모멘텀</div>
+            <div class="momentum-value">{macd_arrow} {macd_state}</div>
+            <div class="momentum-sub">시그널 교차 및 수급</div>
         </div>
         """, unsafe_allow_html=True)
 
     # DETAIL TABS
-    detail_tabs = st.tabs(["📍 매물대", "🏛 테마", "📖 지표"])
+    detail_tabs = st.tabs(["📍 매물대 분포", "🏛 테마 및 중장기 관점", "📖 지표 가이드 및 산정기준"])
 
     with detail_tabs[0]:
-        st.markdown("#### 매물대 집중 구간")
+        st.markdown("#### 최근 120거래일 매물대 집중 구간")
+        st.markdown("주가가 오랫동안 머물며 거래가 집중된 가격대는 향후 주가 하락 시 강력한 방어선(지지) 혹은 상승 시 저항으로 작용합니다.")
         if not vp.empty:
             vp_show = vp.head(7)[["price", "ratio"]].copy()
             vp_show["가격대"] = vp_show["price"].map(lambda x: f"{x:,.0f}원")
-            vp_show["집중도"] = vp_show["ratio"].map(lambda x: f"{x * 100:.0f}%")
-            st.dataframe(vp_show[["가격대", "집중도"]], use_container_width=True, hide_index=True)
+            vp_show["거래 집중도"] = vp_show["ratio"].map(lambda x: f"{x * 100:.1f}%")
+            st.dataframe(vp_show[["가격대", "거래 집중도"]], use_container_width=True, hide_index=True)
 
-        st.markdown("#### 지지 / 저항")
+        st.markdown("#### 주요 지지 및 저항 레벨 상세")
         sc, rc = st.columns(2)
         with sc:
-            st.markdown("**🟢 SUPPORT**")
+            st.markdown("**🟢 주요 지지 라인 (Support)**")
             for i, item in enumerate(supports[:3], 1):
-                st.success(f"S{i} · {item['price']:,.0f}원")
+                st.success(f"지지 S{i} : {item['price']:,.0f}원 (신뢰도 높음)")
         with rc:
-            st.markdown("**🔴 RESISTANCE**")
+            st.markdown("**🔴 주요 저항 라인 (Resistance)**")
             for i, item in enumerate(resistances[:3], 1):
-                st.warning(f"R{i} · {item['price']:,.0f}원")
+                st.warning(f"저항 R{i} : {item['price']:,.0f}원 (매물 출현 가능)")
 
     with detail_tabs[1]:
         theme_info = st.session_state.theme_info.get(code, {
-            "theme": "미등록 테마", "cycle": "관찰 필요", "desc": "정보 등록 필요", "long_view": "중장기 관점을 입력해주세요."
+            "theme": "미등록 테마", "cycle": "탐색 구간", "desc": "상세 테마 설명이 등록되지 않았습니다.", "long_view": "기초 자산의 산업 성장성을 바탕으로 중장기 분할 매수를 검토하세요."
         })
         st.markdown(f"""
         <div class="card">
-            <div class="card-title">THEME</div>
-            <div style="font-size:1.05rem; font-weight:900; margin-top:4px;">{theme_info["theme"]}</div>
-            <div style="margin-top:8px; color:#2563eb; font-weight:850; font-size:0.73rem;">{theme_info["cycle"]}</div>
-            <div style="margin-top:10px; color:#64748b; font-size:0.72rem; line-height:1.55;">{theme_info["desc"]}</div>
+            <div class="card-title">소속 테마 및 산업 사이클</div>
+            <div style="font-size:1.15rem; font-weight:900; margin-top:6px; color:#0f172a;">{theme_info["theme"]}</div>
+            <div style="margin-top:8px; color:#2563eb; font-weight:900; font-size:0.8rem;">현재 사이클: {theme_info["cycle"]}</div>
+            <div style="margin-top:10px; color:#334155; font-size:0.8rem; line-height:1.6;"><b>테마 특징:</b> {theme_info["desc"]}</div>
         </div>
         """, unsafe_allow_html=True)
         st.markdown(f"""
         <div class="action-card action-break">
-            <div class="action-label" style="color:#1d4ed8;">LONG VIEW</div>
-            <div style="margin-top:5px; font-size:0.75rem; line-height:1.5; color:#334155;">{theme_info["long_view"]}</div>
+            <div class="action-label" style="color:#1d4ed8;">📌 중장기 투자 관점 (Long-Term View)</div>
+            <div style="margin-top:6px; font-size:0.8rem; line-height:1.6; color:#1e293b; font-weight:600;">{theme_info["long_view"]}</div>
         </div>
         """, unsafe_allow_html=True)
 
     with detail_tabs[2]:
-        st.markdown("#### 종합점수 구성")
-        breakdown_html = "".join([f'<div class="score-line"><div class="score-line-label">{l}</div><div class="score-line-value">+{v}</div></div>' for l, v in score_breakdown.items()])
+        st.markdown("#### 종합 기술 점수 산정 기준")
+        st.markdown("현재 종목의 기술적 건강 상태를 정량화하기 위해 아래 5가지 요소를 종합하여 100점 만점으로 환산합니다.")
+        breakdown_html = "".join([f'<div class="score-line"><div class="score-line-label">{l}</div><div class="score-line-value">+{v}점</div></div>' for l, v in score_breakdown.items()])
         st.markdown(f'<div class="score-breakdown">{breakdown_html}</div>', unsafe_allow_html=True)
+        
         st.markdown("""
-        #### RSI  
-        **70 이상** → 단기 과열 영역 | **50~70** → 상승 모멘텀 영역 | **30 이하** → 침체 영역  
-        ---  
-        #### MACD  
-        MACD가 Signal보다 위에 있으면 단기 모멘텀이 상대적으로 강한 상태입니다.  
-        ---  
-        #### 거래량  
-        **1.0x** → 20일 평균 | **1.5x 이상** → 거래량 증가 | **2.0x 이상** → 강한 거래량 유입  
-        ---  
-        #### 이동평균  
-        **MA20 > MA60** → 중단기 추세가 상대적으로 강한 상태입니다.
+        ---
+        #### 💡 주요 보조지표 해석 가이드
+        * **RSI (상대강도지수):** 
+          - **70 이상:** 매수세가 과도하게 유입된 과열 국면 (단기 차익실현 주의)
+          - **50 ~ 70:** 상승 에너지가 우세한 건강한 모멘텀 구간
+          - **30 이하:** 주가가 과도하게 하락한 침체 국면 (중장기 분할 접근 검토)
+        * **MACD (이동평균수렴확산):** 
+          - MACD선이 시그널선을 상향 돌파(골든크로스)하고 히스토그램이 양(+)일 때 수급 모멘텀이 가장 강력합니다.
+        * **거래량 비율 (Vol Ratio):** 
+          - 20일 평균 거래량 대비 **1.5배 이상** 터지며 주가가 상승할 때 진짜 주포(기관/외인)의 수급 유입으로 해석합니다.
+        * **이동평균선 배열:** 
+          - 주가가 20일선 위에 위치하고 20일선이 60일선보다 위에 있는 정배열 상태일 때 추세 추종 매매가 유리합니다.
         """)
 
-    with st.expander("⚙️ 관심종목 관리"):
-        if st.button("🗑 현재 종목 삭제", use_container_width=True):
+    with st.expander("⚙️️ 관심종목 관리 설정"):
+        st.markdown("현재 보고 계신 ETF를 관심 목록에서 삭제할 수 있습니다.")
+        if st.button("🗑 현재 종목 관심목록에서 삭제", use_container_width=True):
             del st.session_state.watchlist[symbol_input]
             save_json_file(WATCHLIST_FILE, st.session_state.watchlist)
+            st.success("종목이 삭제되었습니다.")
             st.rerun()
 
 
@@ -1133,18 +1137,18 @@ with tab_analysis:
 with tab_market:
     st.markdown("""
     <div class="card">
-        <div class="card-title">MARKET RADAR</div>
-        <div style="font-size:1.12rem; font-weight:900; margin-top:4px;">시장 모멘텀 탐색</div>
-        <div style="color:#64748b; font-size:0.72rem; line-height:1.5; margin-top:6px;">
-            주요 ETF 테마군의 MACD · 거래량 · 이동평균을 종합해 현재 모멘텀을 확인합니다.
+        <div class="card-title">MARKET RADAR · 시장 전반 모멘텀 스캔</div>
+        <div style="font-size:1.2rem; font-weight:900; margin-top:4px; color:#0f172a;">주요 ETF 테마군 실시간 순위 탐색</div>
+        <div style="color:#334155; font-size:0.8rem; line-height:1.6; margin-top:8px; font-weight:600;">
+            국내 주요 연금 계좌 및 DC형 퇴직연금 투자 가능 ETF 풀을 대상으로, 각 테마별 수급 모멘텀과 기술적 활성화 점수를 실시간 스캔하여 현재 가장 주목받는 주도 테마를 찾아냅니다.
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("🚀 MARKET RADAR 실행", use_container_width=True, type="primary", key="auto_scan_btn"):
+    if st.button("🚀 시장 테마 모멘텀 전체 스캔 실행", use_container_width=True, type="primary", key="auto_scan_btn"):
         st.cache_data.clear()
 
-    with st.spinner("시장 테마를 분석하고 있습니다..."):
+    with st.spinner("전체 연금 ETF 풀의 기술적 지표를 전수 분석 중입니다. 잠시만 기다려주세요..."):
         leading_themes = scan_market_leading_themes()
 
     if leading_themes:
@@ -1153,15 +1157,15 @@ with tab_market:
 
         st.markdown(f"""
         <div class="hero">
-            <div class="card-title">CURRENT MOMENTUM</div>
-            <div style="font-size:1.15rem; font-weight:900; margin-top:4px;">{top_theme["theme_name"]}</div>
-            <div style="display:flex; align-items:end; justify-content:space-between; margin-top:10px;">
+            <div class="card-title">👑 현재 시장 최고 주도 테마 (TOP 1)</div>
+            <div style="font-size:1.25rem; font-weight:950; margin-top:5px; color:#0f172a;">{top_theme["theme_name"]}</div>
+            <div style="display:flex; align-items:end; justify-content:space-between; margin-top:12px;">
                 <div>
-                    <div style="color:#64748b; font-size:0.63rem;">MOMENTUM SCORE</div>
-                    <div style="font-size:1.95rem; font-weight:950; color:#2563eb;">{top_theme["avg_score"]:.1f}</div>
+                    <div style="color:#475569; font-size:0.72rem; font-weight:800;">테마 활성화 점수</div>
+                    <div style="font-size:2.1rem; font-weight:950; color:#2563eb;">{top_theme["avg_score"]:.1f}점</div>
                 </div>
-                <div style="color:{top_change_color}; font-weight:900; font-size:0.86rem;">
-                    {"▲" if top_theme["avg_change"] >= 0 else "▼"} {abs(top_theme["avg_change"]):.2f}%
+                <div style="color:{top_change_color}; font-weight:950; font-size:0.95rem;">
+                    평균 등락률 {"▲" if top_theme["avg_change"] >= 0 else "▼"} {abs(top_theme["avg_change"]):.2f}%
                 </div>
             </div>
         </div>
@@ -1169,60 +1173,60 @@ with tab_market:
 
         st.markdown("""
         <div class="section-head">
-            <div class="section-title">🔥 THEME MOMENTUM</div>
-            <div class="section-caption">Technical activation</div>
+            <div class="section-title">🔥 전체 테마별 모멘텀 순위 랭킹</div>
+            <div class="section-caption">Theme Momentum Ranking</div>
         </div>
         """, unsafe_allow_html=True)
 
         for rank, th in enumerate(leading_themes, 1):
             th_change_color = "#16a34a" if th["avg_change"] >= 0 else "#dc2626"
-            with st.expander(f"{rank:02d}  {th['theme_name']}  ·  {th['avg_score']:.1f}점"):
+            with st.expander(f"RANK {rank:02d}  ｜  {th['theme_name']}  (모멘텀 점수: {th['avg_score']:.1f}점)"):
                 st.markdown(f"""
                 <div class="theme-card">
-                    <div class="theme-rank">MOMENTUM {rank:02d}</div>
+                    <div class="theme-rank">THEME RANK #{rank:02d}</div>
                     <div class="theme-name">{th["theme_name"]}</div>
-                    <div style="display:flex; justify-content:space-between; align-items:end; margin-top:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:end; margin-top:10px;">
                         <div>
-                            <div style="color:#64748b; font-size:0.61rem;">ACTIVATION</div>
-                            <div style="font-size:1.2rem; font-weight:950; color:#2563eb;">{th["avg_score"]:.1f}</div>
+                            <div style="color:#475569; font-size:0.7rem; font-weight:800;">테마 모멘텀 활성도</div>
+                            <div style="font-size:1.3rem; font-weight:950; color:#2563eb;">{th["avg_score"]:.1f}점 / 100점</div>
                         </div>
-                        <div style="color:{th_change_color}; font-weight:850; font-size:0.71rem;">
-                            {"▲" if th["avg_change"] >= 0 else "▼"} {abs(th["avg_change"]):.2f}%
+                        <div style="color:{th_change_color}; font-weight:900; font-size:0.8rem;">
+                            구성종목 평균 {"▲" if th["avg_change"] >= 0 else "▼"} {abs(th["avg_change"]):.2f}%
                         </div>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
 
                 if th["gems"]:
-                    st.markdown("**💎 MOMENTUM ETF**")
+                    st.markdown("**💎 해당 테마 내 기술적 우수 종목 (Top Picks)**")
                     for g in th["gems"][:5]:
                         g_color = "#16a34a" if g["change"] >= 0 else "#dc2626"
                         reasons_str = " · ".join(g["reasons"])
                         st.markdown(f"""
-                        <div style="background:#f8fafc; border:1px solid #e5e7eb; border-radius:13px; padding:10px; margin-top:7px;">
+                        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:14px; padding:12px; margin-top:8px;">
                             <div style="display:flex; justify-content:space-between;">
-                                <div style="font-size:0.74rem; font-weight:900; color:#111827;">💎 {g["name"]}</div>
-                                <div style="font-size:0.69rem; font-weight:900; color:{g_color};">
+                                <div style="font-size:0.85rem; font-weight:900; color:#0f172a;">💎 {g["name"]}</div>
+                                <div style="font-size:0.78rem; font-weight:950; color:{g_color};">
                                     {"▲" if g["change"] >= 0 else "▼"} {abs(g["change"]):.2f}%
                                 </div>
                             </div>
-                            <div style="font-size:0.64rem; color:#64748b; margin-top:3px;">
-                                {g["code"]} · {g["price"]:,.0f}원 · 기술점수 {g["score"]}
+                            <div style="font-size:0.72rem; color:#475569; margin-top:4px; font-weight:700;">
+                                코드: {g["code"]}  ｜  현재가: {g["price"]:,.0f}원  ｜  기술 점수: <b>{g["score"]}점</b>
                             </div>
-                            <div style="font-size:0.64rem; color:#334155; margin-top:3px;">{reasons_str}</div>
+                            <div style="font-size:0.72rem; color:#1e4ed8; margin-top:5px; font-weight:800;">포착 신호: {reasons_str}</div>
                         </div>
                         """, unsafe_allow_html=True)
                 else:
-                    st.info("현재 뚜렷한 신호가 없습니다.")
+                    st.info("현재 해당 테마 내에 뚜렷한 기술적 매수 신호가 포착된 종목이 없습니다.")
     else:
-        st.warning("시장 데이터를 불러오지 못했습니다.")
+        st.warning("시장 테마 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.")
 
 
 # ============================================================
 # FOOTER
 # ============================================================
 st.markdown("""
-<div style="text-align:center; color:#94a3b8; font-size:0.61rem; margin-top:24px; padding-top:12px; border-top:1px solid #e2e8f0;">
-    ETF RADAR v10.1 · Technical Dashboard
+<div style="text-align:center; color:#64748b; font-size:0.75rem; margin-top:30px; padding-top:15px; border-top:1px solid #cbd5e1; font-weight:600;">
+    ETF RADAR v10.2 · Professional Mobile Financial Dashboard
 </div>
 """, unsafe_allow_html=True)
