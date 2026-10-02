@@ -11,7 +11,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 
 # ============================================================
-# ETF Technical Radar v3 (밝은 라이트 테마 적용)
+# ETF Technical Radar v4 (밝은 라이트 테마 + 테마/중장기 분석 기능 추가)
 # ============================================================
 
 st.set_page_config(
@@ -36,12 +36,12 @@ div[data-testid="stMetric"] {
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 div[data-testid="stMetricLabel"] {
-    color: #475569 !important; /* 명확한 다크 회색 */
+    color: #475569 !important;
     font-size: 0.95rem !important;
     font-weight: 600;
 }
 div[data-testid="stMetricValue"] {
-    color: #0f172a !important; /* 선명한 다크 슬레이트 */
+    color: #0f172a !important;
     font-weight: 700;
 }
 
@@ -82,7 +82,12 @@ div[data-testid="stMetricValue"] {
 </style>
 """, unsafe_allow_html=True)
 
+# -----------------------------
+# 데이터 및 파일 관리 (관심종목 & 테마정보)
+# -----------------------------
 WATCHLIST_FILE = "watchlist.json"
+THEME_FILE = "theme_info.json"
+
 DEFAULT_WATCHLIST = {
     "395160": "KODEX AI반도체TOP2플러스 (395160)",
     "487240": "KODEX 미국AI테크TOP10 (487240)",
@@ -92,6 +97,44 @@ DEFAULT_WATCHLIST = {
     "360750": "TIGER 미국S&P500 (360750)"
 }
 
+DEFAULT_THEME_INFO = {
+    "395160": {
+        "theme": "국내 AI 반도체 / HBM",
+        "cycle": "성장기 (메모리 재편기)",
+        "desc": "SK하이닉스, 삼성전자 중심의 HBM 및 반도체 공정 핵심 기업 추종.",
+        "long_view": "메모리 반도체 업황 사이클 및 AI 서버 CapEx 지속 여부가 중장기 주가를 좌우합니다."
+    },
+    "487240": {
+        "theme": "미국 AI 빅테크 TOP10",
+        "cycle": "고성장기 (시장 독점기)",
+        "desc": "엔비디아, 마이크로소프트 등 독점적 지위를 지닌 메가캡 중심 포트폴리오.",
+        "long_view": "단순 기대감을 넘어 AI 서비스 수익화(Monetization) 단계 진입에 따른 실적 확인이 핵심입니다."
+    },
+    "471990": {
+        "theme": "AI 전력망 / 변압기 / 원자력",
+        "cycle": "확장기 (초기 병목 해소)",
+        "desc": "AI 데이터센터 증설의 최대 병목인 전력 부족을 해결하는 인프라 기업.",
+        "long_view": "북미 노후 전력망 교체 및 데이터센터 전력 공급 계약 확대로 3~5년간 장기 수혜가 기대됩니다."
+    },
+    "0173Y0": {
+        "theme": "미국 AI 광통신 네트워크",
+        "cycle": "도입~성장기 초입 (초고속 전송)",
+        "desc": "AI 클러스터 간 대용량 데이터 전송 병목을 해결하는 광트랜시버 및 CPO 기술 기업.",
+        "long_view": "기술 혁신 속도가 매우 빠르고 고성장하는 구간이나, 단기 변동성을 감안한 분할 접근이 유효합니다."
+    },
+    "133690": {
+        "theme": "미국 대표 기술주 (나스닥100)",
+        "cycle": "구조적 장기 우상향",
+        "desc": "미국 나스닥 상장 상위 100개 혁신 기술기업 추종 패시브 자산.",
+        "long_view": "개별 테마의 순환매 변동성을 완화해 주는 포트폴리오의 코어(Core) 자산입니다."
+    },
+    "360750": {
+        "theme": "미국 대표 대형주 (S&P500)",
+        "cycle": "구조적 장기 우상향",
+        "desc": "미국 자본주의 핵심 대형 기업 500개 추종 기초 체력 자산.",
+        "long_view": "테마주 변동성 위험을 흡수하고 장기 자산 배분 기준점을 제공하는 필수 보유 종목입니다."
+    }
+}
 
 def load_watchlist():
     if os.path.exists(WATCHLIST_FILE):
@@ -110,8 +153,28 @@ def save_watchlist(data):
     except Exception:
         pass
 
+def load_theme_info():
+    if os.path.exists(THEME_FILE):
+        try:
+            with open(THEME_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data if isinstance(data, dict) else DEFAULT_THEME_INFO.copy()
+        except Exception:
+            pass
+    return DEFAULT_THEME_INFO.copy()
+
+def save_theme_info(data):
+    try:
+        with open(THEME_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
 if "watchlist" not in st.session_state:
     st.session_state.watchlist = load_watchlist()
+
+if "theme_info" not in st.session_state:
+    st.session_state.theme_info = load_theme_info()
 
 # -----------------------------
 # 데이터 수집
@@ -160,7 +223,7 @@ def fetch_from_naver(code, count=500):
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_etf_data(ticker_code, period="1y"):
-    clean_code = "".join(filter(str.isdigit, str(ticker_code)))
+    clean_code = "".join(filter(str.isalnum, str(ticker_code)))
     if not clean_code:
         clean_code = str(ticker_code).strip()
 
@@ -240,11 +303,10 @@ def calculate_indicators(df):
     return df
 
 # -----------------------------
-# 자동 지지/저항
+# 자동 지지/저항 및 매물대
 # -----------------------------
 def local_extrema_levels(df, window=3):
-    highs = []
-    lows = []
+    highs, lows = [], []
     h = df["High"].values
     l = df["Low"].values
 
@@ -339,7 +401,6 @@ def volume_profile(df, bins=24):
 
     edges = np.linspace(low, high, bins + 1)
     volumes = np.zeros(bins)
-
     typical = (data["High"] + data["Low"] + data["Close"]) / 3
 
     for price, vol in zip(typical, data["Volume"]):
@@ -354,7 +415,7 @@ def volume_profile(df, bins=24):
     return vp.sort_values("volume", ascending=False).reset_index(drop=True)
 
 # -----------------------------
-# 기술점수 계산
+# 기술점수 및 매매 전략
 # -----------------------------
 def technical_score(df):
     x = df.iloc[-1]
@@ -442,22 +503,18 @@ def detect_patterns(df, supports, resistances):
     recent20_high = float(df.iloc[-21:-1]["High"].max()) if len(df) >= 22 else float(df["High"].max())
     patterns = []
 
-    # 눌림목
     if pd.notna(ma20) and pd.notna(ma60) and pd.notna(rsi):
         if close >= ma20 * 0.985 and close <= ma20 * 1.025 and ma20 > ma60 and 42 <= rsi <= 65 and vol < 1.3:
             patterns.append("💡 눌림목 매수 적기")
 
-    # 강한 돌파
     if close > recent20_high and vol >= 1.3 and pd.notna(macd) and macd > sig:
         patterns.append("🚀 강력한 저항선 돌파")
 
-    # 추격 위험
     bb_width = x["BB_Upper"] - x["BB_Lower"]
     bb_pos = ((close - x["BB_Lower"]) / bb_width) if pd.notna(bb_width) and bb_width > 0 else 0.5
     if pd.notna(rsi) and rsi >= 70 and bb_pos >= 0.88:
         patterns.append("⚠️ 단기 과열 (추격매수 위험)")
 
-    # 추세 훼손/이탈
     if pd.notna(ma20) and close < ma20 and macd < sig:
         patterns.append("🔻 단기 추세 약화")
 
@@ -467,9 +524,6 @@ def detect_patterns(df, supports, resistances):
 
     return patterns
 
-# -----------------------------
-# 명확하고 쉬운 매매 안내 생성기
-# -----------------------------
 def easy_action_scenario(df, score, supports, resistances, patterns):
     x = df.iloc[-1]
     close = float(x["Close"])
@@ -481,44 +535,40 @@ def easy_action_scenario(df, score, supports, resistances, patterns):
     r1 = resistances[0]["price"] if resistances else close * 1.03
     r2 = resistances[1]["price"] if len(resistances) > 1 else close * 1.06
 
-    buy_guide = ""
-    sell_guide = ""
-    wait_guide = ""
-
     if "⚠️ 단기 과열 (추격매수 위험)" in patterns:
         status_title = "🟠 과열 구간 : 지금 바로 사지 말고 기다리세요!"
-        buy_guide = f"**지금 매수는 위험합니다.** 주가가 단기 폭등하여 RSI가 {rsi:.0f}로 과열되었습니다. 주가가 **{s1:,.0f}원 부근**까지 내려와서 숨고르기를 할 때 분할 매수로 접근하세요."
-        sell_guide = f"기존 보유자라면 **{r1:,.0f}원~{r2:,.0f}원 매물대 구간**에서 이익을 일부 실현(팔아서 현금화)하기 좋은 위치입니다."
-        wait_guide = f"**{s1:,.0f}원 지지선**이 무너지면 조정이 길어질 수 있으니 섣부른 추격 매수는 금물입니다."
+        buy_guide = f"**지금 매수는 위험합니다.** 주가가 단기 폭등하여 RSI가 {rsi:.0f}로 과열되었습니다. **{s1:,.0f}원 부근**까지 내려와 숨고르기를 할 때 분할 매수로 접근하세요."
+        sell_guide = f"기존 보유자라면 **{r1:,.0f}원~{r2:,.0f}원 매물대 구간**에서 이익을 일부 실현하기 좋은 위치입니다."
+        wait_guide = f"**{s1:,.0f}원 지지선**이 무너지면 조정이 길어질 수 있으니 추격 매수는 금물입니다."
 
     elif "🚀 강력한 저항선 돌파" in patterns:
         status_title = "🟢 강력한 저항 돌파 : 추가 상승 가능성이 높은 구간!"
-        buy_guide = f"위쪽 매물대를 거래량을 싣고 뚫어냈습니다! **현재 가격대 또는 {r1:,.0f}원 부근**으로 잠시 밀릴 때(돌파 후 지지) 매수 타이밍으로 잡을 수 있습니다."
+        buy_guide = f"매물대를 거래량을 싣고 뚫었습니다! **현재 가격대 또는 {r1:,.0f}원 부근**으로 잠시 밀릴 때(돌파 후 지지) 매수 타이밍으로 활용할 수 있습니다."
         sell_guide = f"다음 강한 저항선인 **{r2:,.0f}원 부근**까지 추가 상승을 노려보세요."
-        wait_guide = f"만약 다시 밀려 **{s1:,.0f}원 아래로 종가가 떨어지면** '가짜 돌파'일 수 있으니 손절/관망이 필요합니다."
+        wait_guide = f"다시 밀려 **{s1:,.0f}원 아래로 종가가 떨어지면** 가짜 돌파 일 수 있으니 관망/손절 대응이 필요합니다."
 
     elif "💡 눌림목 매수 적기" in patterns:
         status_title = "🟢 눌림목 기회 : 차분히 모아가기 좋은 매수 타이밍!"
-        buy_guide = f"상승 추세 중에 잠시 쉬어가는 구간입니다. 20일 이동평균선 근처인 **{s1:,.0f}원~{close:,.0f}원 사이**는 매수하기에 매우 매력적인 가격대입니다."
-        sell_guide = f"상승 전환 시 전고점 및 저항대인 **{r1:,.0f}원**을 1차 목표가로 잡고 대응하세요."
-        wait_guide = f"주요 지지선인 **{s2:,.0f}원**을 하향 이탈하면 추세가 꺾일 수 있으니 이때는 손절(매도)로 대응하세요."
+        buy_guide = f"상승 추세 중 잠시 쉬어가는 구간입니다. 20일선 근처인 **{s1:,.0f}원~{close:,.0f}원 사이**는 매력적인 매수 구간입니다."
+        sell_guide = f"상승 전환 시 전고점 및 저항대인 **{r1:,.0f}원**을 1차 목표가로 잡으세요."
+        wait_guide = f"주요 지지선인 **{s2:,.0f}원**을 하향 이탈하면 추세가 꺾일 수 있으므로 손절로 대응하세요."
 
     elif "🔻 단기 추세 약화" in patterns or score < 45:
         status_title = "🔴 추세 약화 : 무리한 매수 금지, 관망이 필요한 때!"
-        buy_guide = f"지금은 힘이 빠지는 구간입니다. **매수를 멈추고 관망**하는 것이 안전합니다."
+        buy_guide = f"힘이 빠지는 구간입니다. **매수를 멈추고 관망**하는 것이 안전합니다."
         sell_guide = f"보유 중이라면 **{r1:,.0f}원** 근처로 반등할 때 비중을 줄이거나 팔아서 현금을 확보하세요."
-        wait_guide = f"하방 지지선인 **{s1:,.0f}원 및 {s2:,.0f}원**에서 주가가 멈추고 반등 신호가 나올 때까지 기다려야 합니다."
+        wait_guide = f"하방 지지선인 **{s1:,.0f}원 및 {s2:,.0f}원**에서 반등 신호가 나올 때까지 기다리세요."
 
     else:
         status_title = "🔵 중립 흐름 : 뚜렷한 방향성을 찾는 중"
-        buy_guide = f"안전하게 사려면 주가가 **{s1:,.0f}원 지지선**까지 내려오거나, 반대로 **{r1:,.0f}원 저항선**을 확실하게 뚫어줄 때 매수하세요."
-        sell_guide = f"상승 시 **{r1:,.0f}원 부근**에 매물(팔려는 물량)이 몰려있으니 이 가격대에 오면 익절을 고려하세요."
-        wait_guide = f"{s1:,.0f}원~{r1:,.0f}원 박스권 안에서 주가가 어느 방향으로 튈지 지켜보는 구간입니다."
+        buy_guide = f"주가가 **{s1:,.0f}원 지지선**까지 내려오거나, 반대로 **{r1:,.0f}원 저항선**을 확실히 뚫어줄 때 매수하세요."
+        sell_guide = f"상승 시 **{r1:,.0f}원 부근**에 매물대가 몰려있으니 이 가격대에서 익절을 고려하세요."
+        wait_guide = f"{s1:,.0f}원~{r1:,.0f}원 박스권 안에서 주가가 어느 방향으로 튈지 지켜볼 구간입니다."
 
     return status_title, buy_guide, sell_guide, wait_guide, s1, s2, r1, r2
 
 # -----------------------------
-# 차트 생성 (라이트 모드 고대비 설정)
+# Plotly 차트 생성
 # -----------------------------
 def make_chart(df, supports, resistances):
     fig = make_subplots(
@@ -548,7 +598,6 @@ def make_chart(df, supports, resistances):
                 ), row=1, col=1
             )
 
-    # 지지/저항 표시 (라이트 테마 대비 보정)
     for i, item in enumerate(supports[:2]):
         fig.add_hline(
             y=item["price"], row=1, col=1,
@@ -619,6 +668,7 @@ with c1:
 with c2:
     period = st.selectbox("분석 기간", ["6m", "1y", "2y"], index=1)
 
+# 종목 추가 로직
 if selected == "➕ 종목코드로 관심종목 추가":
     st.subheader("종목코드 등록")
     a, b = st.columns([2, 1])
@@ -628,12 +678,23 @@ if selected == "➕ 종목코드로 관심종목 추가":
         add = st.button("⭐ 추가", use_container_width=True)
 
     if add and new_code:
-        code = "".join(filter(str.isdigit, new_code))
+        code = "".join(filter(str.isalnum, new_code))
         test_df, _ = load_etf_data(code, "6m")
         if test_df is not None:
             name = get_stock_name(code)
             st.session_state.watchlist[code] = f"{name} ({code})"
             save_watchlist(st.session_state.watchlist)
+
+            # 신규 종목에 대한 기본 테마 정보 템플릿 생성
+            if code not in st.session_state.theme_info:
+                st.session_state.theme_info[code] = {
+                    "theme": "신규 등록 테마",
+                    "cycle": "관찰/분석 필요",
+                    "desc": f"{name} 관련 기본 정보 등록 필요",
+                    "long_view": "테마 & 중장기 분석 탭 하단의 편집 메뉴를 이용하여 종목 정보 및 관점을 직접 입력해주세요."
+                }
+                save_theme_info(st.session_state.theme_info)
+
             st.success(f"{name} ({code}) 등록 완료")
             st.rerun()
         else:
@@ -697,7 +758,7 @@ st.markdown(
 )
 
 # -----------------------------
-# 2. 명확한 매매 안내 (사용자 요청 핵심!)
+# 2. 명확한 매매 안내
 # -----------------------------
 st.markdown("### 💡 쉽게 풀어쓴 매매 대응 전략")
 
@@ -745,10 +806,10 @@ with col_b:
     )
 
 # -----------------------------
-# 3. 탭별 상세 내용 (차트, 지지저항, 지표 설명서)
+# 3. 탭별 상세 내용 (차트, 지지저항, 테마&중장기분석, 지표 설명서)
 # -----------------------------
-tab_chart, tab_zones, tab_guide = st.tabs(
-    ["📊 차트 보기", "📍 매물대 & 지지/저항", "📖 보조지표 쉬운 설명서"]
+tab_chart, tab_zones, tab_theme, tab_guide = st.tabs(
+    ["📊 차트 보기", "📍 매물대 & 지지/저항", "🏛️ 테마 & 중장기 분석", "📖 보조지표 쉬운 설명서"]
 )
 
 with tab_chart:
@@ -796,6 +857,53 @@ with tab_zones:
             hide_index=True
         )
 
+with tab_theme:
+    st.subheader("🏛️ 테마 분류 및 중장기 사이클 분석")
+    
+    current_code = code
+    theme_info = st.session_state.theme_info.get(current_code, {
+        "theme": "미등록 테마",
+        "cycle": "관찰 필요",
+        "desc": "테마 상세 정보가 아직 등록되지 않았습니다.",
+        "long_view": "하단의 수정 메뉴를 통해 종목 정보 및 중장기 관점을 등록해주세요."
+    })
+
+    col_t1, col_t2 = st.columns(2)
+    with col_t1:
+        st.markdown(f"**🏷️️ 속한 테마**: {theme_info['theme']}")
+        st.markdown(f"**🔄 테마 사이클**: <span class='highlight-yellow'>{theme_info['cycle']}</span>", unsafe_allow_html=True)
+    with col_t2:
+        st.markdown(f"**📝 종목 개요**: {theme_info['desc']}")
+
+    st.markdown("---")
+    st.markdown(
+        f'<div class="price-zone">'
+        f'<b class="highlight-green">🎯 중장기 관점 (3개월~1년 이상) 투자 포인트</b><br>{theme_info["long_view"]}'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown("---")
+    # ✏️ 테마 정보 및 중장기 관점 편집 도구
+    with st.expander("✏️ 이 종목의 테마 및 중장기 정보 직접 수정/등록하기"):
+        with st.form(f"edit_theme_form_{current_code}"):
+            edit_theme = st.text_input("테마 분류", value=theme_info['theme'])
+            edit_cycle = st.text_input("테마 사이클 (예: 성장기, 고성장기, 확장기, 구조적 우상향)", value=theme_info['cycle'])
+            edit_desc = st.text_area("종목 간단 설명", value=theme_info['desc'])
+            edit_long_view = st.text_area("중장기 투자 관점", value=theme_info['long_view'])
+
+            submit_theme = st.form_submit_button("💾 정보 저장하기")
+            if submit_theme:
+                st.session_state.theme_info[current_code] = {
+                    "theme": edit_theme,
+                    "cycle": edit_cycle,
+                    "desc": edit_desc,
+                    "long_view": edit_long_view
+                }
+                save_theme_info(st.session_state.theme_info)
+                st.success("테마 및 중장기 정보가 저장되었습니다!")
+                st.rerun()
+
 with tab_guide:
     st.subheader("❓ 각종 보조지표, 어쩌라는 건가요? (초보자 해설)")
 
@@ -823,4 +931,4 @@ with tab_guide:
     - **20일선 (주황색)**: 생명선입니다. 주가가 20일선 위에 있어야 안전한 상승장입니다.
     """, unsafe_allow_html=True)
 
-st.caption("ETF Technical Radar · 라이트 테마 가독성 강화 버전")
+st.caption("ETF Technical Radar · 지속 관리형 테마 분석 통합 버전")
