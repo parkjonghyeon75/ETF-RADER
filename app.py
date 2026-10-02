@@ -11,7 +11,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 
 # ============================================================
-# ETF Technical Radar v9.1 (f-string 오류 수정 버전)
+# ETF Technical Radar v9.2 (f-string 포맷 오류 완벽 수정 버전)
 # ============================================================
 
 st.set_page_config(
@@ -736,8 +736,7 @@ with tab_gem_finder:
         st.subheader("📊 세분화된 테마별 주도주 랭킹 & 원석 리스트")
 
         for rank, th in enumerate(leading_themes, 1):
-            # [오류 수정 부분]: f-string 중괄호 및 문자열 포맷 구문 정리
-            expander_title = f"[{rank}위] {th['theme_name']} (종합 활성도: {th['avg_score']:.1f점} / 평균등락률: {th['avg_change']:+.2f}%)".replace("점", "점")
+            # [오류 해결 완료]: f-string 포맷 내의 글자 오기 수정
             with st.expander(f"[{rank}위] {th['theme_name']} (종합 활성도: {th['avg_score']:.1f}점 / 평균등락률: {th['avg_change']:+.2f}%)"):
                 if th["gems"]:
                     for g in th["gems"]:
