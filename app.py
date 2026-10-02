@@ -11,7 +11,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 
 # ============================================================
-# ETF Technical Radar v8 (동적 DC연금 풀 관리 기능 추가)
+# ETF Technical Radar v9 (세분화된 테마 & 자동 주도주 스캐너)
 # ============================================================
 
 st.set_page_config(
@@ -45,6 +45,10 @@ div[data-testid="stMetricValue"] {color: #0f172a !important; font-weight: 700;}
     background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;
     padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
+.hot-theme-card {
+    background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;
+    padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
 .highlight-green {color: #16a34a; font-weight: bold;}
 .highlight-red {color: #dc2626; font-weight: bold;}
 .highlight-yellow {color: #d97706; font-weight: bold;}
@@ -65,44 +69,57 @@ div[data-testid="stMetricValue"] {color: #0f172a !important; font-weight: 700;}
 """, unsafe_allow_html=True)
 
 # -----------------------------
-# 파일 관리 및 데이터 저장소 정의
+# 파일 관리 및 세분화된 DC 연금 테마 풀 정의
 # -----------------------------
 WATCHLIST_FILE = "watchlist.json"
 THEME_FILE = "theme_info.json"
-DC_POOL_FILE = "dc_pools.json"
 
-DEFAULT_DC_PENSION_POOLS = {
-    "🇺🇸 미국 대표지수 / 성장주": {
+# 세분화된 DC연금 전문 카테고리 풀
+DC_PENSION_POOLS = {
+    "🇺🇸 미국 S&P500 / 대형가치": {
         "360750": "TIGER 미국S&P500",
-        "133690": "TIGER 미국나스닥100",
-        "487240": "KODEX 미국AI테크TOP10",
         "379800": "KODEX 미국S&P500TR",
-        "379810": "KODEX 미국나스닥100TR"
+        "448290": "SOL 미국S&P500"
     },
-    "🤖 AI / 반도체 / 테크": {
+    "🇺🇸 미국 나스닥100 / 빅테크": {
+        "133690": "TIGER 미국나스닥100",
+        "379810": "KODEX 미국나스닥100TR",
+        "487240": "KODEX 미국AI테크TOP10",
+        "452330": "TIGER 미국테크TOP10"
+    },
+    "🤖 AI 반도체 / HBM / 소부장": {
         "395160": "KODEX AI반도체TOP2플러스",
-        "471990": "KODEX AI전력핵심설비",
         "462100": "TIGER AI반도체핵심공정",
-        "441680": "SOL 미국AI반도체"
+        "441680": "SOL 미국AI반도체",
+        "486410": "TIGER 미국반도체TOP10"
     },
-    "🔋 2차전지 / 소부장 / 신재생": {
+    "⚡ AI 전력인프라 / 원자력": {
+        "471990": "KODEX AI전력핵심설비",
+        "445380": "SOL 원자력TOP3플러스",
+        "465560": "TIGER 글로벌원자력"
+    },
+    "🔋 2차전지 / 배터리 소재": {
         "305540": "KODEX 2차전지산업",
         "364980": "TIGER 2차전지소부장",
-        "438320": "KODEX 2차전지핵심소재",
-        "329750": "TIGER 친환경자동차"
+        "438320": "KODEX 2차전지핵심소재"
+    },
+    "🚀 우주항공 / 로봇 / 차세대": {
+        "465610": "KODEX 로봇산업",
+        "476250": "TIGER 우주항공&로봇",
+        "456720": "SOL 다이와일본레버리지"
     },
     "💊 바이오 / 헬스케어": {
         "329200": "TIGER 헬스케어",
         "266420": "KODEX 바이오",
         "462610": "ARIRANG 3대주주바이오"
     },
-    "💰 배당 / 월배당 / 인컴": {
+    "💰 미국 고배당 / 월배당": {
         "458730": "TIGER 미국배당다우존스",
         "441680": "SOL 미국배당 다우존스",
         "476480": "KODEX 미국배당커버드콜",
         "451780": "TIGER 미국배당+7%프리미엄"
     },
-    "🛡️ 채권 / 안전자산 / 금리": {
+    "🛡️ 안전자산 / 국내단기채 / 미국국채": {
         "423160": "KODEX CD금리활성(합성)",
         "449170": "TIGER KOFR금리액티브",
         "308620": "KODEX 미국채울트라30년선물",
@@ -116,7 +133,7 @@ DEFAULT_WATCHLIST = {
     "471990": "KODEX AI전력핵심설비 (471990)",
     "133690": "TIGER 미국나스닥100 (133690)",
     "360750": "TIGER 미국S&P500 (360750)",
-    "458730": "TIGER 미국배당다우존ส (458730)"
+    "458730": "TIGER 미국배당다우존스 (458730)"
 }
 
 DEFAULT_THEME_INFO = {
@@ -181,11 +198,8 @@ if "watchlist" not in st.session_state:
 if "theme_info" not in st.session_state:
     st.session_state.theme_info = load_json_file(THEME_FILE, DEFAULT_THEME_INFO)
 
-if "dc_pools" not in st.session_state:
-    st.session_state.dc_pools = load_json_file(DC_POOL_FILE, DEFAULT_DC_PENSION_POOLS)
-
 # -----------------------------
-# 검색 및 데이터 도우미 함수
+# 검색 및 데이터 수집 도우미
 # -----------------------------
 def search_stock_code_by_keyword(keyword):
     try:
@@ -444,44 +458,68 @@ def easy_action_scenario(df, score, supports, resistances, patterns):
 
     return status_title, buy_guide, sell_guide, wait_guide, s1, s2, r1, r2
 
-def find_dc_category_gems(pool_dict):
-    gem_list = []
-    for code, name in pool_dict.items():
-        raw_df, _ = load_etf_data(code, "6m")
-        if raw_df is None or len(raw_df) < 30:
-            continue
-        df = calculate_indicators(raw_df)
-        x = df.iloc[-1]
-        prev = df.iloc[-2]
+# 자동 주도 테마 및 원석 스캐너 엔진
+def scan_market_leading_themes():
+    theme_scores = []
+    
+    for theme_name, pool_dict in DC_PENSION_POOLS.items():
+        theme_total_score = 0
+        theme_change_sum = 0
+        valid_count = 0
+        top_gems_in_theme = []
         
-        reasons = []
-        score_add = 0
-        
-        if pd.notna(x["MACD"]) and pd.notna(x["MACD_Signal"]):
-            if prev["MACD"] <= prev["MACD_Signal"] and x["MACD"] > x["MACD_Signal"]:
-                reasons.append("⚡ MACD 골든크로스 (상승 반전)")
-                score_add += 35
-        if pd.notna(x["Vol_Ratio"]) and x["Vol_Ratio"] >= 1.4 and x["Close"] > prev["Close"]:
-            reasons.append("🔥 거래량 유입 동반 상승")
-            score_add += 30
-        if pd.notna(x["MA20"]) and pd.notna(x["RSI"]):
-            if 0.98 <= (x["Close"] / x["MA20"]) <= 1.02 and 42 <= x["RSI"] <= 62:
-                reasons.append("🎯 20일선 눌림목 지지 반등")
+        for code, name in pool_dict.items():
+            raw_df, _ = load_etf_data(code, "6m")
+            if raw_df is None or len(raw_df) < 30:
+                continue
+            df = calculate_indicators(raw_df)
+            x = df.iloc[-1]
+            prev = df.iloc[-2]
+            
+            change = float((x["Close"] - prev["Close"]) / prev["Close"] * 100)
+            theme_change_sum += change
+            valid_count += 1
+            
+            reasons = []
+            score_add = 0
+            if pd.notna(x["MACD"]) and pd.notna(x["MACD_Signal"]):
+                if prev["MACD"] <= prev["MACD_Signal"] and x["MACD"] > x["MACD_Signal"]:
+                    reasons.append("⚡ MACD 골든크로스")
+                    score_add += 35
+            if pd.notna(x["Vol_Ratio"]) and x["Vol_Ratio"] >= 1.3 and x["Close"] > prev["Close"]:
+                reasons.append("🔥 거래량 유입")
+                score_add += 30
+            if pd.notna(x["MA20"]) and 0.98 <= (x["Close"] / x["MA20"]) <= 1.02:
+                reasons.append("🎯 20일선 지지")
                 score_add += 25
-        if pd.notna(x["RSI"]) and x["RSI"] < 42 and x["Close"] > prev["Close"]:
-            reasons.append("🛡️ 과매도 구간 탈출 시도")
-            score_add += 20
-
-        if reasons:
-            gem_list.append({
-                "code": code,
-                "name": name,
-                "price": float(x["Close"]),
-                "change": float((x["Close"] - prev["Close"]) / prev["Close"] * 100),
-                "reasons": reasons,
-                "score": min(100, 50 + score_add)
+                
+            item_score = min(100, 50 + score_add)
+            theme_total_score += item_score
+            
+            if reasons or change > 0:
+                top_gems_in_theme.append({
+                    "code": code,
+                    "name": name,
+                    "price": float(x["Close"]),
+                    "change": change,
+                    "reasons": reasons if reasons else ["📈 안정적 우상향 흐름"],
+                    "score": item_score
+                })
+                
+        if valid_count > 0:
+            avg_theme_score = theme_total_score / valid_count
+            avg_change = theme_change_sum / valid_count
+            top_gems_in_theme = sorted(top_gems_in_theme, key=lambda x: x["score"], reverse=True)
+            
+            theme_scores.append({
+                "theme_name": theme_name,
+                "avg_score": avg_theme_score,
+                "avg_change": avg_change,
+                "gems": top_gems_in_theme
             })
-    return sorted(gem_list, key=lambda x: x["score"], reverse=True)
+            
+    # 평균 점수가 높은 순으로 자동 정렬하여 현재 시장 주도 테마 판별
+    return sorted(theme_scores, key=lambda x: x["avg_score"], reverse=True)
 
 def make_chart(df, supports, resistances):
     fig = make_subplots(rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.03, row_heights=[0.50, 0.16, 0.17, 0.17])
@@ -511,14 +549,13 @@ def make_chart(df, supports, resistances):
     return fig
 
 # ============================================================
-# UI 메인 레이아웃 (최상위 3대 독립 탭 구조)
+# UI 메인 레이아웃 (최상위 2대 독립 탭 구조)
 # ============================================================
-st.title("📈 ETF 기술적 레이더 & 💎 DC연금 원석 찾기")
+st.title("📈 ETF 기술적 레이더 & 💎 DC연금 주도 테마 스캐너")
 
-tab_analysis, tab_gem_finder, tab_pool_manager = st.tabs([
+tab_analysis, tab_gem_finder = st.tabs([
     "📊 개별 종목 분석 & 레이더", 
-    "💎 DC연금 카테고리별 원석 찾기",
-    "⚙️ DC연금 풀 & 테마 관리"
+    "🔥 실시간 시장 주도 테마 & DC연금 원석 스캐너"
 ])
 
 # ============================================================
@@ -674,102 +711,53 @@ with tab_analysis:
         st.error("데이터를 불러오지 못했습니다.")
 
 # ============================================================
-# 탭 2: DC연금 카테고리별 원석 찾기
+# 탭 2: 실시간 자동 주도 테마 & DC연금 원석 스캐너
 # ============================================================
 with tab_gem_finder:
-    st.subheader("💎 DC퇴직연금 카테고리별 '원석' 스크리닝")
-    st.caption("퇴직연금 계좌로 투자 가능한 주요 섹터/카테고리를 선택하여, 반등 신호가 포착된 저평가 유망주를 발굴합니다.")
+    st.subheader("🔥 실시간 시장 주도 테마 자동 감지 & 원석 스캐너")
+    st.caption("퇴직연금(DC) 세분화 테마들을 AI 엔진이 자동으로 스캔하여, 현재 가장 강력한 모멘텀과 수급이 유입되는 **주도 테마 랭킹**과 **추천 원석**을 실시간으로 도출합니다.")
 
-    dc_pools = st.session_state.dc_pools
-    selected_category = st.selectbox("📂 스캔할 DC연금 투자 카테고리 선택", list(dc_pools.keys()), key="dc_cat_select")
-    target_pool = dc_pools[selected_category]
-
-    if st.button(f"🔍 [{selected_category}] 전 종목 스캔 실행", use_container_width=True, key="dc_scan_btn"):
+    if st.button("🚀 전체 시장 주도 테마 및 유망주 자동 스캔 시작", use_container_width=True, key="auto_scan_btn"):
         st.cache_data.clear()
 
-    with st.spinner(f"'{selected_category}' 카테고리 내 종목 정밀 분석 중..."):
-        category_gems = find_dc_category_gems(target_pool)
+    with st.spinner("세분화된 9개 테마 정밀 분석 및 주도주 순위 산정 중..."):
+        leading_themes = scan_market_leading_themes()
 
-    if category_gems:
-        st.success(f"총 {len(category_gems)}개의 반등 기대 원석이 포착되었습니다!")
-        for g in category_gems:
-            reasons_html = "<br>".join([f"• {r}" for r in g["reasons"]])
-            st.markdown(
-                f'<div class="gem-card">'
-                f'<div style="display:flex; justify-content:space-between; align-items:center;">'
-                f'<b style="font-size:1.05rem; color:#15803d;">💎 {g["name"]} ({g["code"]})</b>'
-                f'<span style="font-size:1.0rem; font-weight:bold;">{g["price"]:,.0f}원 ({g["change"]:+.2f}%)</span>'
-                f'</div>'
-                f'<div style="margin-top:6px; font-size:0.9rem; color:#334155;">'
-                f'<b>포착된 신호:</b><br>{reasons_html}'
-                f'</div>'
-                f'</div>',
-                unsafe_allow_html=True
-            )
+    if leading_themes:
+        # 1위 주도 테마 대장주 강조 배너 표시
+        top_theme = leading_themes[0]
+        st.markdown(
+            f'<div class="hot-theme-card">'
+            f'<h3 style="margin:0 0 6px 0; color:#1d4ed8;">🏆 현재 시장 최고의 주도 테마: {top_theme["theme_name"]}</h3>'
+            f'<p style="margin:0; font-size:0.95srem; color:#475569;">테마 평균 모멘텀 점수: <b>{top_theme["avg_score"]:.1f}점</b> | 평균 등락률: <span class="{ "highlight-green" if top_theme["avg_change"] >= 0 else "highlight-red" }">{top_theme["avg_change"]:+.2f}%</span></p>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+
+        st.markdown("---")
+        st.subheader("📊 세분화된 테마별 주도주 랭킹 & 원석 리스트")
+
+        for rank, th in enumerate(leading_themes, 1):
+            with st.expander(f"[{rank위] {th['theme_name']} (종합 활성도: {th['avg_score']:.1f점} / 평균등락률: {th['avg_change']:+.2f}%)"):
+                if th["gems"]:
+                    for g in th["gems"]:
+                        reasons_str = " · ".join(g["reasons"])
+                        st.markdown(
+                            f'<div class="gem-card">'
+                            f'<div style="display:flex; justify-content:space-between; align-items:center;">'
+                            f'<b style="font-size:1.02rem; color:#15803d;">💎 {g["name"]} ({g["code"]})</b>'
+                            f'<span style="font-size:0.95rem; font-weight:bold;">{g["price"]:,.0f}원 (<span class="{ "highlight-green" if g["change"] >= 0 else "highlight-red" }">{g["change"]:+.2f}%</span>)</span>'
+                            f'</div>'
+                            f'<div style="margin-top:4px; font-size:0.88rem; color:#334155;">'
+                            f'<b>포착 신호:</b> {reasons_str} | <b>기술 점수:</b> {g["score"]}점'
+                            f'</div>'
+                            f'</div>',
+                            unsafe_allow_html=True
+                        )
+                else:
+                    st.info("현재 이 테마 내에서 뚜렷한 상승 신호가 포착된 종목이 없습니다.")
     else:
-        st.info(f"현재 '{selected_category}' 카테고리 내에서 뚜렷한 상승 신호가 포착된 원석이 없습니다. 관리 탭에서 새로운 종목을 추가해보세요.")
-
-# ============================================================
-# 탭 3: DC연금 풀 & 테마 관리 (NEW!)
-# ============================================================
-with tab_pool_manager:
-    st.subheader("⚙️ DC연금 스크리닝 풀 & 카테고리 편집")
-    st.caption("최신 트렌드나 신규 상장 주도주에 맞춰 DC연금 카테고리별 종목을 실시간으로 추가하거나 삭제할 수 있습니다.")
-
-    dc_pools = st.session_state.dc_pools
-
-    # 1. 새 카테고리 추가
-    with st.expander("📁 새로운 DC연금 카테고리 생성하기"):
-        new_cat_name = st.text_input("새 카테고리명", placeholder="예: 🚀 우주항공 / 양자컴퓨터")
-        if st.button("카테고리 생성"):
-            if new_cat_name and new_cat_name not in dc_pools:
-                dc_pools[new_cat_name] = {}
-                save_json_file(DC_POOL_FILE, dc_pools)
-                st.success(f"'{new_cat_name}' 카테고리가 생성되었습니다!")
-                st.rerun()
-
-    st.markdown("---")
-
-    # 2. 카테고리별 종목 추가/삭제
-    manage_cat = st.selectbox("편집할 카테고리 선택", list(dc_pools.keys()), key="mgr_cat")
-    
-    st.markdown(f"#### 📌 [{manage_cat}]에 속한 종목 리스트")
-    current_items = dc_pools[manage_cat]
-    
-    if current_items:
-        for code, name in list(current_items.items()):
-            col_m1, col_m2 = st.columns([4, 1])
-            with col_m1:
-                st.write(f"• **{name}** (`{code}`)")
-            with col_m2:
-                if st.button("삭제", key=f"del_{manage_cat}_{code}"):
-                    del dc_pools[manage_cat][code]
-                    save_json_file(DC_POOL_FILE, dc_pools)
-                    st.success("종목이 삭제되었습니다.")
-                    st.rerun()
-    else:
-        st.info("등록된 종목이 없습니다. 아래에서 새로운 종목을 추가해보세요.")
-
-    st.markdown("---")
-    st.markdown("#### ➕ 선택한 카테고리에 신규 종목 추가")
-    add_keyword = st.text_input("추가할 종목명 또는 코드 검색", placeholder="예: KODEX AI전력, 471990", key="mgr_add_input")
-    if st.button("카테고리에 종목 추가하기", use_container_width=True):
-        if add_keyword:
-            found_code, found_name = search_stock_code_by_keyword(add_keyword.strip())
-            if not found_code:
-                clean_test = "".join(filter(str.isalnum, add_keyword.strip()))
-                test_df, _ = load_etf_data(clean_test, "6m")
-                if test_df is not None:
-                    found_code = clean_test
-                    found_name = get_stock_name(clean_test)
-            
-            if found_code:
-                dc_pools[manage_cat][found_code] = found_name
-                save_json_file(DC_POOL_FILE, dc_pools)
-                st.success(f"'{found_name} ({found_code})' 종목이 [{manage_cat}]에 추가되었습니다!")
-                st.rerun()
-            else:
-                st.error("종목을 찾을 수 없습니다. 정확한 이름이나 코드를 입력해주세요.")
+        st.warning("스캔 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.")
 
 st.markdown("---")
 st.caption("ETF Technical Radar & DC Gem Finder 통합 버전")
