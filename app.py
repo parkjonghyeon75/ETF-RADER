@@ -70,7 +70,6 @@ div[data-testid="stMetricValue"] {color: #0f172a !important; font-weight: 700;}
 WATCHLIST_FILE = "watchlist.json"
 THEME_FILE = "theme_info.json"
 
-# DC형 퇴직연금 주요 투자 가능 ETF 마스터 풀 (카테고리별)
 DC_PENSION_POOLS = {
     "🇺🇸 미국 대표지수 / 성장주": {
         "360750": "TIGER 미국S&P500",
@@ -455,7 +454,7 @@ def easy_action_scenario(df, score, supports, resistances, patterns):
     return status_title, buy_guide, sell_guide, wait_guide, s1, s2, r1, r2
 
 # -----------------------------
-# 💎 [서브 메인] DC연금 카테고리별 원석 찾기 엔진
+# 💎 DC연금 카테고리별 원석 찾기 엔진
 # -----------------------------
 def find_dc_category_gems(pool_dict):
     gem_list = []
@@ -470,21 +469,17 @@ def find_dc_category_gems(pool_dict):
         reasons = []
         score_add = 0
         
-        # 1. MACD 골든크로스 초입
         if pd.notna(x["MACD"]) and pd.notna(x["MACD_Signal"]):
             if prev["MACD"] <= prev["MACD_Signal"] and x["MACD"] > x["MACD_Signal"]:
                 reasons.append("⚡ MACD 골든크로스 (상승 반전)")
                 score_add += 35
-        # 2. 거래량 급증 대바닥 탈출
         if pd.notna(x["Vol_Ratio"]) and x["Vol_Ratio"] >= 1.4 and x["Close"] > prev["Close"]:
             reasons.append("🔥 거래량 유입 동반 상승")
             score_add += 30
-        # 3. 20일선 눌림목 반등
         if pd.notna(x["MA20"]) and pd.notna(x["RSI"]):
             if 0.98 <= (x["Close"] / x["MA20"]) <= 1.02 and 42 <= x["RSI"] <= 62:
                 reasons.append("🎯 20일선 눌림목 지지 반등")
                 score_add += 25
-        # 4. 과매도 반등
         if pd.notna(x["RSI"]) and x["RSI"] < 42 and x["Close"] > prev["Close"]:
             reasons.append("🛡️ 과매도 구간 탈출 시도")
             score_add += 20
@@ -540,7 +535,7 @@ options = list(watchlist.values()) + ["➕ 종목코드로 관심종목 추가"]
 
 c1, c2 = st.columns([2.1, 1])
 with c1:
-    selected = st.selectbox("⭐ 관심 ETF 선택 (메인 레이더)", options)
+    selected = st.selectbox("⭐ 관심 ETF 선택 (개별 종목 분석용)", options)
 with c2:
     period = st.selectbox("분석 기간", ["6m", "1y", "2y"], index=1)
 
@@ -606,55 +601,48 @@ macd = float(x["MACD"]) if pd.notna(x["MACD"]) else 0
 macd_sig = float(x["MACD_Signal"]) if pd.notna(x["MACD_Signal"]) else 0
 
 # -----------------------------
-# 1. 메인 레이더 표시
+# 전체 기능을 분리된 탭으로 구성
 # -----------------------------
-st.markdown("### 📊 현재 주가 및 종합 점수")
-m1, m2 = st.columns(2)
-with m1: st.metric("현재가", f"{price:,.0f}원", f"{change:+.2f}%")
-with m2: st.metric("종합 점수", f"{score}점 / 100점", score_label)
-
-st.markdown(f'<div class="radar-card"><b style="color:#b45309;">🎯 핵심 신호: {" · ".join(patterns)}</b></div>', unsafe_allow_html=True)
-
-st.markdown("### 💡 쉽고 명확한 매매 대응 전략")
-if "🟢" in status_title: st.success(f"### {status_title}")
-elif "🔴" in status_title: st.error(f"### {status_title}")
-elif "🟠" in status_title: st.warning(f"### {status_title}")
-else: st.info(f"### {status_title}")
-
-col_a, col_b = st.columns(2)
-with col_a:
-    st.markdown(f'<div class="price-zone"><b class="highlight-green">🛒 매수 전략</b><br>{buy_guide}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="price-zone"><b class="highlight-red">💰 익절 전략</b><br>{sell_guide}</div>', unsafe_allow_html=True)
-with col_b:
-    st.markdown(f'<div class="price-zone"><b class="highlight-yellow">🛑 손절/관망 전략</b><br>{wait_guide}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="price-zone"><b>📍 핵심 가격 요약</b><br>'
-                f'• <b>2차 저항</b>: <span class="highlight-red">{r2:,.0f}원</span><br>'
-                f'• <b>1차 저항</b>: <span class="highlight-red">{r1:,.0f}원</span><br>'
-                f'• <b>현재가</b>: <b>{price:,.0f}원</b><br>'
-                f'• <b>1차 지지</b>: <span class="highlight-green">{s1:,.0f}원</span><br>'
-                f'• <b>2차 지지</b>: <span class="highlight-green">{s2:,.0f}원</span></div>', unsafe_allow_html=True)
-
-# -----------------------------
-# 2. 탭 구성 (메인 차트 & 서브 메인: DC연금 카테고리별 원석 찾기)
-# -----------------------------
-tab_chart, tab_gems, tab_zones, tab_theme, tab_guide = st.tabs([
-    "📊 차트 분석", 
-    "💎 DC연금 카테고리별 원석 찾기 (서브메인)", 
+main_tab1, main_tab2, main_tab3, main_tab4, main_tab5, main_tab6 = st.tabs([
+    "📊 개별종목 레이더 & 매매전략",
+    "💎 DC연금 카테고리별 원석 찾기", 
+    "📊 정밀 차트 분석", 
     "📍 매물대 & 지지/저항", 
     "🏛️ 테마 & 중장기 분석", 
     "📖 지표 설명서"
 ])
 
-with tab_chart:
-    st.caption("캔들차트 / 이평선 / 거래량 / RSI / MACD 통합 레이더")
-    fig = make_chart(df, supports, resistances)
-    st.plotly_chart(fig, use_container_width=True, config={"responsive": True, "displayModeBar": False}, key=f"chart_{symbol_input}_{period}")
+with main_tab1:
+    st.markdown("### 📊 현재 주가 및 종합 점수")
+    m1, m2 = st.columns(2)
+    with m1: st.metric("현재가", f"{price:,.0f}원", f"{change:+.2f}%")
+    with m2: st.metric("종합 점수", f"{score}점 / 100점", score_label)
 
-with tab_gems:
+    st.markdown(f'<div class="radar-card"><b style="color:#b45309;">🎯 핵심 신호: {" · ".join(patterns)}</b></div>', unsafe_allow_html=True)
+
+    st.markdown("### 💡 쉽고 명확한 매매 대응 전략")
+    if "🟢" in status_title: st.success(f"### {status_title}")
+    elif "🔴" in status_title: st.error(f"### {status_title}")
+    elif "🟠" in status_title: st.warning(f"### {status_title}")
+    else: st.info(f"### {status_title}")
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.markdown(f'<div class="price-zone"><b class="highlight-green">🛒 매수 전략</b><br>{buy_guide}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="price-zone"><b class="highlight-red">💰 익절 전략</b><br>{sell_guide}</div>', unsafe_allow_html=True)
+    with col_b:
+        st.markdown(f'<div class="price-zone"><b class="highlight-yellow">🛑 손절/관망 전략</b><br>{wait_guide}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="price-zone"><b>📍 핵심 가격 요약</b><br>'
+                    f'• <b>2차 저항</b>: <span class="highlight-red">{r2:,.0f}원</span><br>'
+                    f'• <b>1차 저항</b>: <span class="highlight-red">{r1:,.0f}원</span><br>'
+                    f'• <b>현재가</b>: <b>{price:,.0f}원</b><br>'
+                    f'• <b>1차 지지</b>: <span class="highlight-green">{s1:,.0f}원</span><br>'
+                    f'• <b>2차 지지</b>: <span class="highlight-green">{s2:,.0f}원</span></div>', unsafe_allow_html=True)
+
+with main_tab2:
     st.subheader("💎 DC퇴직연금 카테고리별 '원석' 스크리닝")
     st.caption("퇴직연금 계좌로 투자 가능한 주요 섹터/카테고리를 선택하여, 반등 신호가 포착된 저평가 유망주를 발굴합니다.")
 
-    # 카테고리 선택 셀렉트박스
     selected_category = st.selectbox("📂 스캔할 DC연금 투자 카테고리 선택", list(DC_PENSION_POOLS.keys()))
     target_pool = DC_PENSION_POOLS[selected_category]
 
@@ -683,7 +671,12 @@ with tab_gems:
     else:
         st.info(f"현재 '{selected_category}' 카테고리 내에서 뚜렷한 상승 신호가 포착된 원석이 없습니다. 안전하게 관망하거나 다른 카테고리를 스캔해보세요.")
 
-with tab_zones:
+with main_tab3:
+    st.caption("캔들차트 / 이평선 / 거래량 / RSI / MACD 통합 레이더")
+    fig = make_chart(df, supports, resistances)
+    st.plotly_chart(fig, use_container_width=True, config={"responsive": True, "displayModeBar": False}, key=f"chart_{symbol_input}_{period}")
+
+with main_tab4:
     st.subheader("📍 지지선과 저항선 분석")
     col_s, col_r = st.columns(2)
     with col_s:
@@ -704,7 +697,7 @@ with tab_zones:
         vp_show["집중도"] = vp_show["ratio"].map(lambda x: f"{x*100:.0f}%")
         st.dataframe(vp_show[["가격대", "집중도"]], use_container_width=True, hide_index=True)
 
-with tab_theme:
+with main_tab5:
     st.subheader("🏛️ 테마 분류 및 중장기 사이클 분석")
     theme_info = st.session_state.theme_info.get(code, {
         "theme": "미등록 테마", "cycle": "관찰 필요",
@@ -718,7 +711,7 @@ with tab_theme:
         st.markdown(f"**📝 개요**: {theme_info['desc']}")
     st.markdown(f'<div class="price-zone"><b class="highlight-green">🎯 중장기 투자 포인트</b><br>{theme_info["long_view"]}</div>', unsafe_allow_html=True)
 
-with tab_guide:
+with main_tab6:
     st.subheader("📖 지표 가이드")
     st.markdown(f"- **RSI (현재 {rsi:.1f})**: 70 이상 과열, 30 이하 침체\n- **MACD**: 추세 반전 판단 지표\n- **거래량 비율 ({vol_ratio:.2f}배)**: 평균 대비 거래량 유입 강도")
 
