@@ -84,12 +84,14 @@ div[data-testid="stMetricValue"] {
 
 WATCHLIST_FILE = "watchlist.json"
 DEFAULT_WATCHLIST = {
-    "069500": "KODEX 200 (069500)",
-    "091160": "KODEX 반도체 (091160)",
-    "466920": "KODEX AI반도체핵심장비 (466920)",
     "395160": "KODEX AI반도체TOP2플러스 (395160)",
-    "379800": "KODEX 미국S&P500 (379800)"
+    "487240": "KODEX 미국AI테크TOP10 (487240)",
+    "471990": "KODEX AI전력핵심설비 (471990)",
+    "0173Y0": "KODEX 미국AI광통신네트워크 (0173Y0)",
+    "133690": "TIGER 미국나스닥100 (133690)",
+    "360750": "TIGER 미국S&P500 (360750)"
 }
+
 
 def load_watchlist():
     if os.path.exists(WATCHLIST_FILE):
