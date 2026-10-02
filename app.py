@@ -655,7 +655,7 @@ def easy_action_scenario(df, score, supports, resistances, patterns):
     r1 = resistances[0]["price"] if resistances else close * 1.03
     r2 = resistances[1]["price"] if len(resistances) > 1 else close * 1.06
 
-    if "⚠️️ 단기 과열" in patterns:
+    if "⚠ 단기 과열" in patterns:
         st_title, b_g, s_g, w_g = "과열 구간 · 추격보다 눌림 대기", f"{s1:,.0f}원 부근 지지 여부", f"{r1:,.0f}~{r2:,.0f}원 저항 구간", f"{s1:,.0f}원 지지선 확인"
     elif "🚀 강력한 저항선 돌파" in patterns:
         st_title, b_g, s_g, w_g = "돌파 확인 · 거래량 유지 중요", f"{r1:,.0f}원 돌파 후 지지", f"{r2:,.0f}원 전후 저항 확인", f"{r1:,.0f}원 재이탈 확인"
