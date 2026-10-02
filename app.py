@@ -11,7 +11,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 
 # ============================================================
-# ETF Technical Radar v6 (메인: 기술적 분석 + 서브메인: DC연금 카테고리별 원석 찾기)
+# ETF Technical Radar v8 (동적 DC연금 풀 관리 기능 추가)
 # ============================================================
 
 st.set_page_config(
@@ -65,12 +65,13 @@ div[data-testid="stMetricValue"] {color: #0f172a !important; font-weight: 700;}
 """, unsafe_allow_html=True)
 
 # -----------------------------
-# 파일 관리 및 DC 퇴직연금 카테고리 풀(Pool) 정의
+# 파일 관리 및 데이터 저장소 정의
 # -----------------------------
 WATCHLIST_FILE = "watchlist.json"
 THEME_FILE = "theme_info.json"
+DC_POOL_FILE = "dc_pools.json"
 
-DC_PENSION_POOLS = {
+DEFAULT_DC_PENSION_POOLS = {
     "🇺🇸 미국 대표지수 / 성장주": {
         "360750": "TIGER 미국S&P500",
         "133690": "TIGER 미국나스닥100",
@@ -82,8 +83,7 @@ DC_PENSION_POOLS = {
         "395160": "KODEX AI반도체TOP2플러스",
         "471990": "KODEX AI전력핵심설비",
         "462100": "TIGER AI반도체핵심공정",
-        "441680": "SOL 미국AI반도체",
-        "0173Y0": "KODEX 미국AI광통신네트워크"
+        "441680": "SOL 미국AI반도체"
     },
     "🔋 2차전지 / 소부장 / 신재생": {
         "305540": "KODEX 2차전지산업",
@@ -116,7 +116,7 @@ DEFAULT_WATCHLIST = {
     "471990": "KODEX AI전력핵심설비 (471990)",
     "133690": "TIGER 미국나스닥100 (133690)",
     "360750": "TIGER 미국S&P500 (360750)",
-    "458730": "TIGER 미국배당다우존스 (458730)"
+    "458730": "TIGER 미국배당다우존ส (458730)"
 }
 
 DEFAULT_THEME_INFO = {
@@ -158,49 +158,49 @@ DEFAULT_THEME_INFO = {
     }
 }
 
-def load_watchlist():
-    if os.path.exists(WATCHLIST_FILE):
+def load_json_file(file_path, default_data):
+    if os.path.exists(file_path):
         try:
-            with open(WATCHLIST_FILE, "r", encoding="utf-8") as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            return data if isinstance(data, dict) and data else DEFAULT_WATCHLIST.copy()
+            return data if isinstance(data, (dict, list)) and data else default_data.copy()
         except Exception:
             pass
-    return DEFAULT_WATCHLIST.copy()
+    return default_data.copy()
 
-def save_watchlist(data):
+def save_json_file(file_path, data):
     try:
-        with open(WATCHLIST_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
-
-def load_theme_info():
-    if os.path.exists(THEME_FILE):
-        try:
-            with open(THEME_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            return data if isinstance(data, dict) else DEFAULT_THEME_INFO.copy()
-        except Exception:
-            pass
-    return DEFAULT_THEME_INFO.copy()
-
-def save_theme_info(data):
-    try:
-        with open(THEME_FILE, "w", encoding="utf-8") as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception:
         pass
 
 if "watchlist" not in st.session_state:
-    st.session_state.watchlist = load_watchlist()
+    st.session_state.watchlist = load_json_file(WATCHLIST_FILE, DEFAULT_WATCHLIST)
 
 if "theme_info" not in st.session_state:
-    st.session_state.theme_info = load_theme_info()
+    st.session_state.theme_info = load_json_file(THEME_FILE, DEFAULT_THEME_INFO)
+
+if "dc_pools" not in st.session_state:
+    st.session_state.dc_pools = load_json_file(DC_POOL_FILE, DEFAULT_DC_PENSION_POOLS)
 
 # -----------------------------
-# 데이터 수집 (네이버 금융 크롤링 + 야후 파이낸스 백업)
+# 검색 및 데이터 도우미 함수
 # -----------------------------
+def search_stock_code_by_keyword(keyword):
+    try:
+        encoded = urllib.parse.quote(keyword)
+        url = f"https://ac.stock.naver.com/ac?q={encoded}&target=etf"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            res_json = json.loads(response.read().decode("utf-8"))
+            items = res_json.get("items", [])
+            if items:
+                return items[0][0], items[0][1]
+    except Exception:
+        pass
+    return None, None
+
 def get_stock_name(code):
     try:
         url = f"https://m.stock.naver.com/api/stock/{code}/basic"
@@ -284,11 +284,10 @@ def load_etf_data(ticker_code, period="1y"):
     return df.copy(), clean_code
 
 # -----------------------------
-# 기술 지표 계산
+# 기술 지표 및 분석 함수
 # -----------------------------
 def calculate_indicators(df):
     df = df.copy()
-
     for n in [5, 20, 60, 120]:
         df[f"MA{n}"] = df["Close"].rolling(n).mean()
 
@@ -311,16 +310,11 @@ def calculate_indicators(df):
 
     df["Vol_MA20"] = df["Volume"].rolling(20).mean()
     df["Vol_Ratio"] = df["Volume"] / df["Vol_MA20"].replace(0, np.nan)
-
     return df
 
-# -----------------------------
-# 지지/저항 및 매물대 계산
-# -----------------------------
 def get_support_resistance(df):
     current = float(df["Close"].iloc[-1])
     recent20 = df.iloc[-20:]
-
     supports = []
     resistances = []
 
@@ -370,15 +364,12 @@ def volume_profile(df, bins=20):
     vp["ratio"] = vp["volume"] / max(vp["volume"].max(), 1)
     return vp.sort_values("volume", ascending=False).reset_index(drop=True)
 
-# -----------------------------
-# 기술 점수 및 매매 전략
-# -----------------------------
 def technical_score(df):
     x = df.iloc[-1]
     prev = df.iloc[-2]
     score = 0
     close = float(x["Close"])
-    ma5, ma20, ma60 = x["MA5"], x["MA20"], x["MA60"]
+    ma20, ma60 = x["MA20"], x["MA60"]
     rsi = x["RSI"]
     macd, sig, hist = x["MACD"], x["MACD_Signal"], x["MACD_Hist"]
     vol_ratio = x["Vol_Ratio"]
@@ -453,9 +444,6 @@ def easy_action_scenario(df, score, supports, resistances, patterns):
 
     return status_title, buy_guide, sell_guide, wait_guide, s1, s2, r1, r2
 
-# -----------------------------
-# 💎 DC연금 카테고리별 원석 찾기 엔진
-# -----------------------------
 def find_dc_category_gems(pool_dict):
     gem_list = []
     for code, name in pool_dict.items():
@@ -495,9 +483,6 @@ def find_dc_category_gems(pool_dict):
             })
     return sorted(gem_list, key=lambda x: x["score"], reverse=True)
 
-# -----------------------------
-# Plotly 차트 생성
-# -----------------------------
 def make_chart(df, supports, resistances):
     fig = make_subplots(rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.03, row_heights=[0.50, 0.16, 0.17, 0.17])
     fig.add_trace(go.Candlestick(x=df.index, open=df["Open"], high=df["High"], low=df["Low"], close=df["Close"], name="주가"), row=1, col=1)
@@ -526,127 +511,180 @@ def make_chart(df, supports, resistances):
     return fig
 
 # ============================================================
-# UI 메인 레이아웃
+# UI 메인 레이아웃 (최상위 3대 독립 탭 구조)
 # ============================================================
 st.title("📈 ETF 기술적 레이더 & 💎 DC연금 원석 찾기")
 
-watchlist = st.session_state.watchlist
-options = list(watchlist.values()) + ["➕ 종목코드로 관심종목 추가"]
-
-c1, c2 = st.columns([2.1, 1])
-with c1:
-    selected = st.selectbox("⭐ 관심 ETF 선택 (개별 종목 분석용)", options)
-with c2:
-    period = st.selectbox("분석 기간", ["6m", "1y", "2y"], index=1)
-
-if selected == "➕ 종목코드로 관심종목 추가":
-    st.subheader("종목코드 등록")
-    a, b = st.columns([2, 1])
-    with a:
-        new_code = st.text_input("종목코드 6자리", placeholder="예: 395160", label_visibility="collapsed")
-    with b:
-        add = st.button("⭐ 추가", use_container_width=True)
-
-    if add and new_code:
-        code = "".join(filter(str.isalnum, new_code))
-        test_df, _ = load_etf_data(code, "6m")
-        if test_df is not None:
-            name = get_stock_name(code)
-            st.session_state.watchlist[code] = f"{name} ({code})"
-            save_watchlist(st.session_state.watchlist)
-            if code not in st.session_state.theme_info:
-                st.session_state.theme_info[code] = {
-                    "theme": "신규 등록 테마", "cycle": "관찰 필요",
-                    "desc": f"{name} 관련 정보 등록 필요", "long_view": "중장기 관점을 입력해주세요."
-                }
-                save_theme_info(st.session_state.theme_info)
-            st.success(f"{name} ({code}) 등록 완료")
-            st.rerun()
-        else:
-            st.error("유효하지 않은 종목코드입니다.")
-    st.stop()
-
-symbol_input = next(k for k, v in watchlist.items() if v == selected)
-
-del_col, _ = st.columns([1, 3])
-with del_col:
-    if st.button("🗑 목록에서 삭제", use_container_width=True):
-        del st.session_state.watchlist[symbol_input]
-        save_watchlist(st.session_state.watchlist)
-        st.rerun()
-
-with st.spinner("데이터 분석 중..."):
-    raw_df, code = load_etf_data(symbol_input, period)
-
-if raw_df is None:
-    st.error("데이터를 불러오지 못했습니다.")
-    st.stop()
-
-df = calculate_indicators(raw_df).dropna(subset=["Close"]).copy()
-score, score_label = technical_score(df)
-supports, resistances = get_support_resistance(df)
-vp = volume_profile(df)
-patterns = detect_patterns(df, supports, resistances)
-status_title, buy_guide, sell_guide, wait_guide, s1, s2, r1, r2 = easy_action_scenario(
-    df, score, supports, resistances, patterns
-)
-
-x = df.iloc[-1]
-prev = df.iloc[-2]
-price = float(x["Close"])
-change = (price - float(prev["Close"])) / float(prev["Close"]) * 100
-rsi = float(x["RSI"]) if pd.notna(x["RSI"]) else 50
-vol_ratio = float(x["Vol_Ratio"]) if pd.notna(x["Vol_Ratio"]) else 1
-macd = float(x["MACD"]) if pd.notna(x["MACD"]) else 0
-macd_sig = float(x["MACD_Signal"]) if pd.notna(x["MACD_Signal"]) else 0
-
-# -----------------------------
-# 전체 기능을 분리된 탭으로 구성
-# -----------------------------
-main_tab1, main_tab2, main_tab3, main_tab4, main_tab5, main_tab6 = st.tabs([
-    "📊 개별종목 레이더 & 매매전략",
-    "💎 DC연금 카테고리별 원석 찾기", 
-    "📊 정밀 차트 분석", 
-    "📍 매물대 & 지지/저항", 
-    "🏛️ 테마 & 중장기 분석", 
-    "📖 지표 설명서"
+tab_analysis, tab_gem_finder, tab_pool_manager = st.tabs([
+    "📊 개별 종목 분석 & 레이더", 
+    "💎 DC연금 카테고리별 원석 찾기",
+    "⚙️ DC연금 풀 & 테마 관리"
 ])
 
-with main_tab1:
-    st.markdown("### 📊 현재 주가 및 종합 점수")
-    m1, m2 = st.columns(2)
-    with m1: st.metric("현재가", f"{price:,.0f}원", f"{change:+.2f}%")
-    with m2: st.metric("종합 점수", f"{score}점 / 100점", score_label)
+# ============================================================
+# 탭 1: 개별 종목 분석
+# ============================================================
+with tab_analysis:
+    watchlist = st.session_state.watchlist
+    
+    st.markdown("#### 🔍 종목명 또는 코드로 관심종목 추가")
+    search_col1, search_col2 = st.columns([3, 1])
+    with search_col1:
+        keyword_input = st.text_input("종목명 또는 코드 입력", placeholder="예: S&P500, TIGER, 395160", label_visibility="collapsed", key="ind_search")
+    with search_col2:
+        search_add_btn = st.button("➕ 관심종목 저장", use_container_width=True, key="ind_save_btn")
 
-    st.markdown(f'<div class="radar-card"><b style="color:#b45309;">🎯 핵심 신호: {" · ".join(patterns)}</b></div>', unsafe_allow_html=True)
+    if search_add_btn and keyword_input:
+        with st.spinner("종목 검색 중..."):
+            found_code, found_name = search_stock_code_by_keyword(keyword_input.strip())
+            if not found_code:
+                clean_test = "".join(filter(str.isalnum, keyword_input.strip()))
+                test_df, _ = load_etf_data(clean_test, "6m")
+                if test_df is not None:
+                    found_code = clean_test
+                    found_name = get_stock_name(clean_test)
+            
+            if found_code:
+                st.session_state.watchlist[found_code] = f"{found_name} ({found_code})"
+                save_json_file(WATCHLIST_FILE, st.session_state.watchlist)
+                if found_code not in st.session_state.theme_info:
+                    st.session_state.theme_info[found_code] = {
+                        "theme": "신규 등록 종목", "cycle": "관찰 필요",
+                        "desc": f"{found_name} 관련 정보", "long_view": "중장기 관점 입력 필요"
+                    }
+                    save_json_file(THEME_FILE, st.session_state.theme_info)
+                st.success(f"'{found_name} ({found_code})' 관심종목 저장 완료!")
+                st.rerun()
+            else:
+                st.error("해당 종목을 찾을 수 없습니다.")
 
-    st.markdown("### 💡 쉽고 명확한 매매 대응 전략")
-    if "🟢" in status_title: st.success(f"### {status_title}")
-    elif "🔴" in status_title: st.error(f"### {status_title}")
-    elif "🟠" in status_title: st.warning(f"### {status_title}")
-    else: st.info(f"### {status_title}")
+    st.markdown("---")
+    
+    options = list(watchlist.values())
+    c1, c2 = st.columns([2.1, 1])
+    with c1:
+        selected = st.selectbox("⭐ 저장된 관심 ETF 선택", options)
+    with c2:
+        period = st.selectbox("분석 기간", ["6m", "1y", "2y"], index=1)
 
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.markdown(f'<div class="price-zone"><b class="highlight-green">🛒 매수 전략</b><br>{buy_guide}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="price-zone"><b class="highlight-red">💰 익절 전략</b><br>{sell_guide}</div>', unsafe_allow_html=True)
-    with col_b:
-        st.markdown(f'<div class="price-zone"><b class="highlight-yellow">🛑 손절/관망 전략</b><br>{wait_guide}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="price-zone"><b>📍 핵심 가격 요약</b><br>'
-                    f'• <b>2차 저항</b>: <span class="highlight-red">{r2:,.0f}원</span><br>'
-                    f'• <b>1차 저항</b>: <span class="highlight-red">{r1:,.0f}원</span><br>'
-                    f'• <b>현재가</b>: <b>{price:,.0f}원</b><br>'
-                    f'• <b>1차 지지</b>: <span class="highlight-green">{s1:,.0f}원</span><br>'
-                    f'• <b>2차 지지</b>: <span class="highlight-green">{s2:,.0f}원</span></div>', unsafe_allow_html=True)
+    symbol_input = next(k for k, v in watchlist.items() if v == selected)
 
-with main_tab2:
+    del_col, _ = st.columns([1, 3])
+    with del_col:
+        if st.button("🗑 선택 종목 삭제", use_container_width=True):
+            del st.session_state.watchlist[symbol_input]
+            save_json_file(WATCHLIST_FILE, st.session_state.watchlist)
+            st.rerun()
+
+    with st.spinner("데이터 분석 중..."):
+        raw_df, code = load_etf_data(symbol_input, period)
+
+    if raw_df is not None:
+        df = calculate_indicators(raw_df).dropna(subset=["Close"]).copy()
+        score, score_label = technical_score(df)
+        supports, resistances = get_support_resistance(df)
+        vp = volume_profile(df)
+        patterns = detect_patterns(df, supports, resistances)
+        status_title, buy_guide, sell_guide, wait_guide, s1, s2, r1, r2 = easy_action_scenario(
+            df, score, supports, resistances, patterns
+        )
+
+        x = df.iloc[-1]
+        prev = df.iloc[-2]
+        price = float(x["Close"])
+        change = (price - float(prev["Close"])) / float(prev["Close"]) * 100
+        rsi = float(x["RSI"]) if pd.notna(x["RSI"]) else 50
+        vol_ratio = float(x["Vol_Ratio"]) if pd.notna(x["Vol_Ratio"]) else 1
+
+        sub_tab1, sub_tab2, sub_tab3, sub_tab4, sub_tab5 = st.tabs([
+            "📊 요약 & 매매전략", "📈 정밀 차트", "📍 매물대 & 지지/저항", "🏛️ 테마 분석", "📖 지표 설명서"
+        ])
+
+        with sub_tab1:
+            st.markdown("### 📊 현재 주가 및 종합 점수")
+            m1, m2 = st.columns(2)
+            with m1: st.metric("현재가", f"{price:,.0f}원", f"{change:+.2f}%")
+            with m2: st.metric("종합 점수", f"{score}점 / 100점", score_label)
+
+            st.markdown(f'<div class="radar-card"><b style="color:#b45309;">🎯 핵심 신호: {" · ".join(patterns)}</b></div>', unsafe_allow_html=True)
+
+            st.markdown("### 💡 쉽고 명확한 매매 대응 전략")
+            if "🟢" in status_title: st.success(f"### {status_title}")
+            elif "🔴" in status_title: st.error(f"### {status_title}")
+            elif "🟠" in status_title: st.warning(f"### {status_title}")
+            else: st.info(f"### {status_title}")
+
+            col_a, col_b = st.columns(2)
+            with col_a:
+                st.markdown(f'<div class="price-zone"><b class="highlight-green">🛒 매수 전략</b><br>{buy_guide}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="price-zone"><b class="highlight-red">💰 익절 전략</b><br>{sell_guide}</div>', unsafe_allow_html=True)
+            with col_b:
+                st.markdown(f'<div class="price-zone"><b class="highlight-yellow">🛑 손절/관망 전략</b><br>{wait_guide}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="price-zone"><b>📍 핵심 가격 요약</b><br>'
+                            f'• <b>2차 저항</b>: <span class="highlight-red">{r2:,.0f}원</span><br>'
+                            f'• <b>1차 저항</b>: <span class="highlight-red">{r1:,.0f}원</span><br>'
+                            f'• <b>현재가</b>: <b>{price:,.0f}원</b><br>'
+                            f'• <b>1차 지지</b>: <span class="highlight-green">{s1:,.0f}원</span><br>'
+                            f'• <b>2차 지지</b>: <span class="highlight-green">{s2:,.0f}원</span></div>', unsafe_allow_html=True)
+
+        with sub_tab2:
+            st.caption("캔들차트 / 이평선 / 거래량 / RSI / MACD 통합 레이더")
+            fig = make_chart(df, supports, resistances)
+            st.plotly_chart(fig, use_container_width=True, config={"responsive": True, "displayModeBar": False}, key=f"chart_{symbol_input}_{period}")
+
+        with sub_tab3:
+            st.subheader("📍 지지선과 저항선 분석")
+            col_s, col_r = st.columns(2)
+            with col_s:
+                st.markdown("**🟢 지지 가격 (바닥)**")
+                if supports:
+                    for i, item in enumerate(supports[:3], 1): st.success(f"S{i}: **{item['price']:,.0f}원**")
+                else: st.info("데이터 부족")
+            with col_r:
+                st.markdown("**🔴 저항 가격 (벽)**")
+                if resistances:
+                    for i, item in enumerate(resistances[:3], 1): st.warning(f"R{i}: **{item['price']:,.0f}원**")
+                else: st.info("데이터 부족")
+
+            st.subheader("🧱 매물대 집중 분포")
+            if not vp.empty:
+                vp_show = vp.head(5)[["price", "ratio"]].copy()
+                vp_show["가격대"] = vp_show["price"].map(lambda x: f"{x:,.0f}원")
+                vp_show["집중도"] = vp_show["ratio"].map(lambda x: f"{x*100:.0f}%")
+                st.dataframe(vp_show[["가격대", "집중도"]], use_container_width=True, hide_index=True)
+
+        with sub_tab4:
+            st.subheader("🏛 테마 분류 및 중장기 사이클 분석")
+            theme_info = st.session_state.theme_info.get(code, {
+                "theme": "미등록 테마", "cycle": "관찰 필요",
+                "desc": "정보 등록 필요", "long_view": "중장기 관점을 입력해주세요."
+            })
+            c_t1, c_t2 = st.columns(2)
+            with c_t1:
+                st.markdown(f"**🏷 테마**: {theme_info['theme']}")
+                st.markdown(f"**🔄 사이클**: <span class='highlight-yellow'>{theme_info['cycle']}</span>", unsafe_allow_html=True)
+            with c_t2:
+                st.markdown(f"**📝 개요**: {theme_info['desc']}")
+            st.markdown(f'<div class="price-zone"><b class="highlight-green">🎯 중장기 투자 포인트</b><br>{theme_info["long_view"]}</div>', unsafe_allow_html=True)
+
+        with sub_tab5:
+            st.subheader("📖 지표 가이드")
+            st.markdown(f"- **RSI (현재 {rsi:.1f})**: 70 이상 과열, 30 이하 침체\n- **MACD**: 추세 반전 판단 지표\n- **거래량 비율 ({vol_ratio:.2f}배)**: 평균 대비 거래량 유입 강도")
+    else:
+        st.error("데이터를 불러오지 못했습니다.")
+
+# ============================================================
+# 탭 2: DC연금 카테고리별 원석 찾기
+# ============================================================
+with tab_gem_finder:
     st.subheader("💎 DC퇴직연금 카테고리별 '원석' 스크리닝")
     st.caption("퇴직연금 계좌로 투자 가능한 주요 섹터/카테고리를 선택하여, 반등 신호가 포착된 저평가 유망주를 발굴합니다.")
 
-    selected_category = st.selectbox("📂 스캔할 DC연금 투자 카테고리 선택", list(DC_PENSION_POOLS.keys()))
-    target_pool = DC_PENSION_POOLS[selected_category]
+    dc_pools = st.session_state.dc_pools
+    selected_category = st.selectbox("📂 스캔할 DC연금 투자 카테고리 선택", list(dc_pools.keys()), key="dc_cat_select")
+    target_pool = dc_pools[selected_category]
 
-    if st.button(f"🔍 [{selected_category}] 전 종목 스캔 실행", use_container_width=True):
+    if st.button(f"🔍 [{selected_category}] 전 종목 스캔 실행", use_container_width=True, key="dc_scan_btn"):
         st.cache_data.clear()
 
     with st.spinner(f"'{selected_category}' 카테고리 내 종목 정밀 분석 중..."):
@@ -659,7 +697,7 @@ with main_tab2:
             st.markdown(
                 f'<div class="gem-card">'
                 f'<div style="display:flex; justify-content:space-between; align-items:center;">'
-                f'<b style="font-size:1.05rem; color:#15803d;">💎 {g["name"]}</b>'
+                f'<b style="font-size:1.05rem; color:#15803d;">💎 {g["name"]} ({g["code"]})</b>'
                 f'<span style="font-size:1.0rem; font-weight:bold;">{g["price"]:,.0f}원 ({g["change"]:+.2f}%)</span>'
                 f'</div>'
                 f'<div style="margin-top:6px; font-size:0.9rem; color:#334155;">'
@@ -669,50 +707,69 @@ with main_tab2:
                 unsafe_allow_html=True
             )
     else:
-        st.info(f"현재 '{selected_category}' 카테고리 내에서 뚜렷한 상승 신호가 포착된 원석이 없습니다. 안전하게 관망하거나 다른 카테고리를 스캔해보세요.")
+        st.info(f"현재 '{selected_category}' 카테고리 내에서 뚜렷한 상승 신호가 포착된 원석이 없습니다. 관리 탭에서 새로운 종목을 추가해보세요.")
 
-with main_tab3:
-    st.caption("캔들차트 / 이평선 / 거래량 / RSI / MACD 통합 레이더")
-    fig = make_chart(df, supports, resistances)
-    st.plotly_chart(fig, use_container_width=True, config={"responsive": True, "displayModeBar": False}, key=f"chart_{symbol_input}_{period}")
+# ============================================================
+# 탭 3: DC연금 풀 & 테마 관리 (NEW!)
+# ============================================================
+with tab_pool_manager:
+    st.subheader("⚙️ DC연금 스크리닝 풀 & 카테고리 편집")
+    st.caption("최신 트렌드나 신규 상장 주도주에 맞춰 DC연금 카테고리별 종목을 실시간으로 추가하거나 삭제할 수 있습니다.")
 
-with main_tab4:
-    st.subheader("📍 지지선과 저항선 분석")
-    col_s, col_r = st.columns(2)
-    with col_s:
-        st.markdown("**🟢 지지 가격 (바닥)**")
-        if supports:
-            for i, item in enumerate(supports[:3], 1): st.success(f"S{i}: **{item['price']:,.0f}원**")
-        else: st.info("데이터 부족")
-    with col_r:
-        st.markdown("**🔴 저항 가격 (벽)**")
-        if resistances:
-            for i, item in enumerate(resistances[:3], 1): st.warning(f"R{i}: **{item['price']:,.0f}원**")
-        else: st.info("데이터 부족")
+    dc_pools = st.session_state.dc_pools
 
-    st.subheader("🧱 매물대 집중 분포")
-    if not vp.empty:
-        vp_show = vp.head(5)[["price", "ratio"]].copy()
-        vp_show["가격대"] = vp_show["price"].map(lambda x: f"{x:,.0f}원")
-        vp_show["집중도"] = vp_show["ratio"].map(lambda x: f"{x*100:.0f}%")
-        st.dataframe(vp_show[["가격대", "집중도"]], use_container_width=True, hide_index=True)
+    # 1. 새 카테고리 추가
+    with st.expander("📁 새로운 DC연금 카테고리 생성하기"):
+        new_cat_name = st.text_input("새 카테고리명", placeholder="예: 🚀 우주항공 / 양자컴퓨터")
+        if st.button("카테고리 생성"):
+            if new_cat_name and new_cat_name not in dc_pools:
+                dc_pools[new_cat_name] = {}
+                save_json_file(DC_POOL_FILE, dc_pools)
+                st.success(f"'{new_cat_name}' 카테고리가 생성되었습니다!")
+                st.rerun()
 
-with main_tab5:
-    st.subheader("🏛️ 테마 분류 및 중장기 사이클 분석")
-    theme_info = st.session_state.theme_info.get(code, {
-        "theme": "미등록 테마", "cycle": "관찰 필요",
-        "desc": "정보 등록 필요", "long_view": "중장기 관점을 입력해주세요."
-    })
-    c_t1, c_t2 = st.columns(2)
-    with c_t1:
-        st.markdown(f"**🏷 테마**: {theme_info['theme']}")
-        st.markdown(f"**🔄 사이클**: <span class='highlight-yellow'>{theme_info['cycle']}</span>", unsafe_allow_html=True)
-    with c_t2:
-        st.markdown(f"**📝 개요**: {theme_info['desc']}")
-    st.markdown(f'<div class="price-zone"><b class="highlight-green">🎯 중장기 투자 포인트</b><br>{theme_info["long_view"]}</div>', unsafe_allow_html=True)
+    st.markdown("---")
 
-with main_tab6:
-    st.subheader("📖 지표 가이드")
-    st.markdown(f"- **RSI (현재 {rsi:.1f})**: 70 이상 과열, 30 이하 침체\n- **MACD**: 추세 반전 판단 지표\n- **거래량 비율 ({vol_ratio:.2f}배)**: 평균 대비 거래량 유입 강도")
+    # 2. 카테고리별 종목 추가/삭제
+    manage_cat = st.selectbox("편집할 카테고리 선택", list(dc_pools.keys()), key="mgr_cat")
+    
+    st.markdown(f"#### 📌 [{manage_cat}]에 속한 종목 리스트")
+    current_items = dc_pools[manage_cat]
+    
+    if current_items:
+        for code, name in list(current_items.items()):
+            col_m1, col_m2 = st.columns([4, 1])
+            with col_m1:
+                st.write(f"• **{name}** (`{code}`)")
+            with col_m2:
+                if st.button("삭제", key=f"del_{manage_cat}_{code}"):
+                    del dc_pools[manage_cat][code]
+                    save_json_file(DC_POOL_FILE, dc_pools)
+                    st.success("종목이 삭제되었습니다.")
+                    st.rerun()
+    else:
+        st.info("등록된 종목이 없습니다. 아래에서 새로운 종목을 추가해보세요.")
 
+    st.markdown("---")
+    st.markdown("#### ➕ 선택한 카테고리에 신규 종목 추가")
+    add_keyword = st.text_input("추가할 종목명 또는 코드 검색", placeholder="예: KODEX AI전력, 471990", key="mgr_add_input")
+    if st.button("카테고리에 종목 추가하기", use_container_width=True):
+        if add_keyword:
+            found_code, found_name = search_stock_code_by_keyword(add_keyword.strip())
+            if not found_code:
+                clean_test = "".join(filter(str.isalnum, add_keyword.strip()))
+                test_df, _ = load_etf_data(clean_test, "6m")
+                if test_df is not None:
+                    found_code = clean_test
+                    found_name = get_stock_name(clean_test)
+            
+            if found_code:
+                dc_pools[manage_cat][found_code] = found_name
+                save_json_file(DC_POOL_FILE, dc_pools)
+                st.success(f"'{found_name} ({found_code})' 종목이 [{manage_cat}]에 추가되었습니다!")
+                st.rerun()
+            else:
+                st.error("종목을 찾을 수 없습니다. 정확한 이름이나 코드를 입력해주세요.")
+
+st.markdown("---")
 st.caption("ETF Technical Radar & DC Gem Finder 통합 버전")
