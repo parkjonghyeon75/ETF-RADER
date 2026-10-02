@@ -6,6 +6,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import json
 import os
+import urllib.request
+import xml.etree.ElementTree as ET
 
 # 1. 모바일 최적화 페이지 설정
 st.set_page_config(
@@ -84,23 +86,75 @@ def calculate_indicators(df):
     df['Vol_MA20'] = df['Volume'].rolling(20).mean()
     return df
 
-# 4. 데이터 로드
+# 네이버 금융 데이터 수집기 (국내 모든 종목 100% 연동)
+def fetch_from_naver(code, count=500):
+    try:
+        url = f"https://fchart.stock.naver.com/sise.nhn?symbol={code}&timeframe=day&count={count}&requestType=0"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            xml_data = response.read().decode('euc-kr', errors='ignore')
+        
+        root = ET.fromstring(xml_data)
+        items = root.findall('.//item')
+        
+        rows = []
+        for item in items:
+            data_str = item.attrib.get('data', '')
+            parts = data_str.split('|')
+            if len(parts) >= 6:
+                rows.append({
+                    'Date': pd.to_datetime(parts[0]),
+                    'Open': float(parts[1]),
+                    'High': float(parts[2]),
+                    'Low': float(parts[3]),
+                    'Close': float(parts[4]),
+                    'Volume': float(parts[5])
+                })
+        if not rows:
+            return None
+        df = pd.DataFrame(rows)
+        df.set_index('Date', inplace=True)
+        return df
+    except Exception:
+        return None
+
+# 4. 데이터 통합 로드 (네이버 금융 우선 -> 야후 파이낸스 교차)
 @st.cache_data(ttl=300, show_spinner=False)
 def load_etf_data(ticker_code, period="1y"):
-    ticker = ticker_code.strip().upper()
-    if not (ticker.endswith(".KS") or ticker.endswith(".KQ")):
-        ticker = f"{ticker}.KS"
+    clean_code = ''.join(filter(str.isdigit, str(ticker_code)))
+    if not clean_code:
+        clean_code = str(ticker_code).strip()
+
+    # 1차: 네이버 증권 데이터 수집 시도 (국내 ETF 누락 문제 완벽 해결)
+    df = fetch_from_naver(clean_code, count=500)
     
-    data = yf.download(ticker, period=period, progress=False)
-    # 최소 데이터 개수 기준을 10개로 완화 (새로 상장된 종목 및 짧은 검증 기간 대응)
-    if data.empty or len(data) < 10:
-        return None, ticker
-    
-    if isinstance(data.columns, pd.MultiIndex):
-        data.columns = data.columns.get_level_values(0)
-        
-    df = calculate_indicators(data)
-    return df, ticker
+    # 2차: 네이버 실패 시 야후 파이낸스 예비 시도
+    if df is None or df.empty:
+        for suffix in [".KS", ".KQ"]:
+            ticker = f"{clean_code}{suffix}"
+            try:
+                data = yf.download(ticker, period=period, progress=False)
+                if not data.empty and len(data) >= 5:
+                    if isinstance(data.columns, pd.MultiIndex):
+                        data.columns = data.columns.get_level_values(0)
+                    df = data
+                    break
+            except Exception:
+                pass
+
+    if df is None or df.empty or len(df) < 5:
+        return None, clean_code
+
+    # 기간 필터링
+    if period == "6m":
+        df = df.iloc[-120:]
+    elif period == "1y":
+        df = df.iloc[-250:]
+    elif period == "2y":
+        df = df.iloc[-500:]
+
+    df = calculate_indicators(df)
+    return df, clean_code
 
 # UI 헤더
 st.title("📈 ETF Technical Radar")
@@ -126,28 +180,27 @@ if selected_option == "➕ 종목코드로 관심종목 추가":
         add_btn = st.button("⭐ 추가", use_container_width=True)
         
     if add_btn and new_code:
-        clean_code = new_code.strip().upper()
-        # 데이터 유효성 검증 (6개월치 데이터로 확인)
-        test_df, full_code = load_etf_data(clean_code, period="6m")
-        if test_df is not None:
-            display_label = f"ETF {clean_code} ({clean_code})"
-            st.session_state.watchlist[clean_code] = display_label
-            save_watchlist(st.session_state.watchlist)
-            st.success(f"종목코드 '{clean_code}' 등록 완료!")
-            st.rerun()
+        clean_code = ''.join(filter(str.isdigit, str(new_code)))
+        if not clean_code:
+            st.error("숫자 종목코드를 정확히 입력해주세요.")
         else:
-            st.error("유효하지 않은 종목코드이거나 데이터를 가져올 수 없습니다.")
+            test_df, _ = load_etf_data(clean_code, period="6m")
+            if test_df is not None:
+                display_label = f"ETF {clean_code} ({clean_code})"
+                st.session_state.watchlist[clean_code] = display_label
+                save_watchlist(st.session_state.watchlist)
+                st.success(f"종목코드 '{clean_code}' 등록 완료!")
+                st.rerun()
+            else:
+                st.error("유효하지 않은 종목코드이거나 데이터를 가져올 수 없습니다.")
             
-    # 관심종목 추가 화면일 때는 아래의 차트를 렌더링하지 않고 멈춤 (NameError 방지)
     st.stop()
 else:
-    # 선택된 종목코드 추출
     symbol_input = [k for k, v in watchlist.items() if v == selected_option][0]
     
-    # 삭제 버튼
     col_space, col_del = st.columns([3, 1])
     with col_del:
-        if st.button("🗑️ 목록에서 삭제", use_container_width=True):
+        if st.button("🗑️️ 목록에서 삭제", use_container_width=True):
             del st.session_state.watchlist[symbol_input]
             save_watchlist(st.session_state.watchlist)
             st.toast("삭제되었습니다.")
@@ -163,15 +216,18 @@ else:
     prev_price = float(df['Close'].iloc[-2])
     chg_pct = ((curr_price - prev_price) / prev_price) * 100
     
-    rsi = float(df['RSI'].iloc[-1])
-    ma20 = float(df['MA20'].iloc[-1])
-    ma60 = float(df['MA60'].iloc[-1])
-    ma120 = float(df['MA120'].iloc[-1])
-    macd = float(df['MACD'].iloc[-1])
-    macd_sig = float(df['MACD_Signal'].iloc[-1])
-    vol_ratio = float(df['Volume'].iloc[-1] / df['Vol_MA20'].iloc[-1]) if df['Vol_MA20'].iloc[-1] > 0 else 1.0
-    bb_upper = float(df['BB_Upper'].iloc[-1])
-    bb_lower = float(df['BB_Lower'].iloc[-1])
+    rsi = float(df['RSI'].iloc[-1]) if 'RSI' in df and not pd.isna(df['RSI'].iloc[-1]) else 50.0
+    ma20 = float(df['MA20'].iloc[-1]) if 'MA20' in df and not pd.isna(df['MA20'].iloc[-1]) else curr_price
+    ma60 = float(df['MA60'].iloc[-1]) if 'MA60' in df and not pd.isna(df['MA60'].iloc[-1]) else curr_price
+    ma120 = float(df['MA120'].iloc[-1]) if 'MA120' in df and not pd.isna(df['MA120'].iloc[-1]) else curr_price
+    macd = float(df['MACD'].iloc[-1]) if 'MACD' in df and not pd.isna(df['MACD'].iloc[-1]) else 0.0
+    macd_sig = float(df['MACD_Signal'].iloc[-1]) if 'MACD_Signal' in df and not pd.isna(df['MACD_Signal'].iloc[-1]) else 0.0
+    
+    vol_ma20 = df['Vol_MA20'].iloc[-1] if 'Vol_MA20' in df and not pd.isna(df['Vol_MA20'].iloc[-1]) else 1.0
+    vol_ratio = float(df['Volume'].iloc[-1] / vol_ma20) if vol_ma20 > 0 else 1.0
+    
+    bb_upper = float(df['BB_Upper'].iloc[-1]) if 'BB_Upper' in df and not pd.isna(df['BB_Upper'].iloc[-1]) else curr_price
+    bb_lower = float(df['BB_Lower'].iloc[-1]) if 'BB_Lower' in df and not pd.isna(df['BB_Lower'].iloc[-1]) else curr_price
     
     trend_score = 0
     if curr_price > ma20: trend_score += 1
@@ -180,7 +236,6 @@ else:
     
     status_text = "상승 추세" if trend_score >= 2 else ("조정/횡보" if trend_score == 1 else "하락 추세")
     
-    # 지표 카드
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("현재가", f"{curr_price:,.0f}원", f"{chg_pct:+.2f}%")
     m2.metric("추세점수", f"{trend_score}/3", status_text)
@@ -193,7 +248,6 @@ else:
         fig = make_subplots(rows=3, cols=1, shared_xaxes=True, 
                             vertical_spacing=0.03, row_heights=[0.55, 0.2, 0.25])
 
-        # 캔들차트
         fig.add_trace(go.Candlestick(x=df.index, open=df['Open'], high=df['High'],
                                      low=df['Low'], close=df['Close'], name="주가"), row=1, col=1)
         fig.add_trace(go.Scatter(x=df.index, y=df['MA20'], line=dict(color='orange', width=1), name="MA20"), row=1, col=1)
@@ -202,11 +256,9 @@ else:
         fig.add_trace(go.Scatter(x=df.index, y=df['BB_Upper'], line=dict(color='gray', dash='dot'), name="BB상단"), row=1, col=1)
         fig.add_trace(go.Scatter(x=df.index, y=df['BB_Lower'], line=dict(color='gray', dash='dot'), name="BB하단"), row=1, col=1)
 
-        # 거래량
         colors = ['red' if c >= o else 'blue' for c, o in zip(df['Close'], df['Open'])]
         fig.add_trace(go.Bar(x=df.index, y=df['Volume'], marker_color=colors, name="거래량"), row=2, col=1)
 
-        # MACD
         fig.add_trace(go.Scatter(x=df.index, y=df['MACD'], line=dict(color='blue'), name="MACD"), row=3, col=1)
         fig.add_trace(go.Scatter(x=df.index, y=df['MACD_Signal'], line=dict(color='red'), name="Signal"), row=3, col=1)
 
@@ -216,14 +268,14 @@ else:
         st.plotly_chart(fig, use_container_width=True, key=f"chart_{symbol_input}_{period}")
 
     with tab_scenario:
-        recent_60 = df.iloc[-60:]
+        recent_60 = df.iloc[-60:] if len(df) >= 60 else df
         r1 = float(recent_60['High'].max())
         s1 = float(recent_60['Low'].min())
         
         st.subheader("📌 지지 & 저항 가격대")
         c_sup, c_res = st.columns(2)
-        c_sup.info(f"**1차 지지선 (60일 최저)**\n\n### {s1:,.0f} 원")
-        c_res.warning(f"**1차 저항선 (60일 최고)**\n\n### {r1:,.0f} 원")
+        c_sup.info(f"**1차 지지선 (최저)**\n\n### {s1:,.0f} 원")
+        c_res.warning(f"**1차 저항선 (최고)**\n\n### {r1:,.0f} 원")
 
         st.subheader("💡 자동 분석 대응 시나리오")
         if trend_score == 3 and rsi < 65:
@@ -237,13 +289,16 @@ else:
 
     with tab_details:
         st.markdown("### 📋 세부 보조지표 종합")
+        bb_denom = (bb_upper - bb_lower) if (bb_upper - bb_lower) != 0 else 1
+        bb_pos = ((curr_price - bb_lower) / bb_denom) * 100
+        
         details_df = pd.DataFrame({
             "지표": ["MA20 위치", "MA60 위치", "MACD 방향", "볼린저밴드 위치", "거래량 변동"],
             "상태": [
                 "상회" if curr_price > ma20 else "하회",
                 "상회" if curr_price > ma60 else "하회",
                 "우상향 (Golden Cross)" if macd > macd_sig else "우하향 (Dead Cross)",
-                f"상단 대비 {((curr_price - bb_lower)/(bb_upper - bb_lower))*100:.0f}% 위치",
+                f"상단 대비 {bb_pos:.0f}% 위치",
                 f"20일 평균 대비 {vol_ratio*100:.0f}%"
             ]
         })
