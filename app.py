@@ -17,40 +17,32 @@ st.set_page_config(
 )
 
 # ============================================================
-# PREMIUM WARM GRAPHITE THEME
+# DARK WARM GRAPHITE THEME
 # ============================================================
-st.markdown(r'''<style>
+
+st.markdown(
+    """
+<style>
 :root{
     --bg:#171817;
-    --bg2:#1d1f1d;
-    --panel:#242624;
+    --panel:#232623;
     --panel2:#2b2e2b;
-    --panel3:#323532;
-    --line:#414641;
+    --panel3:#323632;
+    --line:#424742;
     --text:#f3f0e8;
-    --text2:#ddd9cf;
-    --muted:#9da39b;
+    --muted:#a4aaa2;
     --mint:#65d7b5;
     --coral:#f0786d;
     --amber:#e6bb63;
-    --orange:#ee9365;
-    --sky:#79b7d9;
 }
 
-/* ============================================================
-   STREAMLIT 전체 기본 흰색 영역 제거
-   ============================================================ */
-
+/* 전체 배경 */
 html,
 body,
-[data-testid="stApp"],
 [data-testid="stAppViewContainer"],
-[data-testid="stAppViewContainer"] > section,
 [data-testid="stMain"],
 [data-testid="stMainBlockContainer"],
-section.main,
 .main,
-.main > div,
 .block-container{
     background:var(--bg)!important;
     color:var(--text)!important;
@@ -66,377 +58,56 @@ section.main,
     padding:12px 12px 32px!important;
 }
 
+/* 기본 컨테이너 */
 [data-testid="stVerticalBlock"],
 [data-testid="stHorizontalBlock"],
 [data-testid="column"],
 [data-testid="stColumn"],
-.element-container,
-.stMarkdown,
-.stCaption{
+.element-container{
     background:transparent!important;
     color:var(--text)!important;
 }
 
-*{
-    box-sizing:border-box;
-    scrollbar-color:#555b55 var(--bg);
-    scrollbar-width:thin;
-}
-
-body{
-    background:var(--bg)!important;
-    color:var(--text)!important;
-}
-
+/* 텍스트 */
 h1,h2,h3,h4,h5,h6,
-p,span,label,div{
+p,
+span,
+label{
     color:inherit;
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
-
-.app-title{
-    font-size:1.65rem;
-    font-weight:900;
-    letter-spacing:-.05em;
-    color:#f5f1e8!important;
-}
-
-.app-sub{
-    color:var(--muted)!important;
-    font-size:.78rem;
-    margin-top:2px;
-}
-
-.section{
-    font-size:1.05rem;
-    font-weight:900;
-    margin:18px 0 8px;
-    color:#f1eee5!important;
-}
-
-.sub{
-    color:var(--muted)!important;
-    font-size:.78rem;
-}
-
-/* ============================================================
-   HERO / CARD
-   ============================================================ */
-
-.hero,
-.panel,
-.card,
-.theme-card{
-    background:var(--panel)!important;
-    border:1px solid var(--line)!important;
-    border-radius:13px!important;
-    color:var(--text)!important;
-    box-shadow:0 6px 22px rgba(0,0,0,.20)!important;
-}
-
-.hero{
-    padding:16px;
-    margin:10px 0;
-}
-
-.hero-name{
-    font-size:1.3rem;
-    font-weight:900;
-    color:#f5f1e8!important;
-}
-
-.hero-code{
-    font-size:.76rem;
-    color:var(--muted)!important;
-}
-
-.quote{
-    display:flex;
-    align-items:baseline;
-    gap:12px;
-    margin-top:13px;
-}
-
-.price{
-    font-size:2.1rem;
-    font-weight:900;
-    letter-spacing:-.05em;
-    color:#fffaf0!important;
-}
-
-.chg{
-    font-size:1rem;
-    font-weight:800;
-}
-
-.pos{
-    color:var(--mint)!important;
-}
-
-.neg{
-    color:var(--coral)!important;
-}
-
-.neu{
-    color:var(--text2)!important;
-}
-
-/* ============================================================
-   EVIDENCE
-   ============================================================ */
-
-.panel{
-    padding:13px;
-    margin:8px 0;
-}
-
-.evidence{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:7px;
-    margin:8px 0;
-}
-
-.e-box{
-    background:var(--panel2)!important;
-    border:1px solid var(--line)!important;
-    border-radius:9px;
-    padding:10px;
-}
-
-.e-label,
-.e-sub{
-    font-size:.7rem;
-    color:var(--muted)!important;
-}
-
-.e-value{
-    font-size:.95rem;
-    font-weight:900;
-    margin-top:3px;
-    color:#f4f0e7!important;
-}
-
-/* ============================================================
-   JUDGMENT
-   ============================================================ */
-
-.judge{
-    border-left:4px solid var(--mint);
-    padding:13px;
-    background:var(--panel2)!important;
-    border-radius:9px;
-}
-
-.judge-title{
-    font-size:.73rem;
-    color:var(--muted)!important;
-}
-
-.judge-main{
-    font-size:1.2rem;
-    font-weight:900;
-    margin-top:3px;
-    color:#f5f1e8!important;
-}
-
-.judge-text{
-    font-size:.83rem;
-    line-height:1.55;
-    color:#d8d7d0!important;
-    margin-top:7px;
-}
-
-.action{
-    border-left:4px solid var(--amber);
-    padding:13px;
-    background:var(--panel2)!important;
-    border-radius:9px;
-}
-
-.action-title{
-    font-size:.73rem;
-    color:var(--amber)!important;
-    font-weight:800;
-}
-
-.action-text{
-    font-size:.84rem;
-    line-height:1.55;
-    font-weight:700;
-    margin-top:5px;
-    color:#eeeae0!important;
-}
-
-/* ============================================================
-   PRICE SCENARIO
-   ============================================================ */
-
-.scenarios{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:7px;
-}
-
-.scenario{
-    background:var(--panel)!important;
-    border:1px solid var(--line)!important;
-    border-radius:9px;
-    padding:10px;
-}
-
-.s-label{
-    font-size:.68rem;
-    color:var(--muted)!important;
-}
-
-.s-price{
-    font-size:1.05rem;
-    font-weight:900;
-    margin-top:4px;
-    color:#f5f1e8!important;
-}
-
-.s-desc{
-    font-size:.7rem;
-    color:#c4c7c1!important;
-    line-height:1.4;
-    margin-top:5px;
-}
-
-/* ============================================================
-   FUTURE THEME
-   ============================================================ */
-
-.theme-card{
-    padding:13px;
-    margin:9px 0;
-    background:linear-gradient(
-        135deg,
-        #252825,
-        #222522
-    )!important;
-}
-
-.stage{
-    font-size:.72rem;
-    color:var(--mint)!important;
-    font-weight:900;
-}
-
-.theme-title{
-    font-size:1.1rem;
-    font-weight:900;
-    margin-top:2px;
-    color:#f4f0e7!important;
-}
-
-.theme-reason{
-    font-size:.79rem;
-    color:#c4c8c1!important;
-    line-height:1.5;
-    margin:4px 0 10px;
-}
-
-.theme-etf{
-    background:var(--panel2)!important;
-    border:1px solid var(--line)!important;
-    border-radius:9px;
-    padding:11px;
-}
-
-.theme-name{
-    font-size:.95rem;
-    font-weight:900;
-    color:#f4f0e7!important;
-}
-
-.theme-code{
-    font-size:.7rem;
-    color:var(--muted)!important;
-}
-
-.theme-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:5px;
-    margin-top:8px;
-}
-
-.theme-stat{
-    background:#202320!important;
-    border:1px solid #3b403b;
-    border-radius:7px;
-    padding:8px;
-}
-
-.theme-stat-label{
-    font-size:.65rem;
-    color:var(--muted)!important;
-}
-
-.theme-stat-value{
-    font-size:.92rem;
-    font-weight:900;
-    margin-top:2px;
-    color:#f2eee5!important;
-}
-
-/* ============================================================
-   BUTTON
-   ============================================================ */
-
-.stButton > button,
-button[kind="secondary"],
-button[kind="primary"]{
+/* 버튼 */
+.stButton > button{
     background:#303430!important;
     color:#f5f1e8!important;
     border:1px solid #4b514b!important;
     border-radius:8px!important;
     font-weight:800!important;
-    box-shadow:none!important;
 }
 
 .stButton > button:hover{
     background:#3a3f3a!important;
     border-color:var(--mint)!important;
-    color:#fff!important;
+    color:#ffffff!important;
 }
 
-.stButton > button[kind="primary"]{
-    background:#3a6f61!important;
-    border-color:#65d7b5!important;
-}
-
-/* ============================================================
-   INPUT
-   ============================================================ */
-
+/* 입력창 */
 div[data-baseweb="input"],
 div[data-baseweb="input"] > div,
 div[data-baseweb="select"],
-div[data-baseweb="select"] > div,
-div[data-baseweb="textarea"],
-div[data-baseweb="textarea"] > div{
+div[data-baseweb="select"] > div{
     background:#292c29!important;
     color:#f5f1e8!important;
     border-color:#4a504a!important;
-    box-shadow:none!important;
 }
 
-input,
-textarea{
+input{
     background:#292c29!important;
     color:#f5f1e8!important;
     -webkit-text-fill-color:#f5f1e8!important;
-    border-color:#4a504a!important;
 }
 
-input::placeholder,
-textarea::placeholder{
+input::placeholder{
     color:#858c84!important;
     -webkit-text-fill-color:#858c84!important;
 }
@@ -445,39 +116,19 @@ div[data-baseweb="select"] span{
     color:#f5f1e8!important;
 }
 
-/* ============================================================
-   DROPDOWN
-   ============================================================ */
-
+/* 드롭다운 */
 ul[role="listbox"],
 div[role="listbox"],
-[data-baseweb="popover"] > div,
-li[role="option"],
-div[role="option"]{
+li[role="option"]{
     background:#292c29!important;
     color:#f5f1e8!important;
-    border-color:#4a504a!important;
 }
 
-li[role="option"]:hover,
-div[role="option"]:hover{
+li[role="option"]:hover{
     background:#3a3f3a!important;
 }
 
-/* ============================================================
-   RADIO
-   ============================================================ */
-
-[data-testid="stRadio"]{
-    background:transparent!important;
-    color:#ddd9cf!important;
-}
-
-[data-testid="stRadio"] label,
-[data-testid="stRadio"] label p{
-    color:#ddd9cf!important;
-}
-
+/* 라디오 */
 [data-testid="stRadio"] [role="radiogroup"]{
     background:#242724!important;
     border:1px solid var(--line)!important;
@@ -485,44 +136,28 @@ div[role="option"]:hover{
     padding:4px 8px!important;
 }
 
-/* ============================================================
-   ALERT / CAPTION
-   ============================================================ */
-
+/* Alert */
 [data-testid="stAlert"],
-div[data-testid="stNotification"]{
+[data-testid="stNotification"]{
     background:#292c29!important;
     color:#ddd9cf!important;
     border:1px solid #454b45!important;
 }
 
-.stAlert p,
-.stAlert span,
-.stAlert div,
-[data-testid="stCaptionContainer"],
-.stCaption{
+/* Caption */
+.stCaption,
+[data-testid="stCaptionContainer"]{
     color:var(--muted)!important;
 }
 
-/* ============================================================
-   DATAFRAME
-   ============================================================ */
-
+/* Dataframe */
 [data-testid="stDataFrame"],
-div[data-testid="stDataFrame"] > div{
+[data-testid="stDataFrame"] > div{
     background:#242724!important;
     border:1px solid var(--line)!important;
-    color:#eeeae0!important;
 }
 
-[data-testid="stDataFrame"] iframe{
-    background:#242724!important;
-}
-
-/* ============================================================
-   TABS
-   ============================================================ */
-
+/* Tabs */
 button[data-baseweb="tab"]{
     background:transparent!important;
     color:var(--muted)!important;
@@ -537,10 +172,7 @@ button[data-baseweb="tab"]{
     color:var(--mint)!important;
 }
 
-/* ============================================================
-   EXPANDER
-   ============================================================ */
-
+/* Expander */
 [data-testid="stExpander"]{
     background:#242724!important;
     border:1px solid var(--line)!important;
@@ -552,70 +184,34 @@ button[data-baseweb="tab"]{
     color:#eeeae0!important;
 }
 
-hr{
-    border-color:#383d38!important;
-}
-
-/* ============================================================
-   PLOTLY
-   ============================================================ */
-
-div[data-testid="stPlotlyChart"],
+/* Plotly */
 .js-plotly-plot,
 .plot-container,
 .svg-container{
     background:#242724!important;
     border-radius:10px!important;
-}
-
-.js-plotly-plot{
     touch-action:pan-y!important;
 }
 
-/* ============================================================
-   STREAMLIT TOP STATUS
-   ============================================================ */
-
-[data-testid="stStatusWidget"]{
-    display:none!important;
+hr{
+    border-color:#383d38!important;
 }
 
-/* ============================================================
-   MOBILE
-   ============================================================ */
-
+/* 모바일 */
 @media(max-width:700px){
 
     .block-container{
         padding:8px 9px 24px!important;
     }
 
-    .price{
-        font-size:1.85rem;
-    }
-
     .scenarios{
         grid-template-columns:repeat(2,1fr);
     }
-
-    .theme-grid{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .theme-name{
-        font-size:.9rem;
-    }
-
-    .theme-stat-value{
-        font-size:.86rem;
-    }
-
-    .e-value{
-        font-size:.82rem;
-    }
 }
 </style>
-''', unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True
+)
 
 
 # ============================================================
@@ -628,29 +224,27 @@ UNIVERSE_FILE = "etf_universe_cache.json"
 
 
 # ============================================================
-# ETF BASE DATA
+# ETF DATA
 # ============================================================
 
 BASE_ETFS = {
-    "395160":"KODEX AI반도체핵심장비",
-    "487240":"KODEX AI반도체",
-    "471990":"KODEX AI반도체TOP2Plus",
-    "133690":"TIGER 미국나스닥100",
-    "360750":"TIGER 미국S&P500",
-    "458730":"TIGER 글로벌AI&로봇",
-    "381170":"TIGER 미국테크TOP10 INDXX",
-    "396500":"TIGER 반도체",
-    "091160":"KODEX 반도체",
-    "305720":"KODEX 2차전지산업",
-    "449170":"TIGER 글로벌AI인프라액티브",
-    "434060":"TIGER 글로벌AI&반도체액티브",
-    "464240":"KODEX AI전력핵심설비",
-    "487130":"KODEX AI전력인프라",
-    "475050":"ACE 글로벌반도체TOP4 Plus",
-    "469150":"ACE AI반도체포커스"
+    "395160": "KODEX AI반도체핵심장비",
+    "487240": "KODEX AI반도체",
+    "471990": "KODEX AI반도체TOP2Plus",
+    "133690": "TIGER 미국나스닥100",
+    "360750": "TIGER 미국S&P500",
+    "458730": "TIGER 글로벌AI&로봇",
+    "381170": "TIGER 미국테크TOP10 INDXX",
+    "396500": "TIGER 반도체",
+    "091160": "KODEX 반도체",
+    "305720": "KODEX 2차전지산업",
+    "449170": "TIGER 글로벌AI인프라액티브",
+    "434060": "TIGER 글로벌AI&반도체액티브",
+    "464240": "KODEX AI전력핵심설비",
+    "487130": "KODEX AI전력인프라",
+    "475050": "ACE 글로벌반도체TOP4 Plus",
+    "469150": "ACE AI반도체포커스",
 }
-
-FALLBACK_ETFS = BASE_ETFS.copy()
 
 DEFAULT_WATCHLIST = [
     "395160",
@@ -658,7 +252,7 @@ DEFAULT_WATCHLIST = [
     "471990",
     "133690",
     "360750",
-    "458730"
+    "458730",
 ]
 
 
@@ -668,86 +262,87 @@ DEFAULT_WATCHLIST = [
 
 THEMES = {
 
-    "AI 반도체":{
-        "keywords":[
+    "AI 반도체": {
+        "keywords": [
             "AI반도체",
             "반도체",
             "AI",
             "HBM",
-            "반도체장비"
+            "반도체장비",
         ],
-        "seeds":[
+        "seeds": [
             "395160",
             "487240",
             "471990",
-            "396500"
+            "396500",
         ],
         "reason":
-            "AI 연산 확대와 첨단 반도체 투자 증가의 직접적인 수혜 영역입니다."
+            "AI 연산 확대와 첨단 반도체 투자 증가의 직접적인 수혜 영역입니다.",
     },
 
-    "데이터센터·AI 인프라":{
-        "keywords":[
+    "데이터센터·AI 인프라": {
+        "keywords": [
             "데이터센터",
             "AI인프라",
             "AI 인프라",
-            "글로벌AI인프라"
+            "글로벌AI인프라",
         ],
-        "seeds":[
+        "seeds": [
             "449170",
             "434060",
-            "381170"
+            "381170",
         ],
         "reason":
-            "AI 서비스 확산에 따라 서버·네트워크·데이터센터 투자를 추적합니다."
+            "AI 서비스 확산에 따라 서버·네트워크·데이터센터 투자를 추적합니다.",
     },
 
-    "전력 인프라":{
-        "keywords":[
+    "전력 인프라": {
+        "keywords": [
             "전력",
             "전력인프라",
             "전력핵심설비",
-            "전력설비"
+            "전력설비",
         ],
-        "seeds":[
+        "seeds": [
             "464240",
-            "487130"
+            "487130",
         ],
         "reason":
-            "데이터센터와 산업용 전력수요 증가에 따른 전력망 투자를 추적합니다."
+            "데이터센터와 산업용 전력수요 증가에 따른 전력망 투자를 추적합니다.",
     },
 
-    "원자력":{
-        "keywords":[
+    "원자력": {
+        "keywords": [
             "원자력",
-            "원전"
+            "원전",
         ],
-        "seeds":[],
+        "seeds": [],
         "reason":
-            "전력수요와 에너지 믹스 변화에 따른 원전 관련 흐름을 추적합니다."
+            "전력수요와 에너지 믹스 변화에 따른 원전 관련 흐름을 추적합니다.",
     },
 
-    "냉각·열관리":{
-        "keywords":[
+    "냉각·열관리": {
+        "keywords": [
             "냉각",
             "열관리",
-            "액침냉각"
+            "액침냉각",
         ],
-        "seeds":[
+        "seeds": [
             "434060",
-            "449170"
+            "449170",
         ],
         "reason":
-            "AI 서버 고집적화에 따른 냉각·열관리 후방 수혜를 추적합니다."
-    }
+            "AI 서버 고집적화에 따른 냉각·열관리 후방 수혜를 추적합니다.",
+    },
 }
 
+
 FUTURE_CHAIN = [
-    ("AI 반도체","현재 주도"),
-    ("데이터센터·AI 인프라","다음 수혜"),
-    ("전력 인프라","다음 수혜"),
-    ("원자력","관심 확대"),
-    ("냉각·열관리","초기 관심")
+    ("AI 반도체", "현재 주도"),
+    ("데이터센터·AI 인프라", "다음 수혜"),
+    ("전력 인프라", "다음 수혜"),
+    ("원자력", "관심 확대"),
+    ("냉각·열관리", "초기 관심"),
 ]
 
 
@@ -765,7 +360,7 @@ def read_json(path, default):
         with open(
             path,
             "r",
-            encoding="utf-8"
+            encoding="utf-8",
         ) as f:
 
             return json.load(f)
@@ -782,14 +377,14 @@ def write_json(path, data):
         with open(
             path,
             "w",
-            encoding="utf-8"
+            encoding="utf-8",
         ) as f:
 
             json.dump(
                 data,
                 f,
                 ensure_ascii=False,
-                indent=2
+                indent=2,
             )
 
         return True
@@ -805,22 +400,24 @@ def write_json(path, data):
 
 def load_universe():
 
-    u = dict(BASE_ETFS)
+    universe = dict(BASE_ETFS)
 
     cached = read_json(
         UNIVERSE_FILE,
-        {}
+        {},
     )
 
     if isinstance(cached, dict):
 
-        for c, n in cached.items():
+        for code, name in cached.items():
 
-            if c and n:
+            if code and name:
 
-                u[str(c).zfill(6)] = str(n)
+                universe[
+                    str(code).zfill(6)
+                ] = str(name)
 
-    return u
+    return universe
 
 
 def fetch_catalog():
@@ -830,24 +427,24 @@ def fetch_catalog():
         "api/sise/etfItemList.nhn"
     )
 
-    req = urllib.request.Request(
+    request = urllib.request.Request(
         url,
         headers={
             "User-Agent":
-            "Mozilla/5.0"
-        }
+                "Mozilla/5.0",
+        },
     )
 
     with urllib.request.urlopen(
-        req,
-        timeout=7
-    ) as r:
+        request,
+        timeout=7,
+    ) as response:
 
-        raw = r.read()
+        raw = response.read()
 
     root = ET.fromstring(raw)
 
-    out = {}
+    result = {}
 
     for item in root.findall(".//item"):
 
@@ -865,36 +462,39 @@ def fetch_catalog():
 
         if code and name:
 
-            out[
+            result[
                 str(code).zfill(6)
             ] = name
 
-    return out
+    return result
 
 
 def refresh_universe():
 
     try:
 
-        ext = fetch_catalog()
+        external = fetch_catalog()
 
-        if ext:
+        if external:
 
-            u = dict(
+            universe = dict(
                 st.session_state.etf_universe
             )
 
-            u.update(ext)
+            universe.update(external)
 
-            st.session_state.etf_universe = u
+            st.session_state.etf_universe = (
+                universe
+            )
 
             write_json(
                 UNIVERSE_FILE,
-                u
+                universe,
             )
 
             st.session_state.notice = (
-                f"ETF 목록을 {len(ext):,}개 확인했습니다."
+                f"ETF 목록을 "
+                f"{len(external):,}개 확인했습니다."
             )
 
             return
@@ -904,28 +504,29 @@ def refresh_universe():
         pass
 
     st.session_state.notice = (
-        "외부 목록 연결이 지연되어 기존 ETF 목록을 사용합니다."
+        "외부 목록 연결이 지연되어 "
+        "기존 ETF 목록을 사용합니다."
     )
 
 
 # ============================================================
-# SESSION STATE
+# SESSION
 # ============================================================
 
 def init_state():
 
     if "watchlist" not in st.session_state:
 
-        w = read_json(
+        watchlist = read_json(
             WATCHLIST_FILE,
-            DEFAULT_WATCHLIST.copy()
+            DEFAULT_WATCHLIST.copy(),
         )
 
-        if isinstance(w, list):
+        if isinstance(watchlist, list):
 
             st.session_state.watchlist = [
                 str(x).zfill(6)
-                for x in w
+                for x in watchlist
             ]
 
         else:
@@ -938,7 +539,7 @@ def init_state():
 
         st.session_state.holdings = read_json(
             HOLDINGS_FILE,
-            {}
+            {},
         )
 
     if "etf_universe" not in st.session_state:
@@ -963,7 +564,9 @@ def init_state():
 
     if "main_page" not in st.session_state:
 
-        st.session_state.main_page = "📊 내 ETF"
+        st.session_state.main_page = (
+            "📊 내 ETF"
+        )
 
     if "page_request" not in st.session_state:
 
@@ -986,47 +589,52 @@ def name_of(code):
         code,
         BASE_ETFS.get(
             code,
-            f"ETF {code}"
-        )
+            f"ETF {code}",
+        ),
     )
 
 
-def sf(v, d=0.0):
+def sf(value, default=0.0):
 
     try:
 
-        return d if pd.isna(v) else float(v)
+        return (
+            default
+            if pd.isna(value)
+            else float(value)
+        )
 
     except Exception:
 
-        return d
+        return default
 
 
-def money(v):
+def money(value):
 
-    v = sf(v)
+    value = sf(value)
 
-    if abs(v) >= 1000:
+    if abs(value) >= 1000:
 
-        return f"{v:,.0f}원"
+        return f"{value:,.0f}원"
 
-    return f"{v:,.2f}원"
+    return f"{value:,.2f}원"
 
 
 # ============================================================
-# DATA NORMALIZE
+# NORMALIZE
 # ============================================================
 
 def normalize(df):
 
     if df is None or df.empty:
+
         return pd.DataFrame()
 
     df = df.copy()
 
     if isinstance(
         df.columns,
-        pd.MultiIndex
+        pd.MultiIndex,
     ):
 
         df.columns = [
@@ -1036,42 +644,47 @@ def normalize(df):
             for c in df.columns
         ]
 
-    ren = {}
+    rename = {}
 
-    for c in df.columns:
+    for column in df.columns:
 
-        k = str(c).lower()
+        key = str(column).lower()
 
-        ren[c] = {
-            "open":"Open",
-            "high":"High",
-            "low":"Low",
-            "close":"Close",
-            "volume":"Volume"
-        }.get(k, c)
+        rename[column] = {
+            "open": "Open",
+            "high": "High",
+            "low": "Low",
+            "close": "Close",
+            "volume": "Volume",
+        }.get(
+            key,
+            column,
+        )
 
-    df = df.rename(columns=ren)
+    df = df.rename(
+        columns=rename,
+    )
 
-    req = [
+    required = [
         "Open",
         "High",
         "Low",
         "Close",
-        "Volume"
+        "Volume",
     ]
 
     if any(
-        c not in df.columns
-        for c in req
+        column not in df.columns
+        for column in required
     ):
 
         return pd.DataFrame()
 
-    for c in req:
+    for column in required:
 
-        df[c] = pd.to_numeric(
-            df[c],
-            errors="coerce"
+        df[column] = pd.to_numeric(
+            df[column],
+            errors="coerce",
         )
 
     df = df.dropna(
@@ -1090,11 +703,11 @@ def normalize(df):
 
         pass
 
-    return df[req]
+    return df[required]
 
 
 # ============================================================
-# PRICE DATA
+# PRICE
 # ============================================================
 
 def fetch_naver(code):
@@ -1103,54 +716,59 @@ def fetch_naver(code):
 
         url = (
             "https://fchart.stock.naver.com/"
-            f"spevent.nhn?symbol={str(code).zfill(6)}"
+            f"spevent.nhn?"
+            f"symbol={str(code).zfill(6)}"
             "&timeframe=day"
             "&count=600"
             "&requestType=0"
         )
 
-        req = urllib.request.Request(
+        request = urllib.request.Request(
             url,
             headers={
                 "User-Agent":
-                "Mozilla/5.0"
-            }
+                    "Mozilla/5.0",
+            },
         )
 
         with urllib.request.urlopen(
-            req,
-            timeout=7
-        ) as r:
+            request,
+            timeout=7,
+        ) as response:
 
-            raw = r.read()
+            raw = response.read()
 
         root = ET.fromstring(raw)
 
         rows = []
 
-        for item in root.findall(".//item"):
+        for item in root.findall(
+            ".//item"
+        ):
 
-            p = item.attrib.get(
+            values = item.attrib.get(
                 "data",
-                ""
+                "",
             ).split("|")
 
-            if len(p) >= 6:
+            if len(values) >= 6:
 
-                rows.append([
-                    p[0],
-                    float(p[1]),
-                    float(p[2]),
-                    float(p[3]),
-                    float(p[4]),
-                    float(p[5])
-                ])
+                rows.append(
+                    [
+                        values[0],
+                        float(values[1]),
+                        float(values[2]),
+                        float(values[3]),
+                        float(values[4]),
+                        float(values[5]),
+                    ]
+                )
 
         if not rows:
 
             return pd.DataFrame()
 
-        d = pd.DataFrame(
+        data = pd.DataFrame(
             rows,
             columns=[
                 "Date",
@@ -1158,16 +776,16 @@ def fetch_naver(code):
                 "High",
                 "Low",
                 "Close",
-                "Volume"
-            ]
+                "Volume",
+            ],
         )
 
-        d["Date"] = pd.to_datetime(
-            d["Date"]
+        data["Date"] = pd.to_datetime(
+            data["Date"]
         )
 
         return normalize(
-            d.set_index("Date")
+            data.set_index("Date")
         )
 
     except Exception:
@@ -1179,31 +797,35 @@ def fetch_yahoo(code):
 
     try:
 
-        return normalize(
-            yf.download(
-                f"{str(code).zfill(6)}.KS",
-                period="2y",
-                interval="1d",
-                auto_adjust=False,
-                progress=False,
-                threads=False
-            )
+        data = yf.download(
+            f"{str(code).zfill(6)}.KS",
+            period="2y",
+            interval="1d",
+            auto_adjust=False,
+            progress=False,
+            threads=False,
         )
+
+        return normalize(data)
 
     except Exception:
 
         return pd.DataFrame()
 
 
-def load_price(code, force=False):
+def load_price(
+    code,
+    force=False,
+):
 
     code = str(code).zfill(6)
 
     now = datetime.now()
 
     cached = (
-        st.session_state.price_cache
-        .get(code)
+        st.session_state.price_cache.get(
+            code
+        )
     )
 
     if (
@@ -1216,22 +838,22 @@ def load_price(code, force=False):
 
         return cached["data"]
 
-    d = fetch_naver(code)
+    data = fetch_naver(code)
 
-    if d.empty:
+    if data.empty:
 
-        d = fetch_yahoo(code)
+        data = fetch_yahoo(code)
 
-    if not d.empty:
+    if not data.empty:
 
         st.session_state.price_cache[
             code
         ] = {
-            "time":now,
-            "data":d
+            "time": now,
+            "data": data,
         }
 
-    return d
+    return data
 
 
 # ============================================================
@@ -1244,29 +866,29 @@ def indicators(df):
 
         return pd.DataFrame()
 
-    d = df.copy()
+    data = df.copy()
 
-    d["MA20"] = (
-        d.Close.rolling(20).mean()
+    data["MA20"] = (
+        data.Close.rolling(20).mean()
     )
 
-    d["MA60"] = (
-        d.Close.rolling(60).mean()
+    data["MA60"] = (
+        data.Close.rolling(60).mean()
     )
 
-    delta = d.Close.diff()
+    delta = data.Close.diff()
 
     gain = (
         delta.where(
             delta > 0,
-            0
+            0,
         ).rolling(14).mean()
     )
 
     loss = (
         (-delta.where(
             delta < 0,
-            0
+            0,
         )).rolling(14).mean()
     )
 
@@ -1274,11 +896,11 @@ def indicators(df):
         gain /
         loss.replace(
             0,
-            np.nan
+            np.nan,
         )
     )
 
-    d["RSI14"] = (
+    data["RSI14"] = (
         100 -
         (
             100 /
@@ -1286,80 +908,66 @@ def indicators(df):
         )
     )
 
-    d["VOL20"] = (
-        d.Volume.rolling(20).mean()
+    data["VOL20"] = (
+        data.Volume.rolling(20).mean()
     )
 
-    d["VOL_RATIO"] = (
-        d.Volume /
-        d.VOL20
+    data["VOL_RATIO"] = (
+        data.Volume /
+        data.VOL20
     )
 
-    d["RET20"] = (
-        d.Close.pct_change(20) * 100
+    data["RET20"] = (
+        data.Close.pct_change(20)
+        * 100
     )
 
-    d["HIGH20"] = (
-        d.High.rolling(20).max()
+    data["HIGH20"] = (
+        data.High.rolling(20).max()
     )
 
-    d["LOW20"] = (
-        d.Low.rolling(20).min()
+    data["LOW20"] = (
+        data.Low.rolling(20).min()
     )
 
-    d["LOW60"] = (
-        d.Low.rolling(60).min()
+    data["LOW60"] = (
+        data.Low.rolling(60).min()
     )
 
-    return d
+    return data
 
 
 # ============================================================
 # JUDGMENT
 # ============================================================
 
-def judgment(d):
+def judgment(data):
 
-    r = d.iloc[-1]
+    row = data.iloc[-1]
 
-    cur = sf(r.Close)
-
-    ma20 = sf(
-        r.MA20,
-        cur
+    current = sf(row.Close)
+    ma20 = sf(row.MA20, current)
+    ma60 = sf(row.MA60, current)
+    rsi = sf(row.RSI14, 50)
+    volume_ratio = sf(
+        row.VOL_RATIO,
+        1,
+    )
+    return20 = sf(
+        row.RET20,
+        0,
     )
 
-    ma60 = sf(
-        r.MA60,
-        cur
-    )
+    above20 = current >= ma20
+    above60 = current >= ma60
 
-    rsi = sf(
-        r.RSI14,
-        50
-    )
-
-    vr = sf(
-        r.VOL_RATIO,
-        1
-    )
-
-    ret = sf(
-        r.RET20,
-        0
-    )
-
-    above20 = cur >= ma20
-    above60 = cur >= ma60
-
-    ma = (
+    ma_state = (
         "20일선 상회"
         if above20
-        else
-        "20일선 하회"
+        else "20일선 하회"
     )
 
-    rs = (
+    rsi_state = (
         "과열권"
         if rsi >= 70
         else
@@ -1375,15 +983,15 @@ def judgment(d):
         "과매도권"
     )
 
-    vs = (
+    volume_state = (
         "거래량 강한 확대"
-        if vr >= 1.5
+        if volume_ratio >= 1.5
         else
         "거래량 증가"
-        if vr >= 1.1
+        if volume_ratio >= 1.1
         else
         "평균 수준"
-        if vr >= .8
+        if volume_ratio >= .8
         else
         "거래량 감소"
     )
@@ -1427,7 +1035,8 @@ def judgment(d):
 
         action = (
             "60일선 아래에서 RSI도 약합니다. "
-            "신규 진입보다 지지 형성과 거래량 회복을 확인합니다."
+            "신규 진입보다 지지 형성과 "
+            "거래량 회복을 확인합니다."
         )
 
     else:
@@ -1442,28 +1051,31 @@ def judgment(d):
 
     reasons = [
         (
-            f"현재가 {money(cur)} · "
-            f"20일선 {money(ma20)} · {ma}"
+            f"현재가 {money(current)} · "
+            f"20일선 {money(ma20)} · "
+            f"{ma_state}"
         ),
         (
-            f"RSI14 {rsi:.1f} · {rs}"
+            f"RSI14 {rsi:.1f} · "
+            f"{rsi_state}"
         ),
         (
-            f"거래량 {vr:.2f}배 · {vs} · "
-            f"20일 수익률 {ret:+.2f}%"
-        )
+            f"거래량 {volume_ratio:.2f}배 · "
+            f"{volume_state} · "
+            f"20일 수익률 {return20:+.2f}%"
+        ),
     ]
 
     return {
-        "title":title,
-        "action":action,
-        "ma":ma,
-        "rs":rs,
-        "vs":vs,
-        "rsi":rsi,
-        "vr":vr,
-        "ret":ret,
-        "reasons":reasons
+        "title": title,
+        "action": action,
+        "ma": ma_state,
+        "rs": rsi_state,
+        "vs": volume_state,
+        "rsi": rsi,
+        "vr": volume_ratio,
+        "ret": return20,
+        "reasons": reasons,
     }
 
 
@@ -1471,64 +1083,42 @@ def judgment(d):
 # PRICE LEVELS
 # ============================================================
 
-def levels(d):
+def levels(data):
 
-    r = d.iloc[-1]
+    row = data.iloc[-1]
 
-    cur = sf(
-        r.Close
-    )
-
-    ma20 = sf(
-        r.MA20,
-        cur
-    )
-
-    ma60 = sf(
-        r.MA60,
-        cur
-    )
-
-    high = sf(
-        r.HIGH20,
-        cur
-    )
-
-    low = sf(
-        r.LOW20,
-        cur
-    )
-
-    low60 = sf(
-        r.LOW60,
-        cur
-    )
+    current = sf(row.Close)
+    ma20 = sf(row.MA20, current)
+    ma60 = sf(row.MA60, current)
+    high20 = sf(row.HIGH20, current)
+    low20 = sf(row.LOW20, current)
+    low60 = sf(row.LOW60, current)
 
     return [
         (
             "1차 관심가격",
             ma20,
-            "20일선 눌림 확인"
+            "20일선 눌림 확인",
         ),
         (
             "핵심 지지",
-            min(ma60, low),
-            "중기 추세 확인"
+            min(ma60, low20),
+            "중기 추세 확인",
         ),
         (
             "돌파 기준",
-            high,
-            "최근 20일 고점"
+            high20,
+            "최근 20일 고점",
         ),
         (
             "위험 가격",
             min(
                 ma60,
-                low,
-                low60
+                low20,
+                low60,
             ),
-            "이탈 시 방어 검토"
-        )
+            "이탈 시 방어 검토",
+        ),
     ]
 
 
@@ -1553,20 +1143,20 @@ def navigate(code):
 # SEARCH
 # ============================================================
 
-def search(q):
+def search(query):
 
-    q = (
-        q or ""
+    query = (
+        query or ""
     ).strip().lower()
 
     return [
-        (c,n)
-        for c,n
+        (code, name)
+        for code, name
         in st.session_state.etf_universe.items()
-        if q
+        if query
         and (
-            q in c.lower()
-            or q in n.lower()
+            query in code.lower()
+            or query in name.lower()
         )
     ][:40]
 
@@ -1577,30 +1167,30 @@ def search(q):
 
 def render_finder():
 
-    st.markdown(
-        '<div class="section">ETF 찾기</div>',
-        unsafe_allow_html=True
+    st.markdown("### ETF 찾기")
+
+    left, right = st.columns(
+        [5, 1]
     )
 
-    a,b = st.columns([5,1])
+    with left:
 
-    with a:
-
-        q = st.text_input(
+        query = st.text_input(
             "ETF 검색",
             placeholder="ETF명 또는 종목코드",
             label_visibility="collapsed",
-            key="search_q"
+            key="search_q",
         )
 
-    with b:
+    with right:
 
         if st.button(
             "목록 갱신",
-            use_container_width=True
+            use_container_width=True,
         ):
 
             refresh_universe()
+
             st.rerun()
 
     if st.session_state.notice:
@@ -1611,61 +1201,68 @@ def render_finder():
 
         st.session_state.notice = None
 
-    res = search(q)
+    results = search(query)
 
-    if res:
+    if results:
 
         labels = [
-            f"{n} · {c}"
-            for c,n in res
+            f"{name} · {code}"
+            for code, name
+            in results
         ]
 
-        label = st.selectbox(
+        selected = st.selectbox(
             "검색 결과",
             labels,
             label_visibility="collapsed",
-            key="search_select"
+            key="search_select",
         )
 
-        c,n = res[
-            labels.index(label)
+        code, name = results[
+            labels.index(selected)
         ]
 
-        x,y = st.columns([5,1])
-
-        x.caption(
-            f"선택: {n} ({c})"
+        left, right = st.columns(
+            [5, 1]
         )
 
-        with y:
+        left.caption(
+            f"선택: {name} ({code})"
+        )
+
+        with right:
 
             if st.button(
-                "추가"
-                if c not in st.session_state.watchlist
-                else "등록됨",
+                (
+                    "추가"
+                    if code
+                    not in st.session_state.watchlist
+                    else "등록됨"
+                ),
                 disabled=(
-                    c in st.session_state.watchlist
+                    code
+                    in st.session_state.watchlist
                 ),
                 use_container_width=True,
-                key=f"add_{c}"
+                key=f"add_{code}",
             ):
 
                 if (
-                    c
+                    code
                     not in
                     st.session_state.watchlist
                 ):
 
                     st.session_state.watchlist.append(
-                        c
+                        code
                     )
 
                     write_json(
                         WATCHLIST_FILE,
-                        st.session_state.watchlist
+                        st.session_state.watchlist,
                     )
 
-                navigate(c)
+                navigate(code)
 
 
 # ============================================================
@@ -1674,14 +1271,13 @@ def render_finder():
 
 def render_watchlist():
 
-    st.markdown(
-        '<div class="section">관심종목</div>',
-        unsafe_allow_html=True
+    st.markdown("### 관심종목")
+
+    watchlist = (
+        st.session_state.watchlist
     )
 
-    w = st.session_state.watchlist
-
-    if not w:
+    if not watchlist:
 
         st.caption(
             "관심종목이 없습니다."
@@ -1690,30 +1286,30 @@ def render_watchlist():
         return
 
     labels = [
-        f"{name_of(c)} · {c}"
-        for c in w
+        f"{name_of(code)} · {code}"
+        for code in watchlist
     ]
 
-    cur = (
+    current = (
         st.session_state.selected_code
     )
 
-    idx = (
-        w.index(cur)
-        if cur in w
+    index = (
+        watchlist.index(current)
+        if current in watchlist
         else 0
     )
 
-    label = st.selectbox(
+    selected = st.selectbox(
         "관심종목",
         labels,
-        index=idx,
+        index=index,
         label_visibility="collapsed",
-        key="watch_select"
+        key="watch_select",
     )
 
-    code = w[
-        labels.index(label)
+    code = watchlist[
+        labels.index(selected)
     ]
 
     st.session_state.selected_code = code
@@ -1721,17 +1317,18 @@ def render_watchlist():
     if st.button(
         "현재 ETF 관심종목에서 삭제",
         use_container_width=True,
-        key="delete_watch"
+        key="delete_watch",
     ):
 
         st.session_state.watchlist = [
-            x for x in w
-            if x != code
+            item
+            for item in watchlist
+            if item != code
         ]
 
         write_json(
             WATCHLIST_FILE,
-            st.session_state.watchlist
+            st.session_state.watchlist,
         )
 
         st.session_state.selected_code = (
@@ -1747,108 +1344,65 @@ def render_watchlist():
 # JUDGMENT UI
 # ============================================================
 
-def render_judgment(d):
+def render_judgment(data):
 
-    j = judgment(d)
-
-    st.markdown(
-        '<div class="section">현재판단 · 지금대응</div>',
-        unsafe_allow_html=True
-    )
+    result = judgment(data)
 
     st.markdown(
-        f'''
-        <div class="evidence">
-
-            <div class="e-box">
-                <div class="e-label">20일선</div>
-                <div class="e-value {'pos' if '상회' in j['ma'] else 'neg'}">
-                    {j['ma']}
-                </div>
-                <div class="e-sub">
-                    단기 추세
-                </div>
-            </div>
-
-            <div class="e-box">
-                <div class="e-label">RSI14</div>
-                <div class="e-value {
-                    'pos'
-                    if j['rsi'] >= 60
-                    else
-                    'neg'
-                    if j['rsi'] < 40
-                    else
-                    'neu'
-                }">
-                    {j['rsi']:.1f}
-                </div>
-                <div class="e-sub">
-                    {j['rs']}
-                </div>
-            </div>
-
-            <div class="e-box">
-                <div class="e-label">거래량</div>
-                <div class="e-value {
-                    'pos'
-                    if j['vr'] >= 1.1
-                    else
-                    'neg'
-                    if j['vr'] < .8
-                    else
-                    'neu'
-                }">
-                    {j['vr']:.2f}배
-                </div>
-                <div class="e-sub">
-                    {j['vs']}
-                </div>
-            </div>
-
-        </div>
-        ''',
-        unsafe_allow_html=True
+        "### 현재판단 · 지금대응"
     )
 
-    a,b = st.columns(2)
+    a, b, c = st.columns(3)
 
     with a:
 
-        st.markdown(
-            f'''
-            <div class="judge">
-                <div class="judge-title">
-                    현재 시장 판단
-                </div>
-
-                <div class="judge-main">
-                    {j["title"]}
-                </div>
-
-                <div class="judge-text">
-                    {"<br>".join(j["reasons"])}
-                </div>
-            </div>
-            ''',
-            unsafe_allow_html=True
+        st.metric(
+            "20일선",
+            result["ma"],
         )
 
     with b:
 
-        st.markdown(
-            f'''
-            <div class="action">
-                <div class="action-title">
-                    지금 대응
-                </div>
+        st.metric(
+            "RSI14",
+            f'{result["rsi"]:.1f}',
+            result["rs"],
+        )
 
-                <div class="action-text">
-                    {j["action"]}
-                </div>
-            </div>
-            ''',
-            unsafe_allow_html=True
+    with c:
+
+        st.metric(
+            "거래량",
+            f'{result["vr"]:.2f}배',
+            result["vs"],
+        )
+
+    left, right = st.columns(2)
+
+    with left:
+
+        st.markdown(
+            "**현재 시장 판단**"
+        )
+
+        st.subheader(
+            result["title"]
+        )
+
+        st.write(
+            " · ".join(
+                result["reasons"]
+            )
+        )
+
+    with right:
+
+        st.markdown(
+            "**지금 대응**"
+        )
+
+        st.write(
+            result["action"]
         )
 
 
@@ -1856,126 +1410,130 @@ def render_judgment(d):
 # CHART
 # ============================================================
 
-def render_chart(d):
+def render_chart(data):
 
-    end = d.index.max()
+    end_date = data.index.max()
 
-    start = (
-        end -
+    start_date = (
+        end_date -
         pd.DateOffset(months=6)
     )
 
-    x = d[
-        d.index >= start
+    chart_data = data[
+        data.index >= start_date
     ].copy()
 
-    fig = make_subplots(
+    figure = make_subplots(
         rows=2,
         cols=1,
         shared_xaxes=True,
         vertical_spacing=.025,
-        row_heights=[.76,.24]
+        row_heights=[
+            .76,
+            .24,
+        ],
     )
 
-    fig.add_trace(
+    figure.add_trace(
         go.Candlestick(
-            x=x.index,
-            open=x.Open,
-            high=x.High,
-            low=x.Low,
-            close=x.Close,
+            x=chart_data.index,
+            open=chart_data.Open,
+            high=chart_data.High,
+            low=chart_data.Low,
+            close=chart_data.Close,
             increasing_line_color="#65d7b5",
             increasing_fillcolor="#65d7b5",
             decreasing_line_color="#f0786d",
             decreasing_fillcolor="#f0786d",
-            name="가격"
+            name="가격",
         ),
         row=1,
-        col=1
+        col=1,
     )
 
-    fig.add_trace(
+    figure.add_trace(
         go.Scatter(
-            x=x.index,
-            y=x.MA20,
+            x=chart_data.index,
+            y=chart_data.MA20,
             mode="lines",
             line=dict(
                 color="#79b7d9",
-                width=1.5
+                width=1.5,
             ),
-            name="20일선"
+            name="20일선",
         ),
         row=1,
-        col=1
+        col=1,
     )
 
-    fig.add_trace(
+    figure.add_trace(
         go.Scatter(
-            x=x.index,
-            y=x.MA60,
+            x=chart_data.index,
+            y=chart_data.MA60,
             mode="lines",
             line=dict(
                 color="#e6bb63",
-                width=1.4
+                width=1.4,
             ),
-            name="60일선"
+            name="60일선",
         ),
         row=1,
-        col=1
+        col=1,
     )
 
-    vc = np.where(
-        x.Close >= x.Open,
+    volume_colors = np.where(
+        chart_data.Close
+        >= chart_data.Open,
         "#65d7b5",
-        "#f0786d"
+        "#f0786d",
     )
 
-    fig.add_trace(
+    figure.add_trace(
         go.Bar(
-            x=x.index,
-            y=x.Volume,
-            marker_color=vc,
+            x=chart_data.index,
+            y=chart_data.Volume,
+            marker_color=volume_colors,
             opacity=.45,
             name="거래량",
-            showlegend=False
+            showlegend=False,
         ),
         row=2,
-        col=1
+        col=1,
     )
 
-    fig.update_xaxes(
+    figure.update_xaxes(
         fixedrange=True,
         showgrid=False,
-        rangeslider_visible=False
+        rangeslider_visible=False,
     )
 
-    fig.update_yaxes(
+    figure.update_yaxes(
         fixedrange=True,
         showgrid=True,
         gridcolor="#303530",
-        zeroline=False
+        zeroline=False,
     )
 
-    fig.update_yaxes(
+    figure.update_yaxes(
         fixedrange=True,
         showgrid=False,
         showticklabels=False,
         row=2,
-        col=1
+        col=1,
     )
 
-    fig.update_layout(
+    figure.update_layout(
         height=410,
         margin=dict(
             l=5,
             r=5,
             t=18,
-            b=5
+            b=5,
         ),
         paper_bgcolor="#242624",
         plot_bgcolor="#242624",
         font=dict(
-            color="#eeeae0"
+            color="#eeeae0",
         ),
         dragmode=False,
         hovermode="x unified",
@@ -1986,21 +1544,21 @@ def render_chart(d):
             x=1,
             xanchor="right",
             font=dict(
-                size=10
-            )
-        )
+                size=10,
+            ),
+        ),
     )
 
     st.plotly_chart(
-        fig,
+        figure,
         use_container_width=True,
         config={
-            "displayModeBar":False,
-            "scrollZoom":False,
-            "doubleClick":False,
-            "responsive":True
+            "displayModeBar": False,
+            "scrollZoom": False,
+            "doubleClick": False,
+            "responsive": True,
         },
-        key="six_month_fixed_chart"
+        key="six_month_fixed_chart",
     )
 
     st.caption(
@@ -2015,8 +1573,9 @@ def render_chart(d):
 def theme_rows(theme):
 
     cache = (
-        st.session_state.theme_cache
-        .get(theme)
+        st.session_state.theme_cache.get(
+            theme
+        )
     )
 
     now = datetime.now()
@@ -2035,84 +1594,83 @@ def theme_rows(theme):
     candidates = []
     seen = set()
 
-    for c in info["seeds"]:
+    for code in info["seeds"]:
 
-        c = str(c).zfill(6)
+        code = str(code).zfill(6)
 
-        if c not in seen:
+        if code not in seen:
 
-            candidates.append(c)
-            seen.add(c)
+            candidates.append(code)
+            seen.add(code)
 
-    for c,n in (
+    for code, name in (
         st.session_state.etf_universe.items()
     ):
 
         if (
-            c not in seen
+            code not in seen
             and any(
-                k.lower() in n.lower()
-                for k in info["keywords"]
+                keyword.lower()
+                in name.lower()
+                for keyword
+                in info["keywords"]
             )
         ):
 
-            candidates.append(c)
-            seen.add(c)
+            candidates.append(code)
+            seen.add(code)
 
     rows = []
 
-    for c in candidates[:4]:
+    for code in candidates[:4]:
 
-        try:
+        data = indicators(
+            load_price(code)
+        )
 
-            d = indicators(
-                load_price(c)
-            )
-
-            if d.empty:
-                continue
-
-            r = d.iloc[-1]
-
-            price = sf(
-                r.Close
-            )
-
-            rows.append({
-                "code":c,
-                "name":name_of(c),
-                "price":price,
-                "rsi":sf(
-                    r.RSI14,
-                    50
-                ),
-                "vr":sf(
-                    r.VOL_RATIO,
-                    1
-                ),
-                "ret":sf(
-                    r.RET20,
-                    0
-                ),
-                "trend":
-                    "상승"
-                    if price >= sf(
-                        r.MA20,
-                        price
-                    )
-                    else
-                    "조정"
-            })
-
-        except Exception:
+        if data.empty:
 
             continue
+
+        row = data.iloc[-1]
+
+        price = sf(row.Close)
+
+        rows.append(
+            {
+                "code": code,
+                "name": name_of(code),
+                "price": price,
+                "rsi": sf(
+                    row.RSI14,
+                    50,
+                ),
+                "vr": sf(
+                    row.VOL_RATIO,
+                    1,
+                ),
+                "ret": sf(
+                    row.RET20,
+                    0,
+                ),
+                "trend":
+                    (
+                        "상승"
+                        if price
+                        >= sf(
+                            row.MA20,
+                            price,
+                        )
+                        else "조정"
+                    ),
+            }
+        )
 
     st.session_state.theme_cache[
         theme
     ] = {
-        "time":now,
-        "rows":rows
+        "time": now,
+        "rows": rows,
     }
 
     return rows
@@ -2125,30 +1683,21 @@ def theme_rows(theme):
 def render_theme(
     theme,
     stage,
-    index
+    index,
 ):
 
     info = THEMES[theme]
 
     st.markdown(
-        f'''
-        <div class="theme-card">
+        f"**{stage}**"
+    )
 
-            <div class="stage">
-                {stage}
-            </div>
+    st.markdown(
+        f"### {theme}"
+    )
 
-            <div class="theme-title">
-                {theme}
-            </div>
-
-            <div class="theme-reason">
-                {info["reason"]}
-            </div>
-
-        </div>
-        ''',
-        unsafe_allow_html=True
+    st.caption(
+        info["reason"]
     )
 
     rows = theme_rows(theme)
@@ -2161,94 +1710,44 @@ def render_theme(
 
         return
 
-    cols = st.columns(
+    columns = st.columns(
         len(rows)
     )
 
-    for i,item in enumerate(rows):
+    for i, item in enumerate(rows):
 
-        with cols[i]:
-
-            cls = (
-                "pos"
-                if item["ret"] >= 0
-                else
-                "neg"
-            )
-
-            trend_cls = (
-                "pos"
-                if item["trend"] == "상승"
-                else
-                "neg"
-            )
+        with columns[i]:
 
             st.markdown(
-                f'''
-                <div class="theme-etf">
+                f'**{item["name"]}**'
+            )
 
-                    <div class="theme-name">
-                        {item["name"]}
-                    </div>
+            st.caption(
+                item["code"]
+            )
 
-                    <div class="theme-code">
-                        {item["code"]}
-                    </div>
+            st.metric(
+                "현재가",
+                money(item["price"]),
+            )
 
-                    <div class="theme-grid">
+            st.metric(
+                "RSI14",
+                f'{item["rsi"]:.1f}',
+            )
 
-                        <div class="theme-stat">
-                            <div class="theme-stat-label">
-                                현재가
-                            </div>
-                            <div class="theme-stat-value">
-                                {money(item["price"])}
-                            </div>
-                        </div>
+            st.metric(
+                "거래량",
+                f'{item["vr"]:.2f}배',
+            )
 
-                        <div class="theme-stat">
-                            <div class="theme-stat-label">
-                                RSI14
-                            </div>
-                            <div class="theme-stat-value">
-                                {item["rsi"]:.1f}
-                            </div>
-                        </div>
+            st.metric(
+                "20일",
+                f'{item["ret"]:+.2f}%',
+            )
 
-                        <div class="theme-stat">
-                            <div class="theme-stat-label">
-                                거래량
-                            </div>
-                            <div class="theme-stat-value">
-                                {item["vr"]:.2f}배
-                            </div>
-                        </div>
-
-                        <div class="theme-stat">
-                            <div class="theme-stat-label">
-                                20일
-                            </div>
-                            <div class="theme-stat-value {cls}">
-                                {item["ret"]:+.2f}%
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div style="
-                        font-size:.74rem;
-                        color:#b8bec2;
-                        margin-top:7px
-                    ">
-                        추세:
-                        <span class="{trend_cls}">
-                            {item["trend"]}
-                        </span>
-                    </div>
-
-                </div>
-                ''',
-                unsafe_allow_html=True
+            st.caption(
+                f'추세: {item["trend"]}'
             )
 
             if st.button(
@@ -2258,8 +1757,8 @@ def render_theme(
                     f"theme_"
                     f"{index}_"
                     f"{i}_"
-                    f"{item['code']}"
-                )
+                    f'{item["code"]}'
+                ),
             ):
 
                 navigate(
@@ -2281,157 +1780,162 @@ def my_etf():
         st.session_state.selected_code
     )
 
-    d = indicators(
+    data = indicators(
         load_price(code)
     )
 
-    if d.empty:
+    if data.empty:
 
-        st.warning(
+        st.error(
             "가격 데이터를 불러오지 못했습니다. "
             "잠시 후 다시 시도해 주세요."
         )
 
         return
 
-    cur = sf(
-        d.Close.iloc[-1]
+    current = sf(
+        data.Close.iloc[-1]
     )
 
-    prev = sf(
-        d.Close.iloc[-2],
-        cur
+    previous = sf(
+        data.Close.iloc[-2],
+        current,
     )
 
-    ch = cur - prev
+    change = (
+        current - previous
+    )
 
-    pct = (
-        ch / prev * 100
-        if prev
+    change_pct = (
+        change / previous * 100
+        if previous
         else 0
     )
 
-    cls = (
-        "pos"
-        if ch > 0
-        else
-        "neg"
-        if ch < 0
-        else
-        "neu"
+    st.markdown(
+        f"## {name_of(code)}"
+    )
+
+    st.caption(
+        f"{code} · 기준일 "
+        f"{data.index[-1].strftime('%Y-%m-%d')}"
+    )
+
+    left, right = st.columns(
+        [2, 1]
+    )
+
+    with left:
+
+        st.markdown(
+            f"# {money(current)}"
+        )
+
+    with right:
+
+        if change > 0:
+
+            st.success(
+                f"{money(change)} "
+                f"({change_pct:+.2f}%)"
+            )
+
+        elif change < 0:
+
+            st.error(
+                f"{money(change)} "
+                f"({change_pct:+.2f}%)"
+            )
+
+        else:
+
+            st.info(
+                f"{money(change)} "
+                f"({change_pct:+.2f}%)"
+            )
+
+    holding = (
+        st.session_state.holdings.get(
+            code
+        )
     )
 
     st.markdown(
-        f'''
-        <div class="hero">
-
-            <div class="hero-name">
-                {name_of(code)}
-            </div>
-
-            <div class="hero-code">
-                {code}
-                · 기준일
-                {d.index[-1].strftime("%Y-%m-%d")}
-            </div>
-
-            <div class="quote">
-
-                <div class="price">
-                    {money(cur)}
-                </div>
-
-                <div class="chg {cls}">
-                    {money(ch)}
-                    ({pct:+.2f}%)
-                </div>
-
-            </div>
-
-        </div>
-        ''',
-        unsafe_allow_html=True
+        "### 보유 상태"
     )
 
-    h = (
-        st.session_state.holdings
-        .get(code)
-    )
-
-    st.markdown(
-        '<div class="section">보유 상태</div>',
-        unsafe_allow_html=True
-    )
-
-    held = st.radio(
+    holding_status = st.radio(
         "보유 여부",
         [
             "미보유",
-            "보유중"
+            "보유중",
         ],
         index=(
             1
-            if h
-            else
-            0
+            if holding
+            else 0
         ),
         horizontal=True,
         label_visibility="collapsed",
-        key=f"hold_{code}"
+        key=f"hold_{code}",
     )
 
-    if held == "보유중":
+    if holding_status == "보유중":
 
-        a,b = st.columns(2)
+        left, right = st.columns(2)
 
-        avg = a.number_input(
-            "평균매수가",
-            min_value=0.0,
-            value=float(
-                h.get(
-                    "avg_price",
-                    0
-                )
-                if h
-                else
-                0
-            ),
-            step=100.0,
-            key=f"avg_{code}"
-        )
+        with left:
 
-        qty = b.number_input(
-            "보유수량",
-            min_value=0.0,
-            value=float(
-                h.get(
-                    "quantity",
-                    0
-                )
-                if h
-                else
-                0
-            ),
-            step=1.0,
-            key=f"qty_{code}"
-        )
+            average_price = st.number_input(
+                "평균매수가",
+                min_value=0.0,
+                value=float(
+                    holding.get(
+                        "avg_price",
+                        0,
+                    )
+                    if holding
+                    else 0
+                ),
+                step=100.0,
+                key=f"avg_{code}",
+            )
+
+        with right:
+
+            quantity = st.number_input(
+                "보유수량",
+                min_value=0.0,
+                value=float(
+                    holding.get(
+                        "quantity",
+                        0,
+                    )
+                    if holding
+                    else 0
+                ),
+                step=1.0,
+                key=f"qty_{code}",
+            )
 
         if st.button(
             "보유정보 저장",
             use_container_width=True,
-            key=f"save_{code}"
+            key=f"save_{code}",
         ):
 
             st.session_state.holdings[
                 code
             ] = {
-                "avg_price":avg,
-                "quantity":qty
+                "avg_price":
+                    average_price,
+                "quantity":
+                    quantity,
             }
 
             write_json(
                 HOLDINGS_FILE,
-                st.session_state.holdings
+                st.session_state.holdings,
             )
 
             st.rerun()
@@ -2441,7 +1945,7 @@ def my_etf():
         if st.button(
             "보유정보 삭제",
             use_container_width=True,
-            key=f"delhold_{code}"
+            key=f"delhold_{code}",
         ):
 
             del st.session_state.holdings[
@@ -2450,59 +1954,46 @@ def my_etf():
 
             write_json(
                 HOLDINGS_FILE,
-                st.session_state.holdings
+                st.session_state.holdings,
             )
 
             st.rerun()
 
-    render_judgment(d)
+    render_judgment(data)
 
     st.markdown(
-        '<div class="section">'
-        '핵심가격 · 대응 시나리오'
-        '</div>',
-        unsafe_allow_html=True
+        "### 핵심가격 · 대응 시나리오"
     )
 
-    cards = levels(d)
+    price_levels = levels(data)
 
-    cards_html = "".join(
-        f'''
-        <div class="scenario">
+    columns = st.columns(4)
 
-            <div class="s-label">
-                {label}
-            </div>
+    for column, (
+        label,
+        price,
+        description,
+    ) in zip(
+        columns,
+        price_levels,
+    ):
 
-            <div class="s-price">
-                {money(price)}
-            </div>
+        with column:
 
-            <div class="s-desc">
-                {desc}
-            </div>
+            st.metric(
+                label,
+                money(price),
+            )
 
-        </div>
-        '''
-        for label,price,desc
-        in cards
-    )
+            st.caption(
+                description
+            )
 
     st.markdown(
-        f'''
-        <div class="scenarios">
-            {cards_html}
-        </div>
-        ''',
-        unsafe_allow_html=True
+        "### 가격 흐름"
     )
 
-    st.markdown(
-        '<div class="section">가격 흐름</div>',
-        unsafe_allow_html=True
-    )
-
-    render_chart(d)
+    render_chart(data)
 
 
 # ============================================================
@@ -2512,26 +2003,17 @@ def my_etf():
 def future():
 
     st.markdown(
-        '''
-        <div class="hero">
+        "## 미래테마"
+    )
 
-            <div class="hero-name">
-                미래테마
-            </div>
-
-            <div class="hero-code">
-                현재 주도 → 다음 수혜 → 초기 관심
-            </div>
-
-        </div>
-        ''',
-        unsafe_allow_html=True
+    st.caption(
+        "현재 주도 → 다음 수혜 → 초기 관심"
     )
 
     if st.button(
         "시장 데이터 다시 탐색",
         use_container_width=True,
-        key="theme_refresh"
+        key="theme_refresh",
     ):
 
         st.session_state.price_cache = {}
@@ -2541,46 +2023,50 @@ def future():
 
         st.rerun()
 
-    for i,(theme,stage) in enumerate(
+    for index, (
+        theme,
+        stage,
+    ) in enumerate(
         FUTURE_CHAIN
     ):
 
         render_theme(
             theme,
             stage,
-            i
+            index,
         )
 
-    rows = []
+    summary = []
 
-    for theme,stage in FUTURE_CHAIN:
+    for theme, stage in FUTURE_CHAIN:
 
-        r = theme_rows(theme)
+        rows = theme_rows(theme)
 
-        if r:
+        if rows:
 
-            rows.append({
-                "테마":theme,
-                "단계":stage,
-                "평균 20일수익률":
-                    f"{np.mean([x['ret'] for x in r]):+.2f}%",
-                "평균 RSI":
-                    f"{np.mean([x['rsi'] for x in r]):.1f}",
-                "평균 거래량":
-                    f"{np.mean([x['vr'] for x in r]):.2f}배"
-            })
+            summary.append(
+                {
+                    "테마": theme,
+                    "단계": stage,
+                    "평균 20일수익률":
+                        f"{np.mean([x['ret'] for x in rows]):+.2f}%",
+                    "평균 RSI":
+                        f"{np.mean([x['rsi'] for x in rows]):.1f}",
+                    "평균 거래량":
+                        f"{np.mean([x['vr'] for x in rows]):.2f}배",
+                }
+            )
 
-    if rows:
+    if summary:
 
         st.markdown(
-            '<div class="section">테마 요약</div>',
-            unsafe_allow_html=True
+            "### 테마 요약"
         )
 
         st.dataframe(
-            pd.DataFrame(rows),
+            pd.DataFrame(summary),
             use_container_width=True,
-            hide_index=True
+            hide_index=True,
         )
 
 
@@ -2592,36 +2078,34 @@ init_state()
 
 
 # 중요:
-# 위젯이 만들어진 이후 main_page를 직접 변경하지 않고
-# 다음 rerun 시작 시점에서만 변경한다.
+# widget이 만들어진 뒤 main_page를 직접 변경하지 않고
+# rerun 시작 시점에 page_request를 반영한다.
+
 if st.session_state.page_request:
 
-    req = (
+    requested_page = (
         st.session_state.page_request
     )
 
     st.session_state.page_request = None
 
-    if req in [
+    if requested_page in [
         "📊 내 ETF",
-        "🚀 미래테마"
+        "🚀 미래테마",
     ]:
 
-        st.session_state.main_page = req
+        st.session_state.main_page = (
+            requested_page
+        )
 
 
 st.markdown(
-    '''
-    <div class="app-title">
-        ETF RADAR
-    </div>
+    "# ETF RADAR"
+)
 
-    <div class="app-sub">
-        ETF 추세 · 모멘텀 · 거래량 ·
-        핵심가격 · 대응 시나리오
-    </div>
-    ''',
-    unsafe_allow_html=True
+st.caption(
+    "ETF 추세 · 모멘텀 · 거래량 · "
+    "핵심가격 · 대응 시나리오"
 )
 
 
@@ -2629,10 +2113,10 @@ page = st.radio(
     "메뉴",
     [
         "📊 내 ETF",
-        "🚀 미래테마"
+        "🚀 미래테마",
     ],
     horizontal=True,
-    key="main_page"
+    key="main_page",
 )
 
 
