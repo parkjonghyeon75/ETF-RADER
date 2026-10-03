@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 
 
 # ============================================================
-# ETF RADAR (글씨 크기 전반적 확대 및 모멘텀 설명 보강 버전)
+# ETF RADAR (점수 산출표 나란히 배치 및 시장/모멘텀 통합 버전)
 # ============================================================
 
 st.set_page_config(
@@ -175,7 +175,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     border: 1px solid #cbd5e1;
     border-radius: 16px;
     padding: 16px;
-    min-height: 175px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -235,13 +235,9 @@ button[data-baseweb="tab"][aria-selected="true"] {
 .price-name { font-size: 0.85rem; font-weight: 800; color: #475569; }
 .price-number { font-size: 1.02rem; font-weight: 950; }
 
-.momentum-card { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 15px; padding: 15px; min-height: 110px; }
-.momentum-title { color: #475569; font-size: 0.78rem; font-weight: 850; }
-.momentum-value { color: #0f172a; font-size: 1.35rem; font-weight: 950; margin-top: 6px; }
-.momentum-sub { color: #475569; font-size: 0.78rem; margin-top: 5px; font-weight: 700; line-height: 1.3; }
-
-.score-breakdown { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 15px; }
-.score-line { display: flex; justify-content: space-between; padding: 7px 0; font-size: 0.83rem; }
+.score-breakdown { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 14px 16px; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+.score-line { display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.82rem; border-bottom: 1px dashed #e2e8f0; }
+.score-line:last-child { border-bottom: none; }
 .score-line-label { color: #475569; font-weight: 700; }
 .score-line-value { font-weight: 950; color: #111827; }
 
@@ -701,12 +697,12 @@ def make_main_chart(df, supports, resistances):
 
     fig.update_layout(
         height=680, margin=dict(l=4, r=4, t=8, b=8), template="plotly_white",
-        showlegend=False, xaxis_rangeslider_visible=False, dragmode=False,
+        showlegend=False, xaxis_rangeslider_visible=False, dragmode="zoom",
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Arial", size=12, color="#334155")
     )
-    fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=True, gridcolor="#e2e8f0", fixedrange=True)
+    fig.update_xaxes(showgrid=False, rangeslider=dict(visible=False))
+    fig.update_yaxes(showgrid=True, gridcolor="#e2e8f0", fixedrange=False)
     return fig
 
 def scan_market_leading_themes():
@@ -858,8 +854,15 @@ with tab_analysis:
     </div>
     """, unsafe_allow_html=True)
 
-    # SCORE + SIGNAL
-    score_col, signal_col = st.columns([0.85, 1.15])
+    # SCORE + SCORE BREAKDOWN (나란히 배치)
+    st.markdown("""
+    <div class="section-head">
+        <div class="section-title">📊 기술 점수 및 세부 산출 내역</div>
+        <div class="section-caption">Technical Score Breakdown</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    score_col, breakdown_col = st.columns([0.45, 0.55])
     with score_col:
         score_color = "#16a34a" if score >= 65 else ("#d97706" if score >= 45 else "#dc2626")
         st.markdown(f"""
@@ -870,30 +873,57 @@ with tab_analysis:
         </div>
         """, unsafe_allow_html=True)
 
-    with signal_col:
+    with breakdown_col:
+        breakdown_html = "".join([f'<div class="score-line"><div class="score-line-label">{l}</div><div class="score-line-value">+{v}점</div></div>' for l, v in score_breakdown.items()])
         st.markdown(f"""
-        <div class="card card-tight">
-            <div class="card-title">종합 시장 신호 진단</div>
-            <div class="signal-grid">
-                <div class="signal">
-                    <div class="signal-title">추세 방향</div>
-                    <div class="signal-value {'signal-good' if '강세' in trend_state else 'signal-warn'}">{trend_state}</div>
-                </div>
-                <div class="signal">
-                    <div class="signal-title">상대강도 (RSI)</div>
-                    <div class="signal-value">{rsi:.0f} · {rsi_state}</div>
-                </div>
-                <div class="signal">
-                    <div class="signal-title">수급 모멘텀</div>
-                    <div class="signal-value {'signal-good' if '확장' in macd_state else 'signal-bad'}">{macd_state}</div>
-                </div>
-                <div class="signal">
-                    <div class="signal-title">거래량 동향</div>
-                    <div class="signal-value">{vol_ratio:.1f}x · {volume_state}</div>
-                </div>
-            </div>
+        <div class="score-breakdown">
+            <div class="card-title" style="margin-bottom:6px;">항목별 가점 내역</div>
+            {breakdown_html}
         </div>
         """, unsafe_allow_html=True)
+
+    # COMBINED MARKET DIAGNOSIS & MOMENTUM SUMMARY (통합 진단)
+    st.markdown("""
+    <div class="section-head">
+        <div class="section-title">🔍 종합 시장 진단 및 핵심 모멘텀</div>
+        <div class="section-caption">Unified Market & Momentum Analysis</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if rsi >= 70: rsi_desc = "과열 구간 (차익실현 주의)"
+    elif rsi <= 30: rsi_desc = "침체 구간 (반등 대기)"
+    else: rsi_desc = "건강한 모멘텀 유지"
+
+    if vol_ratio >= 1.5: vol_desc = "거래량 대폭 유입"
+    elif vol_ratio >= 1.0: vol_desc = "평균 이상 활발한 거래"
+    else: vol_desc = "거래량 다소 한산함"
+
+    macd_hist = float(x["MACD_Hist"])
+    macd_arrow = "▲" if macd_hist > 0 else "▼"
+    macd_desc = "수급 확장 및 상승 우세" if macd_hist > 0 else "수급 둔화 및 조정 압력"
+
+    st.markdown(f"""
+    <div class="card">
+        <div class="signal-grid" style="margin-top:0;">
+            <div class="signal">
+                <div class="signal-title">추세 방향</div>
+                <div class="signal-value {'signal-good' if '강세' in trend_state else 'signal-warn'}">{trend_state}</div>
+            </div>
+            <div class="signal">
+                <div class="signal-title">상대강도 (RSI)</div>
+                <div class="signal-value">{rsi:.0f} · {rsi_desc}</div>
+            </div>
+            <div class="signal">
+                <div class="signal-title">수급 모멘텀 (MACD)</div>
+                <div class="signal-value {'signal-good' if '확장' in macd_state else 'signal-bad'}">{macd_arrow} {macd_state} ({macd_desc})</div>
+            </div>
+            <div class="signal">
+                <div class="signal-title">거래량 동향</div>
+                <div class="signal-value">{vol_ratio:.1f}x · {vol_desc}</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # TODAY SIGNAL
     st.markdown("""
@@ -904,7 +934,6 @@ with tab_analysis:
     """, unsafe_allow_html=True)
 
     pattern_main = patterns[0]
-    
     pattern_desc = "현재 이동평균선과 보조지표를 바탕으로 단기 추세의 지속 여부를 타진하는 구간입니다."
     if "눌림목" in pattern_main:
         pattern_desc = "중장기 상승 추세가 꺾이지 않은 채, 주가가 20일 이동평균선 부근까지 건전하게 조정을 받은 후 반등을 시도하는 유리한 맥락입니다."
@@ -1013,7 +1042,7 @@ with tab_analysis:
     </div>
     """, unsafe_allow_html=True)
 
-    # CHART
+    # CHART (스크롤 및 확대/축소 개선)
     st.markdown("""
     <div class="section-head">
         <div class="section-title">📈 프리미엄 차트 분석 (Price Action)</div>
@@ -1022,60 +1051,7 @@ with tab_analysis:
     """, unsafe_allow_html=True)
 
     fig = make_main_chart(df, supports, resistances)
-    st.plotly_chart(fig, use_container_width=True, config={"responsive": True, "displayModeBar": False, "scrollZoom": False}, key=f"main_chart_{symbol_input}_{period}")
-
-    # MOMENTUM (개선된 설명 적용)
-    st.markdown("""
-    <div class="section-head">
-        <div class="section-title">📊 핵심 모멘텀 지표 요약</div>
-        <div class="section-caption">Technical Indicators</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # 지표별 상세 가이드 텍스트 자동 분기
-    if rsi >= 70:
-        rsi_desc = "⚠️ 과열 구간 (차익실현 주의)"
-    elif rsi <= 30:
-        rsi_desc = "💡 침체 구간 (반등 대기)"
-    else:
-        rsi_desc = "📈 건강한 모멘텀 유지"
-
-    if vol_ratio >= 1.5:
-        vol_desc = "🔥 평소보다 거래량 대폭 유입"
-    elif vol_ratio >= 1.0:
-        vol_desc = "⚡ 평균 이상 활발한 거래"
-    else:
-        vol_desc = "💤 거래량 다소 한산함"
-
-    macd_hist = float(x["MACD_Hist"])
-    macd_arrow = "▲" if macd_hist > 0 else "▼"
-    macd_desc = "🚀 수급 확장 및 상승 우세" if macd_hist > 0 else "🔻 수급 둔화 및 조정 압력"
-
-    i1, i2, i3 = st.columns(3)
-    with i1:
-        st.markdown(f"""
-        <div class="momentum-card">
-            <div class="momentum-title">상대강도 (RSI)</div>
-            <div class="momentum-value">{rsi:.1f}</div>
-            <div class="momentum-sub">{rsi_desc}</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with i2:
-        st.markdown(f"""
-        <div class="momentum-card">
-            <div class="momentum-title">거래량 비율</div>
-            <div class="momentum-value">{vol_ratio:.1f}x</div>
-            <div class="momentum-sub">{vol_desc}</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with i3:
-        st.markdown(f"""
-        <div class="momentum-card">
-            <div class="momentum-title">MACD 모멘텀</div>
-            <div class="momentum-value">{macd_arrow} {macd_state}</div>
-            <div class="momentum-sub">{macd_desc}</div>
-        </div>
-        """, unsafe_allow_html=True)
+    st.plotly_chart(fig, use_container_width=True, config={"responsive": True, "displayModeBar": True, "scrollZoom": True}, key=f"main_chart_{symbol_input}_{period}")
 
     # DETAIL TABS
     detail_tabs = st.tabs(["📍 매물대 분포", "🏛 테마 및 중장기 관점", "📖 지표 가이드 및 산정기준"])
@@ -1122,8 +1098,8 @@ with tab_analysis:
     with detail_tabs[2]:
         st.markdown("#### 종합 기술 점수 산정 기준")
         st.markdown("현재 종목의 기술적 건강 상태를 정량화하기 위해 아래 5가지 요소를 종합하여 100점 만점으로 환산합니다.")
-        breakdown_html = "".join([f'<div class="score-line"><div class="score-line-label">{l}</div><div class="score-line-value">+{v}점</div></div>' for l, v in score_breakdown.items()])
-        st.markdown(f'<div class="score-breakdown">{breakdown_html}</div>', unsafe_allow_html=True)
+        breakdown_html_tab = "".join([f'<div class="score-line"><div class="score-line-label">{l}</div><div class="score-line-value">+{v}점</div></div>' for l, v in score_breakdown.items()])
+        st.markdown(f'<div class="score-breakdown">{breakdown_html_tab}</div>', unsafe_allow_html=True)
         
         st.markdown("""
         ---
