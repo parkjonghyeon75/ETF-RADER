@@ -3513,9 +3513,9 @@ with tab_analysis:
         pnl = trade_plan["pnl"]
 
         pnl_color = (
-            "#4ade80"
+            "#16a34a"
             if pnl >= 0
-            else "#f87171"
+            else "#dc2626"
         )
 
         st.markdown(
@@ -3922,7 +3922,7 @@ with tab_analysis:
     elif "과열" in pattern_main:
 
         pattern_desc = (
-            "단기간 상승 속도가 빨라진 상태입니다. "
+            "단기간 상승 속도가 빠른 상태입니다. "
             "상승 자체보다 현재 가격에서 추가 진입할 "
             "여유가 있는지를 확인해야 합니다."
         )
