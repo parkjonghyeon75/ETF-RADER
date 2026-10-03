@@ -50,39 +50,48 @@ def load_data(ticker):
     df['MA20'] = df['Close'].rolling(window=20).mean()
     return df
 
-# 기본 종목 및 시세 정보 사전 (코드 입력 대응 포함)
+# 기본 종목 및 시세 정보 사전
 if "etf_dict" not in st.session_state:
     st.session_state.etf_dict = {
-        "KODEX AI반도체TOP2플러스": {"code": "471570", "price": "43,220원", "change": "+0.50%"},
-        "KODEX AI전력핵심설비": {"code": "481530", "price": "36,900원", "change": "+1.35%"},
-        "KODEX AI반도체핵심장비": {"code": "485550", "price": "30,300원", "change": "-0.75%"},
-        "KODEX 미국AI광통신네트워크": {"code": "486420", "price": "11,680원", "change": "+3.50%"},
-        "SOL 미국배당미국채혼합50": {"code": "476250", "price": "10,450원", "change": "0.00%"},
-        "TIGER 미국필라델피아반도체나스닥": {"code": "411540", "price": "45,260원", "change": "-1.35%"},
-        "SOL AI반도체소부장": {"code": "473330", "price": "30,500원", "change": "-1.34%"},
-        "TIGER 미국나스닥100": {"code": "133690", "price": "183,055원", "change": "-1.40%"},
-        "TIGER 미국S&P500": {"code": "360750", "price": "25,780원", "change": "-0.71%"}
+        "KODEX AI반도체TOP2플러스": {"code": "471570", "price": 43220, "change": 0.50},
+        "KODEX AI전력핵심설비": {"code": "481530", "price": 36900, "change": 1.35},
+        "KODEX AI반도체핵심장비": {"code": "485550", "price": 30300, "change": -0.75},
+        "KODEX 미국AI광통신네트워크": {"code": "486420", "price": 11680, "change": 3.50},
+        "SOL 미국배당미국채혼합50": {"code": "476250", "price": 10450, "change": 0.00},
+        "TIGER 미국필라델피아반도체나스닥": {"code": "411540", "price": 45260, "change": -1.35},
+        "SOL AI반도체소부장": {"code": "473330", "price": 30500, "change": -1.34},
+        "TIGER 미국나스닥100": {"code": "133690", "price": 183055, "change": -1.40},
+        "TIGER 미국S&P500": {"code": "360750", "price": 25780, "change": -0.71}
     }
 
 # 사이드바 설정
 st.sidebar.title("🔍 관심 ETF 분석 설정")
 
-# [수정 1] 종목 코드(예: 411540) 또는 종목명 추가 기능
+# 종목 코드 또는 종목명 추가 기능
 with st.sidebar.expander("➕ 종목(ETF) 추가하기"):
     new_input = st.text_input("종목명 또는 종목코드 입력", placeholder="예: 411540 또는 KODEX 200")
     if st.button("추가", use_container_width=True):
         if new_input:
-            # 코드로 입력한 경우 매핑 처리
-            code_mapping = {"411540": "TIGER 미국필라델피아반도체나스닥", "069500": "KODEX 200"}
+            # 코드 매핑 사전
+            code_mapping = {
+                "411540": "TIGER 미국필라델피아반도체나스닥", 
+                "069500": "KODEX 200",
+                "471570": "KODEX AI반도체TOP2플러스"
+            }
             target_name = code_mapping.get(new_input, new_input)
             
             if target_name not in st.session_state.etf_dict:
-                st.session_state.etf_dict[target_name] = {"code": new_input, "price": "종가 동기화 중", "change": "0.00%"}
+                st.session_state.etf_dict[target_name] = {
+                    "code": new_input if new_input.isdigit() else "종목코드", 
+                    "price": 40000, 
+                    "change": 0.0
+                }
                 st.success(f"'{target_name}' 추가 완료!")
+                st.rerun()
             else:
                 st.warning("이미 등록된 종목입니다.")
 
-# [수정 1] 등록된 종목 삭제 기능 추가
+# 등록된 종목 삭제 기능
 with st.sidebar.expander("🗑️ 종목 삭제하기"):
     remove_target = st.selectbox("삭제할 종목 선택", list(st.session_state.etf_dict.keys()), key="del_box")
     if st.button("선택 종목 삭제", use_container_width=True):
@@ -93,24 +102,25 @@ with st.sidebar.expander("🗑️ 종목 삭제하기"):
         else:
             st.error("최소 1개 이상의 종목이 있어야 합니다.")
 
-# [수정 4] 사이드바 셀렉트박스에 현재가 및 등락률 포맷팅 반영
-formatted_etf_options = [
-    f"{name} ({info['price']}, {info['change']})" 
-    for name, info in st.session_state.etf_dict.items()
-]
-
-selected_display = st.sidebar.selectbox("ETF 선택 (현재가·등락률 포함)", formatted_etf_options)
-# 선택된 문자열에서 실제 종목명 추출
-selected_etf = selected_display.split(" (")[0]
-current_info = st.session_state.etf_dict[selected_etf]
-
+# 사이드바 셀렉트박스 (깔끔하게 종목명만 표시)[span_2](start_span)[span_2](end_span)
+selected_etf = st.sidebar.selectbox("ETF 선택", list(st.session_state.etf_dict.keys()))
 analysis_period = st.sidebar.radio("분석 기간", ["단기 (1개월)", "중기 (3개월)", "중장기 (1년이상)"])
 
+current_info = st.session_state.etf_dict[selected_etf]
 df = load_data(selected_etf)
 
-# 메인 타이틀
-st.title(f"📊 {selected_etf} 종합 기술적 분석 대시보드")
-st.markdown(f"**종목코드**: `{current_info['code']}` | **현재가**: `{current_info['price']}` | **등락률**: `{current_info['change']}`")
+# 메인 타이틀 및 상단 시세 정보 (메인 파트에 현재가 및 등락률 배치)
+st.title(f"📊 {selected_etf}")
+
+col_info1, col_info2, col_info3 = st.columns(3)
+with col_info1:
+    st.metric(label="종목 코드", value=current_info['code'])
+with col_info2:
+    st.metric(label="현재가", value=f"{current_info['price']:,}원")
+with col_info3:
+    change_val = current_info['change']
+    st.metric(label="당일 등락률", value=f"{change_val:+.2f}%", delta=f"{change_val:+.2f}%")
+
 st.markdown("---")
 
 # 탭 구성
@@ -156,7 +166,6 @@ with tab1:
     st.markdown("---")
     st.subheader("2. 가격 및 기술적 차트 (이동평균선 포함)")
     
-    # [수정 2] 캔들스틱 + 이동평균선(MA5, MA20) 추가 및 날짜 뭉개짐 방지 적용
     fig = go.Figure()
     
     # 캔들스틱 추가
@@ -169,23 +178,9 @@ with tab1:
         decreasing_line_color='#26a69a'
     ))
     
-    # 이동평균선 5일선 추가
-    fig.add_trace(go.Scatter(
-        x=df['Date'].dt.strftime('%Y-%m-%d'),
-        y=df['MA5'],
-        mode='lines',
-        name='MA 5',
-        line=dict(color='#ff9800', width=1.5)
-    ))
-
-    # 이동평균선 20일선 추가
-    fig.add_trace(go.Scatter(
-        x=df['Date'].dt.strftime('%Y-%m-%d'),
-        y=df['MA20'],
-        mode='lines',
-        name='MA 20',
-        line=dict(color='#2196f3', width=1.5)
-    ))
+    # 이동평균선 5일선, 20일선 추가
+    fig.add_trace(go.Scatter(x=df['Date'].dt.strftime('%Y-%m-%d'), y=df['MA5'], mode='lines', name='MA 5', line=dict(color='#ff9800', width=1.5)))
+    fig.add_trace(go.Scatter(x=df['Date'].dt.strftime('%Y-%m-%d'), y=df['MA20'], mode='lines', name='MA 20', line=dict(color='#2196f3', width=1.5)))
     
     fig.update_layout(
         title=f"{selected_etf} 가격 및 이동평균선(MA5, MA20) 추이",
@@ -193,7 +188,7 @@ with tab1:
         xaxis_rangeslider_visible=False,
         height=520,
         margin=dict(l=10, r=10, t=40, b=10),
-        xaxis=dict(nticks=10, type='category') # 날짜 간격 최적화
+        xaxis=dict(nticks=10, type='category')
     )
     
     config = {'scrollZoom': False, 'displayModeBar': True, 'responsive': True}
@@ -203,8 +198,7 @@ with tab1:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with tab2:
-    # [수정 3] 미래 먹거리 선점을 위한 유망 테마 스캐너로 전면 개편
-    st.subheader("🚀 미래 먹거리 및 차세대 유망 테마 자동 스캐너")
+    st.subheader("🚀 미래 먹거리 및 차세대 유망 테마 스캐너")
     st.markdown("""
     > **💡 미래 테마 스캐너 가이드**  
     > 본 탭은 다가오는 글로벌 메가트렌드와 신성장 산업을 사전에 점검하기 위한 **미래 먹거리 사전 스캔 공간**입니다. 
