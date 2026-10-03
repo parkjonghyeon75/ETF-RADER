@@ -9,6 +9,7 @@ from plotly.subplots import make_subplots
 
 import json
 import os
+import html
 from datetime import datetime
 
 
@@ -26,11 +27,19 @@ st.set_page_config(
 
 
 # ============================================================
+# HTML ESCAPE
+# ============================================================
+
+def esc(value):
+    """동적 문자열의 HTML 깨짐 방지"""
+    return html.escape(str(value))
+
+
+# ============================================================
 # CSS
 # ============================================================
 
-st.markdown(
-    """
+CSS = r"""
 <style>
 
 /* ==========================================================
@@ -40,7 +49,6 @@ st.markdown(
 :root {
     --bg: #07111f;
     --bg2: #091522;
-
     --panel: #0d1928;
     --panel2: #111f31;
     --panel3: #16263a;
@@ -59,22 +67,19 @@ st.markdown(
 }
 
 
-/* Streamlit 전체 배경 */
+/* ==========================================================
+   STREAMLIT BACKGROUND
+   ========================================================== */
 
 html,
 body,
 .stApp,
 [data-testid="stAppViewContainer"],
-[data-testid="stAppViewContainer"] > .main,
 [data-testid="stMain"],
-[data-testid="stMainBlockContainer"],
-.main {
+[data-testid="stMainBlockContainer"] {
     background: #07111f !important;
     color: #e3eaf2 !important;
 }
-
-
-/* Header */
 
 [data-testid="stHeader"] {
     background: #07111f !important;
@@ -83,9 +88,6 @@ body,
 [data-testid="stToolbar"] {
     background: #07111f !important;
 }
-
-
-/* Sidebar */
 
 [data-testid="stSidebar"] {
     background: #091522 !important;
@@ -96,7 +98,9 @@ body,
 }
 
 
-/* 메인 컨테이너 */
+/* ==========================================================
+   MAIN
+   ========================================================== */
 
 .block-container {
     max-width: 1180px !important;
@@ -105,32 +109,19 @@ body,
 
 
 /* ==========================================================
-   IMPORTANT:
-   Streamlit 내부 전체 CSS class를 건드리지 않음.
-   기존 [class*="css"] 제거
+   TEXT
    ========================================================== */
 
-.stApp,
-.stApp p,
-.stApp span,
-.stApp label,
-.stApp div {
-    color: inherit;
-}
-
-
-/* 일반 텍스트 */
-
-p {
+.stApp p {
     color: #c7d2de;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+.stApp h1,
+.stApp h2,
+.stApp h3,
+.stApp h4,
+.stApp h5,
+.stApp h6 {
     color: #e3eaf2 !important;
 }
 
@@ -174,18 +165,12 @@ div[data-baseweb="select"] span {
     color: #dce5ee !important;
 }
 
-
-/* Dropdown popup */
-
 div[data-baseweb="popover"] {
     background: #0b1725 !important;
     border: 1px solid #294159 !important;
 }
 
-div[data-baseweb="menu"] {
-    background: #0b1725 !important;
-}
-
+div[data-baseweb="menu"],
 ul[role="listbox"] {
     background: #0b1725 !important;
 }
@@ -205,10 +190,7 @@ li[role="option"]:hover {
    RADIO
    ========================================================== */
 
-div[data-testid="stRadio"] label {
-    color: #c8d4df !important;
-}
-
+div[data-testid="stRadio"] label,
 div[data-testid="stRadio"] p {
     color: #c8d4df !important;
 }
@@ -260,27 +242,9 @@ div[data-testid="stRadio"] p {
    CAPTION
    ========================================================== */
 
-[data-testid="stCaptionContainer"] {
-    color: #72869b !important;
-}
-
+[data-testid="stCaptionContainer"],
 [data-testid="stCaptionContainer"] p {
     color: #72869b !important;
-}
-
-
-/* ==========================================================
-   CODE / PRE
-   혹시 Streamlit이 코드영역을 생성하더라도 흰색이 되지 않게 함
-   ========================================================== */
-
-pre,
-code,
-[data-testid="stCodeBlock"],
-[data-testid="stCodeBlock"] > div {
-    background: #091522 !important;
-    color: #cbd7e3 !important;
-    border-color: #22384d !important;
 }
 
 
@@ -627,7 +591,7 @@ code,
 
 
 /* ==========================================================
-   INLINE FUTURE THEME ANALYSIS
+   FUTURE ANALYSIS
    ========================================================== */
 
 .future-analysis {
@@ -699,11 +663,41 @@ code,
 
 
 /* ==========================================================
-   DIVIDERS
+   STREAMLIT CONTAINERS
    ========================================================== */
 
-hr {
-    border-color: #1d3246 !important;
+[data-testid="stVerticalBlock"],
+[data-testid="stHorizontalBlock"],
+[data-testid="column"] {
+    background: transparent !important;
+}
+
+
+/* ==========================================================
+   EXPANDER
+   ========================================================== */
+
+[data-testid="stExpander"] {
+    background: #0d1928 !important;
+    border: 1px solid #22384d !important;
+}
+
+[data-testid="stExpander"] summary {
+    color: #cbd7e2 !important;
+}
+
+
+/* ==========================================================
+   TABS
+   ========================================================== */
+
+button[data-baseweb="tab"] {
+    color: #8da0b3 !important;
+    background: transparent !important;
+}
+
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #dce6ef !important;
 }
 
 
@@ -761,62 +755,13 @@ hr {
     .theme-data-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-
-}
-
-
-/* ==========================================================
-   REMOVE WHITE FOCUS / CONTAINER
-   ========================================================== */
-
-[data-testid="stVerticalBlock"],
-[data-testid="stHorizontalBlock"],
-[data-testid="column"] {
-    background: transparent !important;
-}
-
-
-/* ==========================================================
-   NO WHITE DATAFRAME
-   ========================================================== */
-
-[data-testid="stDataFrame"],
-.stDataFrame {
-    background: #0b1725 !important;
-}
-
-
-/* ==========================================================
-   EXPANDER
-   ========================================================== */
-
-[data-testid="stExpander"] {
-    background: #0d1928 !important;
-    border: 1px solid #22384d !important;
-}
-
-[data-testid="stExpander"] summary {
-    color: #cbd7e2 !important;
-}
-
-
-/* ==========================================================
-   TABS / RADIO MENU
-   ========================================================== */
-
-button[data-baseweb="tab"] {
-    color: #8da0b3 !important;
-    background: transparent !important;
-}
-
-button[data-baseweb="tab"][aria-selected="true"] {
-    color: #dce6ef !important;
 }
 
 </style>
-""",
-    unsafe_allow_html=True
-)
+"""
+
+# CSS는 반드시 HTML로 처리
+st.markdown(CSS, unsafe_allow_html=True)
 
 
 # ============================================================
@@ -1021,10 +966,6 @@ def write_json(path, data):
 
 def load_etf_universe():
 
-    # 중요:
-    # BASE_ETFS를 먼저 사용하고,
-    # 캐시가 BASE_ETFS 이름을 덮어쓰지 않도록 함.
-
     universe = dict(BASE_ETFS)
 
     cached = read_json(
@@ -1041,8 +982,6 @@ def load_etf_universe():
             if not code or not name:
                 continue
 
-            # BASE_ETFS에 이미 존재하는 종목은
-            # 캐시 이름을 사용하지 않음.
             if code in universe:
                 continue
 
@@ -1140,7 +1079,6 @@ def init_state():
         st.session_state.main_page = "📊 내 ETF"
 
 
-    # 미래테마에서 분석할 ETF
     if "future_detail_code" not in st.session_state:
         st.session_state.future_detail_code = None
 
@@ -1171,13 +1109,41 @@ def normalize_df(df):
 
     df = df.copy()
 
+    # yfinance MultiIndex 처리
     if isinstance(df.columns, pd.MultiIndex):
 
-        df.columns = [
-            c[0] if isinstance(c, tuple)
-            else str(c)
-            for c in df.columns
-        ]
+        new_columns = []
+
+        for col in df.columns:
+
+            if isinstance(col, tuple):
+
+                found = None
+
+                for item in col:
+
+                    item_str = str(item)
+
+                    if item_str.lower() in [
+                        "open",
+                        "high",
+                        "low",
+                        "close",
+                        "volume"
+                    ]:
+                        found = item_str.title()
+                        break
+
+                new_columns.append(
+                    found if found else str(col[0])
+                )
+
+            else:
+
+                new_columns.append(str(col))
+
+        df.columns = new_columns
+
 
     rename_map = {}
 
@@ -1204,6 +1170,7 @@ def normalize_df(df):
         columns=rename_map
     )
 
+
     required = [
         "Open",
         "High",
@@ -1218,7 +1185,9 @@ def normalize_df(df):
     ):
         return pd.DataFrame()
 
+
     df = df[required].copy()
+
 
     for col in required:
 
@@ -1227,9 +1196,11 @@ def normalize_df(df):
             errors="coerce"
         )
 
+
     df = df.dropna(
         subset=["Close"]
     )
+
 
     if getattr(df.index, "tz", None) is not None:
 
@@ -1237,6 +1208,7 @@ def normalize_df(df):
             df.index = df.index.tz_localize(None)
         except Exception:
             pass
+
 
     return df
 
@@ -1277,6 +1249,7 @@ def load_price_data(code, force=False):
         code
     )
 
+
     if cached and not force:
 
         age = (
@@ -1287,7 +1260,9 @@ def load_price_data(code, force=False):
 
             return cached["data"]
 
+
     df = fetch_yahoo(code)
+
 
     if not df.empty:
 
@@ -1295,6 +1270,7 @@ def load_price_data(code, force=False):
             "time": now,
             "data": df
         }
+
 
     return df
 
@@ -1309,6 +1285,7 @@ def calculate_indicators(df):
         return pd.DataFrame()
 
     d = df.copy()
+
 
     d["MA20"] = (
         d["Close"]
@@ -1327,6 +1304,7 @@ def calculate_indicators(df):
         .rolling(120)
         .mean()
     )
+
 
     delta = d["Close"].diff()
 
@@ -1354,6 +1332,7 @@ def calculate_indicators(df):
         (100 / (1 + rs))
     )
 
+
     d["VOL20"] = (
         d["Volume"]
         .rolling(20)
@@ -1362,8 +1341,9 @@ def calculate_indicators(df):
 
     d["VOL_RATIO"] = (
         d["Volume"] /
-        d["VOL20"]
+        d["VOL20"].replace(0, np.nan)
     )
+
 
     d["RET5"] = (
         d["Close"]
@@ -1374,6 +1354,7 @@ def calculate_indicators(df):
         d["Close"]
         .pct_change(20) * 100
     )
+
 
     d["HIGH20"] = (
         d["High"]
@@ -1399,13 +1380,15 @@ def calculate_indicators(df):
         .min()
     )
 
+
     return d
 
 
-def safe_float(
-    value,
-    default=0.0
-):
+# ============================================================
+# HELPERS
+# ============================================================
+
+def safe_float(value, default=0.0):
 
     try:
 
@@ -1453,6 +1436,7 @@ def get_judgment(d):
             "ret20": 0
         }
 
+
     row = d.iloc[-1]
 
     current = safe_float(
@@ -1484,8 +1468,10 @@ def get_judgment(d):
         0
     )
 
+
     above20 = current >= ma20
     above60 = current >= ma60
+
 
     ma_state = (
         "20일선 상회"
@@ -1493,32 +1479,42 @@ def get_judgment(d):
         else "20일선 하회"
     )
 
+
     if rsi >= 70:
+
         rsi_state = "과열권"
 
     elif rsi >= 60:
+
         rsi_state = "강세권"
 
     elif rsi >= 45:
+
         rsi_state = "중립권"
 
     elif rsi >= 30:
+
         rsi_state = "약세권"
 
     else:
+
         rsi_state = "과매도권"
 
 
     if vol_ratio >= 1.5:
+
         vol_state = "거래량 강한 확대"
 
     elif vol_ratio >= 1.1:
+
         vol_state = "거래량 증가"
 
     elif vol_ratio >= 0.8:
+
         vol_state = "평균 수준"
 
     else:
+
         vol_state = "거래량 감소"
 
 
@@ -1535,6 +1531,7 @@ def get_judgment(d):
             "신규 매수는 현재가 추격보다 눌림 확인을 우선합니다."
         )
 
+
     elif above20 and above60:
 
         title = "상승 추세 유지"
@@ -1545,6 +1542,7 @@ def get_judgment(d):
             "돌파 추격보다 눌림을 우선합니다."
         )
 
+
     elif above60 and not above20:
 
         title = "단기 조정 · 중기 추세 확인"
@@ -1554,6 +1552,7 @@ def get_judgment(d):
             "20일선 회복 여부를 확인하면서 "
             "지지구간의 거래량을 봅니다."
         )
+
 
     elif (
         not above60
@@ -1566,6 +1565,7 @@ def get_judgment(d):
             "60일선 아래이고 RSI도 약합니다. "
             "지지 형성과 거래량 회복을 먼저 확인합니다."
         )
+
 
     else:
 
@@ -1625,6 +1625,7 @@ def calculate_levels(d):
     if d.empty:
         return None
 
+
     current = safe_float(
         d["Close"].iloc[-1]
     )
@@ -1654,6 +1655,7 @@ def calculate_levels(d):
         current
     )
 
+
     return {
 
         "first": ma20,
@@ -1681,6 +1683,7 @@ def render_judgment(d):
 
     judgment = get_judgment(d)
 
+
     st.markdown(
         '<div class="section-title">'
         '현재판단 · 지금대응'
@@ -1688,14 +1691,17 @@ def render_judgment(d):
         unsafe_allow_html=True
     )
 
+
     rsi = judgment["rsi"]
     vr = judgment["vol_ratio"]
+
 
     ma_color = (
         "positive"
         if judgment["ma_state"] == "20일선 상회"
         else "negative"
     )
+
 
     rsi_color = (
         "positive"
@@ -1706,6 +1712,7 @@ def render_judgment(d):
             else "neutral"
         )
     )
+
 
     vol_color = (
         "positive"
@@ -1728,7 +1735,7 @@ def render_judgment(d):
                 </div>
 
                 <div class="evidence-value {ma_color}">
-                    {judgment["ma_state"]}
+                    {esc(judgment["ma_state"])}
                 </div>
 
                 <div class="evidence-sub">
@@ -1747,7 +1754,7 @@ def render_judgment(d):
                 </div>
 
                 <div class="evidence-sub">
-                    {judgment["rsi_state"]}
+                    {esc(judgment["rsi_state"])}
                 </div>
             </div>
 
@@ -1762,7 +1769,7 @@ def render_judgment(d):
                 </div>
 
                 <div class="evidence-sub">
-                    {judgment["vol_state"]}
+                    {esc(judgment["vol_state"])}
                 </div>
             </div>
 
@@ -1778,7 +1785,8 @@ def render_judgment(d):
     with c1:
 
         reasons_html = "<br>".join(
-            judgment["reasons"]
+            esc(x)
+            for x in judgment["reasons"]
         )
 
         st.markdown(
@@ -1790,7 +1798,7 @@ def render_judgment(d):
                 </div>
 
                 <div class="judgment-main">
-                    {judgment["title"]}
+                    {esc(judgment["title"])}
                 </div>
 
                 <div class="reason-label">
@@ -1818,7 +1826,7 @@ def render_judgment(d):
                 </div>
 
                 <div class="action-main">
-                    {judgment["action"]}
+                    {esc(judgment["action"])}
                 </div>
 
                 <div class="action-reason-label">
@@ -1848,12 +1856,14 @@ def render_scenarios(d):
     if not levels:
         return
 
+
     st.markdown(
         '<div class="section-title">'
         '핵심가격 · 대응 시나리오'
         '</div>',
         unsafe_allow_html=True
     )
+
 
     cards = [
 
@@ -1882,15 +1892,17 @@ def render_scenarios(d):
         )
     ]
 
-    html = '<div class="scenario-grid">'
+
+    html_block = '<div class="scenario-grid">'
+
 
     for label, price, desc in cards:
 
-        html += f"""
+        html_block += f"""
         <div class="scenario-card">
 
             <div class="scenario-label">
-                {label}
+                {esc(label)}
             </div>
 
             <div class="scenario-price">
@@ -1898,16 +1910,18 @@ def render_scenarios(d):
             </div>
 
             <div class="scenario-desc">
-                {desc}
+                {esc(desc)}
             </div>
 
         </div>
         """
 
-    html += "</div>"
+
+    html_block += "</div>"
+
 
     st.markdown(
-        html,
+        html_block,
         unsafe_allow_html=True
     )
 
@@ -1927,7 +1941,6 @@ def render_chart(d):
         return
 
 
-    # 최근 약 6개월
     chart_df = d.tail(126).copy()
 
 
@@ -2136,24 +2149,32 @@ def search_etfs(query):
         query or ""
     ).strip().lower()
 
+
     if not query:
         return []
 
+
     results = []
+
 
     for code, name in (
         st.session_state.etf_universe.items()
     ):
 
+        code_text = str(code).lower()
+        name_text = str(name).lower()
+
+
         if (
-            query in code.lower()
-            or query in name.lower()
+            query in code_text
+            or query in name_text
         ):
 
             results.append({
                 "code": code,
                 "name": name
             })
+
 
     return results[:30]
 
@@ -2166,6 +2187,7 @@ def add_watch(code):
 
     code = str(code).zfill(6)
 
+
     if code not in st.session_state.watchlist:
 
         st.session_state.watchlist.append(
@@ -2176,6 +2198,7 @@ def add_watch(code):
             WATCHLIST_FILE,
             st.session_state.watchlist
         )
+
 
     st.session_state.selected_code = code
 
@@ -2193,12 +2216,14 @@ def render_finder():
         unsafe_allow_html=True
     )
 
+
     query = st.text_input(
         "ETF명 또는 종목코드",
         placeholder="예: AI반도체 / 395160",
         label_visibility="collapsed",
         key="search_q"
     )
+
 
     results = search_etfs(query)
 
@@ -2210,17 +2235,23 @@ def render_finder():
             for x in results
         ]
 
+
         selected_label = st.selectbox(
             "검색 결과",
             labels,
             key="search_result"
         )
 
-        item = results[
-            labels.index(selected_label)
-        ]
+
+        selected_index = labels.index(
+            selected_label
+        )
+
+        item = results[selected_index]
+
 
         c1, c2 = st.columns([4, 1])
+
 
         with c1:
 
@@ -2229,12 +2260,14 @@ def render_finder():
                 f'({item["code"]})'
             )
 
+
         with c2:
 
             already = (
                 item["code"]
                 in st.session_state.watchlist
             )
+
 
             if st.button(
                 "추가"
@@ -2275,7 +2308,9 @@ def render_watchlist():
         unsafe_allow_html=True
     )
 
+
     watchlist = st.session_state.watchlist
+
 
     if not watchlist:
 
@@ -2291,9 +2326,11 @@ def render_watchlist():
         for code in watchlist
     ]
 
+
     current = (
         st.session_state.selected_code
     )
+
 
     default_index = (
         watchlist.index(current)
@@ -2314,6 +2351,7 @@ def render_watchlist():
         labels.index(selected_label)
     ]
 
+
     st.session_state.selected_code = code
 
 
@@ -2325,16 +2363,19 @@ def render_watchlist():
 
         watchlist.remove(code)
 
+
         write_json(
             WATCHLIST_FILE,
             watchlist
         )
+
 
         st.session_state.selected_code = (
             watchlist[0]
             if watchlist
             else "395160"
         )
+
 
         st.rerun()
 
@@ -2343,10 +2384,7 @@ def render_watchlist():
 # HOLDINGS
 # ============================================================
 
-def render_holdings(
-    code,
-    current
-):
+def render_holdings(code, current):
 
     st.markdown(
         '<div class="section-title">'
@@ -2354,6 +2392,7 @@ def render_holdings(
         '</div>',
         unsafe_allow_html=True
     )
+
 
     old = (
         st.session_state.holdings.get(code)
@@ -2377,6 +2416,7 @@ def render_holdings(
     if held == "보유중":
 
         c1, c2 = st.columns(2)
+
 
         with c1:
 
@@ -2437,10 +2477,12 @@ def render_holdings(
                 "quantity": qty
             }
 
+
             write_json(
                 HOLDINGS_FILE,
                 st.session_state.holdings
             )
+
 
             st.rerun()
 
@@ -2451,6 +2493,7 @@ def render_holdings(
                 (current / avg - 1)
                 * 100
             )
+
 
             cls = (
                 "positive"
@@ -2493,10 +2536,12 @@ def render_holdings(
                 code
             ]
 
+
             write_json(
                 HOLDINGS_FILE,
                 st.session_state.holdings
             )
+
 
             st.rerun()
 
@@ -2511,11 +2556,14 @@ def render_my_etf():
 
     render_watchlist()
 
+
     code = (
         st.session_state.selected_code
     )
 
+
     name = get_etf_name(code)
+
 
     df = load_price_data(code)
 
@@ -2546,6 +2594,7 @@ def render_my_etf():
         d["Close"].iloc[-1]
     )
 
+
     previous = (
         safe_float(
             d["Close"].iloc[-2]
@@ -2554,13 +2603,16 @@ def render_my_etf():
         else current
     )
 
+
     change = current - previous
+
 
     change_pct = (
         change / previous * 100
         if previous != 0
         else 0
     )
+
 
     cls = (
         "positive"
@@ -2571,6 +2623,7 @@ def render_my_etf():
             else "neutral"
         )
     )
+
 
     date_text = (
         d.index[-1]
@@ -2583,11 +2636,11 @@ def render_my_etf():
         <div class="hero">
 
             <div class="hero-name">
-                {name}
+                {esc(name)}
             </div>
 
             <div class="hero-code">
-                {code}
+                {esc(code)}
             </div>
 
             <div class="quote-row">
@@ -2604,7 +2657,7 @@ def render_my_etf():
             </div>
 
             <div class="hero-date">
-                기준일 {date_text}
+                기준일 {esc(date_text)}
             </div>
 
         </div>
@@ -2618,9 +2671,11 @@ def render_my_etf():
         current
     )
 
+
     render_judgment(d)
 
     render_scenarios(d)
+
 
     st.markdown(
         '<div class="section-title">'
@@ -2629,11 +2684,12 @@ def render_my_etf():
         unsafe_allow_html=True
     )
 
+
     render_chart(d)
 
 
 # ============================================================
-# THEME
+# THEME CANDIDATES
 # ============================================================
 
 def theme_candidates(theme):
@@ -2668,6 +2724,7 @@ def theme_candidates(theme):
             .lower()
         )
 
+
         if any(
             keyword.lower() in text
             for keyword in info["keywords"]
@@ -2700,6 +2757,7 @@ def theme_snapshot(theme):
         )
     )
 
+
     now = datetime.now()
 
 
@@ -2709,12 +2767,14 @@ def theme_snapshot(theme):
             now - cached["time"]
         ).total_seconds()
 
+
         if age < 300:
 
             return cached["rows"]
 
 
     rows = []
+
 
     candidates = theme_candidates(
         theme
@@ -2725,21 +2785,28 @@ def theme_snapshot(theme):
 
         code = item["code"]
 
+
         df = load_price_data(code)
+
 
         if df.empty:
             continue
 
+
         d = calculate_indicators(df)
+
 
         if d.empty:
             continue
 
+
         row = d.iloc[-1]
+
 
         current = safe_float(
             row["Close"]
         )
+
 
         ma20 = safe_float(
             row["MA20"],
@@ -2801,6 +2868,7 @@ def render_future_inline_analysis():
         st.session_state.future_detail_code
     )
 
+
     if not code:
         return
 
@@ -2825,15 +2893,18 @@ def render_future_inline_analysis():
 
     d = calculate_indicators(df)
 
+
     if d.empty:
         return
 
 
     name = get_etf_name(code)
 
+
     current = safe_float(
         d["Close"].iloc[-1]
     )
+
 
     previous = (
         safe_float(
@@ -2843,13 +2914,16 @@ def render_future_inline_analysis():
         else current
     )
 
+
     change = current - previous
+
 
     pct = (
         change / previous * 100
         if previous
         else 0
     )
+
 
     cls = (
         "positive"
@@ -2868,15 +2942,15 @@ def render_future_inline_analysis():
 
             <div class="future-analysis-title">
                 미래테마 안에서 분석
-                · {theme or "선택 ETF"}
+                · {esc(theme or "선택 ETF")}
             </div>
 
             <div class="future-analysis-name">
-                {name}
+                {esc(name)}
             </div>
 
             <div class="future-analysis-code">
-                {code}
+                {esc(code)}
             </div>
 
             <div class="quote-row">
@@ -2900,6 +2974,7 @@ def render_future_inline_analysis():
 
     c1, c2 = st.columns(2)
 
+
     with c1:
 
         if st.button(
@@ -2909,7 +2984,9 @@ def render_future_inline_analysis():
         ):
 
             st.session_state.future_detail_code = None
+
             st.session_state.future_detail_theme = None
+
             st.rerun()
 
 
@@ -2922,9 +2999,11 @@ def render_future_inline_analysis():
         ):
 
             st.session_state.selected_code = code
+
             st.session_state.main_page = "📊 내 ETF"
 
             st.session_state.future_detail_code = None
+
             st.session_state.future_detail_theme = None
 
             st.rerun()
@@ -2934,12 +3013,14 @@ def render_future_inline_analysis():
 
     render_scenarios(d)
 
+
     st.markdown(
         '<div class="section-title">'
         '가격 흐름 · 최근 6개월'
         '</div>',
         unsafe_allow_html=True
     )
+
 
     render_chart(d)
 
@@ -2981,15 +3062,15 @@ def render_future_theme():
             <div class="theme-card">
 
                 <div class="theme-stage">
-                    {stage}
+                    {esc(stage)}
                 </div>
 
                 <div class="theme-title">
-                    {theme}
+                    {esc(theme)}
                 </div>
 
                 <div class="theme-reason">
-                    {info["reason"]}
+                    {esc(info["reason"])}
                 </div>
 
             </div>
@@ -3025,6 +3106,7 @@ def render_future_theme():
                     else "negative"
                 )
 
+
                 trend_cls = (
                     "positive"
                     if item["trend"] == "상승"
@@ -3037,11 +3119,11 @@ def render_future_theme():
                     <div class="theme-etf-box">
 
                         <div class="theme-etf-name">
-                            {item["name"]}
+                            {esc(item["name"])}
                         </div>
 
                         <div class="theme-etf-code">
-                            {item["code"]}
+                            {esc(item["code"])}
                         </div>
 
                         <div class="theme-data-grid">
@@ -3109,7 +3191,7 @@ def render_future_theme():
                             추세
 
                             <span class="{trend_cls}">
-                                {item["trend"]}
+                                {esc(item["trend"])}
                             </span>
 
                         </div>
@@ -3119,10 +3201,6 @@ def render_future_theme():
                     unsafe_allow_html=True
                 )
 
-
-                # 핵심 변경:
-                # 여기서 내 ETF로 이동하지 않고
-                # 미래테마 내부에서 분석
 
                 if st.button(
                     "ETF 분석",
@@ -3172,6 +3250,7 @@ def render_future_theme():
 
         rows = theme_snapshot(theme)
 
+
         if not rows:
             continue
 
@@ -3180,9 +3259,11 @@ def render_future_theme():
             [x["ret"] for x in rows]
         )
 
+
         avg_rsi = np.mean(
             [x["rsi"] for x in rows]
         )
+
 
         avg_vol = np.mean(
             [x["vr"] for x in rows]
@@ -3205,7 +3286,7 @@ def render_future_theme():
 
     if summary_rows:
 
-        html = """
+        table_html = """
         <div class="summary-table-wrap">
 
         <table class="summary-table">
@@ -3235,15 +3316,15 @@ def render_future_theme():
             )
 
 
-            html += f"""
+            table_html += f"""
             <tr>
 
                 <td>
-                    {row["theme"]}
+                    {esc(row["theme"])}
                 </td>
 
                 <td>
-                    {row["stage"]}
+                    {esc(row["stage"])}
                 </td>
 
                 <td class="{ret_cls}">
@@ -3262,7 +3343,7 @@ def render_future_theme():
             """
 
 
-        html += """
+        table_html += """
         </tbody>
 
         </table>
@@ -3272,7 +3353,7 @@ def render_future_theme():
 
 
         st.markdown(
-            html,
+            table_html,
             unsafe_allow_html=True
         )
 
@@ -3309,7 +3390,8 @@ nav = st.radio(
         "🚀 미래테마"
     ],
     horizontal=True,
-    key="main_page"
+    key="main_page",
+    label_visibility="collapsed"
 )
 
 
