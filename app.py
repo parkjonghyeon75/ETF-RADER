@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 
 
 # ============================================================
-# ETF RADAR v10.2 (글씨 크기 확대 및 디테일 강화 버전)
+# ETF RADAR (글씨 크기 전반적 확대 및 모멘텀 설명 보강 버전)
 # ============================================================
 
 st.set_page_config(
@@ -68,6 +68,7 @@ header { visibility: hidden; }
 
 html, body, [class*="css"] {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1.02rem;
 }
 
 
@@ -85,7 +86,7 @@ div[data-baseweb="tab-list"] {
 
 button[data-baseweb="tab"] {
     border-radius: 10px !important;
-    font-size: 0.92rem !important;
+    font-size: 0.98rem !important;
     font-weight: 800 !important;
     color: #475569 !important;
     padding: 0.6rem 0.5rem !important;
@@ -99,23 +100,23 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 
 /* ============================================================
-   COMMON CARD (글씨 크기 및 여백 개선)
+   COMMON CARD (글씨 크기 전반적 확대)
    ============================================================ */
 
 .card {
     background: rgba(255,255,255,0.98);
     border: 1px solid #cbd5e1;
     border-radius: 16px;
-    padding: 16px;
+    padding: 18px;
     margin: 10px 0;
     box-shadow: 0 4px 16px rgba(15,23,42,0.05);
 }
 
-.card-tight { padding: 14px 16px; }
+.card-tight { padding: 15px 18px; }
 
 .card-title {
     color: #475569;
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     font-weight: 850;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -127,9 +128,9 @@ button[data-baseweb="tab"][aria-selected="true"] {
    ============================================================ */
 
 .top-brand { padding: 0.4rem 0.1rem 0.7rem; }
-.brand-small { color: #2563eb; font-size: 0.8rem; font-weight: 900; letter-spacing: 0.1em; }
-.brand-main { color: #0f172a; font-size: 1.65rem; font-weight: 900; letter-spacing: -0.04em; margin-top: 2px; }
-.brand-sub { color: #475569; font-size: 0.82rem; margin-top: 4px; font-weight: 600; }
+.brand-small { color: #2563eb; font-size: 0.88rem; font-weight: 900; letter-spacing: 0.1em; }
+.brand-main { color: #0f172a; font-size: 1.8rem; font-weight: 900; letter-spacing: -0.04em; margin-top: 2px; }
+.brand-sub { color: #475569; font-size: 0.9rem; margin-top: 4px; font-weight: 600; }
 
 
 /* ============================================================
@@ -140,29 +141,29 @@ button[data-baseweb="tab"][aria-selected="true"] {
     background: radial-gradient(circle at 100% 0%, rgba(37,99,235,0.12), transparent 40%), #ffffff;
     border: 1px solid #cbd5e1;
     border-radius: 18px;
-    padding: 18px;
+    padding: 20px;
     margin: 10px 0;
     box-shadow: 0 6px 20px rgba(15,23,42,0.06);
 }
 
 .hero-top { display: flex; align-items: flex-start; justify-content: space-between; }
-.hero-name { font-size: 1.05rem; font-weight: 900; color: #0f172a; line-height: 1.35; }
-.hero-code { font-size: 0.76rem; color: #64748b; margin-top: 3px; font-weight: 700; }
-.hero-price { font-size: 2.35rem; line-height: 1.0; font-weight: 950; letter-spacing: -0.05em; color: #0f172a; margin-top: 12px; }
-.hero-unit { font-size: 0.9rem; font-weight: 850; }
-.hero-change { font-size: 0.95rem; font-weight: 900; margin-top: 8px; }
+.hero-name { font-size: 1.15rem; font-weight: 900; color: #0f172a; line-height: 1.35; }
+.hero-code { font-size: 0.82rem; color: #64748b; margin-top: 3px; font-weight: 700; }
+.hero-price { font-size: 2.5rem; line-height: 1.0; font-weight: 950; letter-spacing: -0.05em; color: #0f172a; margin-top: 12px; }
+.hero-unit { font-size: 0.98rem; font-weight: 850; }
+.hero-change { font-size: 1.02rem; font-weight: 900; margin-top: 8px; }
 
 .hero-mini {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 8px 12px;
-    min-width: 90px;
+    min-width: 95px;
     text-align: center;
 }
 
-.hero-mini-label { font-size: 0.68rem; color: #64748b; font-weight: 850; }
-.hero-mini-value { font-size: 0.95rem; color: #0f172a; font-weight: 950; margin-top: 2px; }
+.hero-mini-label { font-size: 0.74rem; color: #64748b; font-weight: 850; }
+.hero-mini-value { font-size: 1.05rem; color: #0f172a; font-weight: 950; margin-top: 2px; }
 
 
 /* ============================================================
@@ -173,8 +174,8 @@ button[data-baseweb="tab"][aria-selected="true"] {
     background: #ffffff;
     border: 1px solid #cbd5e1;
     border-radius: 16px;
-    padding: 14px;
-    min-height: 165px;
+    padding: 16px;
+    min-height: 175px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -182,14 +183,14 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 4px 15px rgba(15,23,42,0.05);
 }
 
-.score-number { font-size: 2.2rem; line-height: 1; font-weight: 950; color: #0f172a; }
-.score-denom { color: #64748b; font-size: 0.68rem; margin-top: 4px; font-weight: 700; }
-.score-label { margin-top: 8px; font-size: 0.85rem; font-weight: 900; color: #2563eb; text-align: center; }
+.score-number { font-size: 2.4rem; line-height: 1; font-weight: 950; color: #0f172a; }
+.score-denom { color: #64748b; font-size: 0.75rem; margin-top: 4px; font-weight: 700; }
+.score-label { margin-top: 8px; font-size: 0.92rem; font-weight: 900; color: #2563eb; text-align: center; }
 
-.signal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
-.signal { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; }
-.signal-title { font-size: 0.72rem; color: #475569; font-weight: 800; }
-.signal-value { font-size: 0.9rem; font-weight: 950; margin-top: 3px; }
+.signal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+.signal { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; }
+.signal-title { font-size: 0.78rem; color: #475569; font-weight: 800; }
+.signal-value { font-size: 0.98rem; font-weight: 950; margin-top: 4px; }
 .signal-good { color: #15803d; }
 .signal-warn { color: #d97706; }
 .signal-bad { color: #dc2626; }
@@ -199,57 +200,57 @@ button[data-baseweb="tab"][aria-selected="true"] {
    SECTION & PATTERN
    ============================================================ */
 
-.section-head { display: flex; align-items: center; justify-content: space-between; margin: 18px 2px 8px; }
-.section-title { font-size: 1rem; font-weight: 900; color: #0f172a; letter-spacing: -0.02em; }
-.section-caption { color: #475569; font-size: 0.72rem; font-weight: 700; }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin: 20px 2px 10px; }
+.section-title { font-size: 1.1rem; font-weight: 900; color: #0f172a; letter-spacing: -0.02em; }
+.section-caption { color: #475569; font-size: 0.78rem; font-weight: 700; }
 
 .pattern-box {
     background: linear-gradient(135deg, #eef5ff, #f8fafc);
     border: 1px solid #bfdbfe;
     border-radius: 16px;
-    padding: 15px;
+    padding: 16px;
 }
-.pattern-title { color: #1d4ed8; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.06em; }
-.pattern-main { color: #0f172a; font-size: 1.05rem; font-weight: 950; margin-top: 5px; line-height: 1.4; }
-.pattern-desc { color: #334155; font-size: 0.78rem; margin-top: 6px; line-height: 1.5; font-weight: 600; }
+.pattern-title { color: #1d4ed8; font-size: 0.78rem; font-weight: 900; letter-spacing: 0.06em; }
+.pattern-main { color: #0f172a; font-size: 1.15rem; font-weight: 950; margin-top: 6px; line-height: 1.4; }
+.pattern-desc { color: #334155; font-size: 0.85rem; margin-top: 8px; line-height: 1.5; font-weight: 600; }
 
 
 /* ============================================================
    ACTION CARDS & PRICE MAP
    ============================================================ */
 
-.action-card { border-radius: 15px; padding: 14px; margin: 6px 0; border: 1px solid; }
+.action-card { border-radius: 15px; padding: 16px; margin: 8px 0; border: 1px solid; }
 .action-buy { background: #f0fdf4; border-color: #86efac; }
 .action-sell { background: #fff1f2; border-color: #fecdd3; }
 .action-wait { background: #fffbeb; border-color: #fde68a; }
 .action-break { background: #eff6ff; border-color: #93c5fd; }
 
-.action-label { font-size: 0.72rem; font-weight: 900; letter-spacing: 0.05em; }
-.action-price { font-size: 1.2rem; font-weight: 950; margin-top: 4px; color: #111827; }
-.action-desc { font-size: 0.75rem; color: #334155; margin-top: 5px; line-height: 1.4; font-weight: 600; }
+.action-label { font-size: 0.78rem; font-weight: 900; letter-spacing: 0.05em; }
+.action-price { font-size: 1.35rem; font-weight: 950; margin-top: 5px; color: #111827; }
+.action-desc { font-size: 0.82rem; color: #334155; margin-top: 6px; line-height: 1.4; font-weight: 600; }
 
-.price-map { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 14px 16px; }
-.price-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #f1f5f9; }
+.price-map { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 16px 18px; }
+.price-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
 .price-row:last-child { border-bottom: none; }
-.price-name { font-size: 0.78rem; font-weight: 800; color: #475569; }
-.price-number { font-size: 0.92rem; font-weight: 950; }
+.price-name { font-size: 0.85rem; font-weight: 800; color: #475569; }
+.price-number { font-size: 1.02rem; font-weight: 950; }
 
-.momentum-card { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 15px; padding: 13px; min-height: 95px; }
-.momentum-title { color: #475569; font-size: 0.72rem; font-weight: 850; }
-.momentum-value { color: #0f172a; font-size: 1.25rem; font-weight: 950; margin-top: 5px; }
-.momentum-sub { color: #64748b; font-size: 0.72rem; margin-top: 3px; font-weight: 600; }
+.momentum-card { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 15px; padding: 15px; min-height: 110px; }
+.momentum-title { color: #475569; font-size: 0.78rem; font-weight: 850; }
+.momentum-value { color: #0f172a; font-size: 1.35rem; font-weight: 950; margin-top: 6px; }
+.momentum-sub { color: #475569; font-size: 0.78rem; margin-top: 5px; font-weight: 700; line-height: 1.3; }
 
-.score-breakdown { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 13px; }
-.score-line { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.76rem; }
+.score-breakdown { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 15px; }
+.score-line { display: flex; justify-content: space-between; padding: 7px 0; font-size: 0.83rem; }
 .score-line-label { color: #475569; font-weight: 700; }
 .score-line-value { font-weight: 950; color: #111827; }
 
-.theme-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 14px; }
-.theme-rank { color: #2563eb; font-size: 0.68rem; font-weight: 900; letter-spacing: 0.06em; }
-.theme-name { color: #111827; font-size: 1rem; font-weight: 900; margin-top: 4px; }
+.theme-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 14px; padding: 15px; }
+.theme-rank { color: #2563eb; font-size: 0.74rem; font-weight: 900; letter-spacing: 0.06em; }
+.theme-name { color: #111827; font-size: 1.1rem; font-weight: 900; margin-top: 4px; }
 
 div[data-testid="stExpander"] { border: 1px solid #cbd5e1 !important; border-radius: 14px !important; background: #ffffff !important; overflow: hidden; }
-.stButton > button { border-radius: 12px !important; font-weight: 900 !important; min-height: 42px !important; font-size: 0.9rem !important; }
+.stButton > button { border-radius: 12px !important; font-weight: 900 !important; min-height: 44px !important; font-size: 0.95rem !important; }
 button[kind="primary"] { background: #2563eb !important; }
 div[data-testid="stDataFrame"] { border-radius: 13px; overflow: hidden; }
 
@@ -258,7 +259,7 @@ div[data-testid="stDataFrame"] { border-radius: 13px; overflow: hidden; }
 
 
 # ============================================================
-# DATA & POOLS (기존 유지)
+# DATA & POOLS
 # ============================================================
 
 WATCHLIST_FILE = "watchlist.json"
@@ -395,7 +396,7 @@ if "theme_info" not in st.session_state:
 
 
 # ============================================================
-# NAVER & YFINANCE API (기존 유지)
+# NAVER & YFINANCE API
 # ============================================================
 
 def search_stock_code_by_keyword(keyword):
@@ -654,7 +655,7 @@ def easy_action_scenario(df, score, supports, resistances, patterns):
     r1 = resistances[0]["price"] if resistances else close * 1.03
     r2 = resistances[1]["price"] if len(resistances) > 1 else close * 1.06
 
-    if "⚠️ 단기 과열" in patterns:
+    if "⚠ 단기 과열" in patterns:
         st_title, b_g, s_g, w_g = "급등에 따른 과열 구간입니다. 무리한 추격 매수보다는 20일선 부근까지의 조정을 기다리세요.", f"지지선인 {s1:,.0f}원 부근 안착 여부를 확인하고 분할 매수를 고려합니다.", f"상단 {r1:,.0f}~{r2:,.0f}원 구간은 차익실현 압력이 강할 수 있습니다.", f"핵심 지지선인 {s1:,.0f}원이 이탈하는지 모니터링하세요."
     elif "🚀 강력한 저항선 돌파" in patterns:
         st_title, b_g, s_g, w_g = "직전 고점 저항선을 거래량을 동반하여 강하게 돌파했습니다. 추세 연장 가능성이 높습니다.", f"돌파된 저항선이 새로운 지지선({r1:,.0f}원)으로 작용하는지 테스트합니다.", f"다음 주요 저항선인 {r2:,.0f}원 도달 시 흐름을 점검합니다.", f"돌파 후 다시 가격이 안으로 밀려 내려오는지(이탈 여부) 확인합니다."
@@ -684,7 +685,7 @@ def make_main_chart(df, supports, resistances):
 
     for col, color in [("MA5", "#f59e0b"), ("MA20", "#2563eb"), ("MA60", "#16a34a"), ("MA120", "#7c3aed")]:
         if col in df:
-            fig.add_trace(go.Scatter(x=df.index, y=df[col], line=dict(color=color, width=1.5), name=col), row=1, col=1)
+            fig.add_trace(go.Scatter(x=df.index, y=df[col], line=dict(color=color, width=1.8), name=col), row=1, col=1)
 
     for i, item in enumerate(supports[:2], 1):
         fig.add_hline(y=item["price"], row=1, col=1, line_dash="dot", line_color="#16a34a", annotation_text=f"지지 S{i}", annotation_position="bottom left")
@@ -693,7 +694,7 @@ def make_main_chart(df, supports, resistances):
 
     volume_colors = ["#16a34a" if c >= o else "#dc2626" for c, o in zip(df["Close"], df["Open"])]
     fig.add_trace(go.Bar(x=df.index, y=df["Volume"], marker_color=volume_colors, name="거래량"), row=2, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df["RSI"], line=dict(color="#2563eb", width=1.8), name="RSI"), row=3, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df["RSI"], line=dict(color="#2563eb", width=2.0), name="RSI"), row=3, col=1)
 
     fig.add_hline(y=70, row=3, col=1, line_dash="dot", line_color="#dc2626")
     fig.add_hline(y=30, row=3, col=1, line_dash="dot", line_color="#16a34a")
@@ -702,7 +703,7 @@ def make_main_chart(df, supports, resistances):
         height=680, margin=dict(l=4, r=4, t=8, b=8), template="plotly_white",
         showlegend=False, xaxis_rangeslider_visible=False, dragmode=False,
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Arial", size=11, color="#334155")
+        font=dict(family="Arial", size=12, color="#334155")
     )
     fig.update_xaxes(showgrid=False)
     fig.update_yaxes(showgrid=True, gridcolor="#e2e8f0", fixedrange=True)
@@ -752,7 +753,7 @@ def scan_market_leading_themes():
 
 st.markdown("""
 <div class="top-brand">
-    <div class="brand-small">ETF RADAR v10.2</div>
+    <div class="brand-small">ETF RADAR</div>
     <div class="brand-main">프리미엄 금융 대시보드</div>
     <div class="brand-sub">정밀 기술적 분석 · 모멘텀 진단 · 지지/저항 실시간 매핑</div>
 </div>
@@ -852,7 +853,7 @@ with tab_analysis:
         <div class="hero-price">{price:,.0f} <span class="hero-unit">원</span></div>
         <div class="hero-change" style="color:{change_color};">
             {"▲" if change >= 0 else "▼"} {abs(change):.2f}% 전일 대비
-            <span style="color:#64748b; font-size:0.75rem; margin-left:8px; font-weight:600;">최근 거래일 종가 기준</span>
+            <span style="color:#64748b; font-size:0.8rem; margin-left:8px; font-weight:600;">최근 거래일 종가 기준</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -908,7 +909,7 @@ with tab_analysis:
     if "눌림목" in pattern_main:
         pattern_desc = "중장기 상승 추세가 꺾이지 않은 채, 주가가 20일 이동평균선 부근까지 건전하게 조정을 받은 후 반등을 시도하는 유리한 맥락입니다."
     elif "돌파" in pattern_main:
-        pattern_desc = "직전 고점이나 강력한 저항 라인을 거래량 수반과 함께 상향 돌파했습니다. 매수세가 집중되고 있어 추가 상승 탄력이 기대됩니다."
+        pattern_desc = "직전 고점이나 강력한 저항 라인을 거래량 수반과 함께 상향 돌파했습니다. 매수세가 집중되어 있어 추가 상승 탄력이 기대됩니다."
     elif "과열" in pattern_main:
         pattern_desc = "단기간 가격이 가파르게 상승하여 RSI 등 지표가 과열 영역에 진입했습니다. 추격 매수보다는 충분한 가격 조정을 기다리는 것이 안전합니다."
     elif "약화" in pattern_main:
@@ -919,7 +920,7 @@ with tab_analysis:
         <div class="pattern-title">현재 시장 패턴 해석</div>
         <div class="pattern-main">{pattern_main}</div>
         <div class="pattern-desc">{pattern_desc}</div>
-        <div style="margin-top:10px; color:#1e3a8a; font-size:0.82rem; font-weight:800; border-top:1px solid #bfdbfe; padding-top:8px;">💡 대응 전략: {status_title}</div>
+        <div style="margin-top:12px; color:#1e3a8a; font-size:0.88rem; font-weight:800; border-top:1px solid #bfdbfe; padding-top:10px;">💡 대응 전략: {status_title}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -980,15 +981,15 @@ with tab_analysis:
     risk_bd = "#fecdd3" if chase_score >= 60 else ("#fde68a" if chase_score >= 30 else "#bbf7d0")
 
     st.markdown(f"""
-    <div style="background:{risk_bg}; border:1px solid {risk_bd}; border-radius:16px; padding:15px;">
+    <div style="background:{risk_bg}; border:1px solid {risk_bd}; border-radius:16px; padding:16px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <div style="color:#475569; font-size:0.72rem; font-weight:850;">추격 매수 위험 평가</div>
-                <div style="font-size:1.1rem; font-weight:950; margin-top:3px; color:#111827;">위험도 수준: {chase_label}</div>
+                <div style="color:#475569; font-size:0.78rem; font-weight:850;">추격 매수 위험 평가</div>
+                <div style="font-size:1.18rem; font-weight:950; margin-top:3px; color:#111827;">위험도 수준: {chase_label}</div>
             </div>
-            <div style="font-size:1.4rem; font-weight:950; color:#0f172a;">{chase_score}점</div>
+            <div style="font-size:1.5rem; font-weight:950; color:#0f172a;">{chase_score}점</div>
         </div>
-        <div style="color:#334155; font-size:0.78rem; margin-top:8px; line-height:1.4; font-weight:600;">진단 사유: {risk_text}</div>
+        <div style="color:#334155; font-size:0.84rem; margin-top:10px; line-height:1.4; font-weight:600;">진단 사유: {risk_text}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1005,7 +1006,7 @@ with tab_analysis:
         <div class="price-row"><div class="price-name">R2 · 2차 상단 저항선</div><div class="price-number" style="color:#dc2626;">{r2:,.0f}원</div></div>
         <div class="price-row"><div class="price-name">R1 · 1차 단기 저항선</div><div class="price-number" style="color:#dc2626;">{r1:,.0f}원</div></div>
         <div class="price-row" style="background:#eff6ff; margin:0 -10px; padding-left:10px; padding-right:10px; border-radius:8px;">
-            <div class="price-name" style="font-weight:900; color:#1d4ed8;">NOW · 현재 종가</div><div class="price-number" style="color:#2563eb; font-size:1rem;">{price:,.0f}원</div>
+            <div class="price-name" style="font-weight:900; color:#1d4ed8;">NOW · 현재 종가</div><div class="price-number" style="color:#2563eb; font-size:1.1rem;">{price:,.0f}원</div>
         </div>
         <div class="price-row"><div class="price-name">S1 · 1차 주요 지지선</div><div class="price-number" style="color:#16a34a;">{s1:,.0f}원</div></div>
         <div class="price-row"><div class="price-name">S2 · 2차 핵심 지지선</div><div class="price-number" style="color:#16a34a;">{s2:,.0f}원</div></div>
@@ -1023,7 +1024,7 @@ with tab_analysis:
     fig = make_main_chart(df, supports, resistances)
     st.plotly_chart(fig, use_container_width=True, config={"responsive": True, "displayModeBar": False, "scrollZoom": False}, key=f"main_chart_{symbol_input}_{period}")
 
-    # MOMENTUM
+    # MOMENTUM (개선된 설명 적용)
     st.markdown("""
     <div class="section-head">
         <div class="section-title">📊 핵심 모멘텀 지표 요약</div>
@@ -1031,13 +1032,32 @@ with tab_analysis:
     </div>
     """, unsafe_allow_html=True)
 
+    # 지표별 상세 가이드 텍스트 자동 분기
+    if rsi >= 70:
+        rsi_desc = "⚠️ 과열 구간 (차익실현 주의)"
+    elif rsi <= 30:
+        rsi_desc = "💡 침체 구간 (반등 대기)"
+    else:
+        rsi_desc = "📈 건강한 모멘텀 유지"
+
+    if vol_ratio >= 1.5:
+        vol_desc = "🔥 평소보다 거래량 대폭 유입"
+    elif vol_ratio >= 1.0:
+        vol_desc = "⚡ 평균 이상 활발한 거래"
+    else:
+        vol_desc = "💤 거래량 다소 한산함"
+
+    macd_hist = float(x["MACD_Hist"])
+    macd_arrow = "▲" if macd_hist > 0 else "▼"
+    macd_desc = "🚀 수급 확장 및 상승 우세" if macd_hist > 0 else "🔻 수급 둔화 및 조정 압력"
+
     i1, i2, i3 = st.columns(3)
     with i1:
         st.markdown(f"""
         <div class="momentum-card">
             <div class="momentum-title">상대강도 (RSI)</div>
             <div class="momentum-value">{rsi:.1f}</div>
-            <div class="momentum-sub">{rsi_state}</div>
+            <div class="momentum-sub">{rsi_desc}</div>
         </div>
         """, unsafe_allow_html=True)
     with i2:
@@ -1045,17 +1065,15 @@ with tab_analysis:
         <div class="momentum-card">
             <div class="momentum-title">거래량 비율</div>
             <div class="momentum-value">{vol_ratio:.1f}x</div>
-            <div class="momentum-sub">20일 평균 거래량 대비</div>
+            <div class="momentum-sub">{vol_desc}</div>
         </div>
         """, unsafe_allow_html=True)
     with i3:
-        macd_hist = float(x["MACD_Hist"])
-        macd_arrow = "▲" if macd_hist > 0 else "▼"
         st.markdown(f"""
         <div class="momentum-card">
             <div class="momentum-title">MACD 모멘텀</div>
             <div class="momentum-value">{macd_arrow} {macd_state}</div>
-            <div class="momentum-sub">시그널 교차 및 수급</div>
+            <div class="momentum-sub">{macd_desc}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1089,15 +1107,15 @@ with tab_analysis:
         st.markdown(f"""
         <div class="card">
             <div class="card-title">소속 테마 및 산업 사이클</div>
-            <div style="font-size:1.15rem; font-weight:900; margin-top:6px; color:#0f172a;">{theme_info["theme"]}</div>
-            <div style="margin-top:8px; color:#2563eb; font-weight:900; font-size:0.8rem;">현재 사이클: {theme_info["cycle"]}</div>
-            <div style="margin-top:10px; color:#334155; font-size:0.8rem; line-height:1.6;"><b>테마 특징:</b> {theme_info["desc"]}</div>
+            <div style="font-size:1.2rem; font-weight:900; margin-top:6px; color:#0f172a;">{theme_info["theme"]}</div>
+            <div style="margin-top:8px; color:#2563eb; font-weight:900; font-size:0.85rem;">현재 사이클: {theme_info["cycle"]}</div>
+            <div style="margin-top:10px; color:#334155; font-size:0.85rem; line-height:1.6;"><b>테마 특징:</b> {theme_info["desc"]}</div>
         </div>
         """, unsafe_allow_html=True)
         st.markdown(f"""
         <div class="action-card action-break">
             <div class="action-label" style="color:#1d4ed8;">📌 중장기 투자 관점 (Long-Term View)</div>
-            <div style="margin-top:6px; font-size:0.8rem; line-height:1.6; color:#1e293b; font-weight:600;">{theme_info["long_view"]}</div>
+            <div style="margin-top:6px; font-size:0.85rem; line-height:1.6; color:#1e293b; font-weight:600;">{theme_info["long_view"]}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1122,7 +1140,7 @@ with tab_analysis:
           - 주가가 20일선 위에 위치하고 20일선이 60일선보다 위에 있는 정배열 상태일 때 추세 추종 매매가 유리합니다.
         """)
 
-    with st.expander("⚙️️ 관심종목 관리 설정"):
+    with st.expander("⚙ 관심종목 관리 설정"):
         st.markdown("현재 보고 계신 ETF를 관심 목록에서 삭제할 수 있습니다.")
         if st.button("🗑 현재 종목 관심목록에서 삭제", use_container_width=True):
             del st.session_state.watchlist[symbol_input]
@@ -1138,8 +1156,8 @@ with tab_market:
     st.markdown("""
     <div class="card">
         <div class="card-title">MARKET RADAR · 시장 전반 모멘텀 스캔</div>
-        <div style="font-size:1.2rem; font-weight:900; margin-top:4px; color:#0f172a;">주요 ETF 테마군 실시간 순위 탐색</div>
-        <div style="color:#334155; font-size:0.8rem; line-height:1.6; margin-top:8px; font-weight:600;">
+        <div style="font-size:1.25rem; font-weight:900; margin-top:4px; color:#0f172a;">주요 ETF 테마군 실시간 순위 탐색</div>
+        <div style="color:#334155; font-size:0.85rem; line-height:1.6; margin-top:8px; font-weight:600;">
             국내 주요 연금 계좌 및 DC형 퇴직연금 투자 가능 ETF 풀을 대상으로, 각 테마별 수급 모멘텀과 기술적 활성화 점수를 실시간 스캔하여 현재 가장 주목받는 주도 테마를 찾아냅니다.
         </div>
     </div>
@@ -1158,13 +1176,13 @@ with tab_market:
         st.markdown(f"""
         <div class="hero">
             <div class="card-title">👑 현재 시장 최고 주도 테마 (TOP 1)</div>
-            <div style="font-size:1.25rem; font-weight:950; margin-top:5px; color:#0f172a;">{top_theme["theme_name"]}</div>
+            <div style="font-size:1.35rem; font-weight:950; margin-top:5px; color:#0f172a;">{top_theme["theme_name"]}</div>
             <div style="display:flex; align-items:end; justify-content:space-between; margin-top:12px;">
                 <div>
-                    <div style="color:#475569; font-size:0.72rem; font-weight:800;">테마 활성화 점수</div>
-                    <div style="font-size:2.1rem; font-weight:950; color:#2563eb;">{top_theme["avg_score"]:.1f}점</div>
+                    <div style="color:#475569; font-size:0.76rem; font-weight:800;">테마 활성화 점수</div>
+                    <div style="font-size:2.3rem; font-weight:950; color:#2563eb;">{top_theme["avg_score"]:.1f}점</div>
                 </div>
-                <div style="color:{top_change_color}; font-weight:950; font-size:0.95rem;">
+                <div style="color:{top_change_color}; font-weight:950; font-size:1.02rem;">
                     평균 등락률 {"▲" if top_theme["avg_change"] >= 0 else "▼"} {abs(top_theme["avg_change"]):.2f}%
                 </div>
             </div>
@@ -1187,10 +1205,10 @@ with tab_market:
                     <div class="theme-name">{th["theme_name"]}</div>
                     <div style="display:flex; justify-content:space-between; align-items:end; margin-top:10px;">
                         <div>
-                            <div style="color:#475569; font-size:0.7rem; font-weight:800;">테마 모멘텀 활성도</div>
-                            <div style="font-size:1.3rem; font-weight:950; color:#2563eb;">{th["avg_score"]:.1f}점 / 100점</div>
+                            <div style="color:#475569; font-size:0.74rem; font-weight:800;">테마 모멘텀 활성도</div>
+                            <div style="font-size:1.4rem; font-weight:950; color:#2563eb;">{th["avg_score"]:.1f}점 / 100점</div>
                         </div>
-                        <div style="color:{th_change_color}; font-weight:900; font-size:0.8rem;">
+                        <div style="color:{th_change_color}; font-weight:900; font-size:0.85rem;">
                             구성종목 평균 {"▲" if th["avg_change"] >= 0 else "▼"} {abs(th["avg_change"]):.2f}%
                         </div>
                     </div>
@@ -1203,17 +1221,17 @@ with tab_market:
                         g_color = "#16a34a" if g["change"] >= 0 else "#dc2626"
                         reasons_str = " · ".join(g["reasons"])
                         st.markdown(f"""
-                        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:14px; padding:12px; margin-top:8px;">
+                        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:14px; padding:14px; margin-top:8px;">
                             <div style="display:flex; justify-content:space-between;">
-                                <div style="font-size:0.85rem; font-weight:900; color:#0f172a;">💎 {g["name"]}</div>
-                                <div style="font-size:0.78rem; font-weight:950; color:{g_color};">
+                                <div style="font-size:0.92rem; font-weight:900; color:#0f172a;">💎 {g["name"]}</div>
+                                <div style="font-size:0.84rem; font-weight:950; color:{g_color};">
                                     {"▲" if g["change"] >= 0 else "▼"} {abs(g["change"]):.2f}%
                                 </div>
                             </div>
-                            <div style="font-size:0.72rem; color:#475569; margin-top:4px; font-weight:700;">
+                            <div style="font-size:0.78rem; color:#475569; margin-top:5px; font-weight:700;">
                                 코드: {g["code"]}  ｜  현재가: {g["price"]:,.0f}원  ｜  기술 점수: <b>{g["score"]}점</b>
                             </div>
-                            <div style="font-size:0.72rem; color:#1e4ed8; margin-top:5px; font-weight:800;">포착 신호: {reasons_str}</div>
+                            <div style="font-size:0.78rem; color:#1e4ed8; margin-top:6px; font-weight:800;">포착 신호: {reasons_str}</div>
                         </div>
                         """, unsafe_allow_html=True)
                 else:
@@ -1226,7 +1244,7 @@ with tab_market:
 # FOOTER
 # ============================================================
 st.markdown("""
-<div style="text-align:center; color:#64748b; font-size:0.75rem; margin-top:30px; padding-top:15px; border-top:1px solid #cbd5e1; font-weight:600;">
-    ETF RADAR v10.2 · Professional Mobile Financial Dashboard
+<div style="text-align:center; color:#64748b; font-size:0.8rem; margin-top:30px; padding-top:15px; border-top:1px solid #cbd5e1; font-weight:600;">
+    ETF RADAR · Professional Mobile Financial Dashboard
 </div>
 """, unsafe_allow_html=True)
