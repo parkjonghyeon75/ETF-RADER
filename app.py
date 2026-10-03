@@ -14,7 +14,6 @@ import xml.etree.ElementTree as ET
 # ============================================================
 # ETF RADAR
 # Mobile ETF Research / Decision Support
-# HTML BODY FREE VERSION
 # ============================================================
 
 st.set_page_config(
@@ -27,26 +26,26 @@ st.set_page_config(
 
 # ============================================================
 # CSS
-# - CSS 외에는 HTML을 사용하지 않음
 # ============================================================
 
 st.markdown(
     """
     <style>
+
     .block-container {
         max-width: 760px;
-        padding-top: 1rem;
+        padding-top: 0.8rem;
         padding-bottom: 3rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
     }
 
     h1 {
-        letter-spacing: -0.04em;
+        letter-spacing: -0.05em;
     }
 
     h2, h3 {
-        letter-spacing: -0.03em;
+        letter-spacing: -0.04em;
     }
 
     div[data-testid="stMetric"] {
@@ -57,7 +56,7 @@ st.markdown(
     }
 
     div[data-testid="stMetricValue"] {
-        font-size: 1.15rem;
+        font-size: 1.12rem;
     }
 
     div[data-testid="stAlert"] {
@@ -68,13 +67,6 @@ st.markdown(
         border-radius: 10px !important;
     }
 
-    [data-testid="stTabs"] button {
-        font-weight: 700;
-    }
-
-    .small-gap {
-        margin-top: 0.2rem;
-    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -82,7 +74,7 @@ st.markdown(
 
 
 # ============================================================
-# FILES
+# FILE
 # ============================================================
 
 WATCHLIST_FILE = "watchlist.json"
@@ -153,6 +145,12 @@ THEMES = {
         "stage": "LEADER",
         "label": "현재 주도",
         "description": "AI 연산 수요와 반도체 투자 확대의 직접적인 수혜 영역",
+        "keywords": [
+            "AI",
+            "반도체",
+            "반도체TOP2",
+            "핵심공정",
+        ],
         "etfs": [
             "395160",
             "462100",
@@ -165,7 +163,12 @@ THEMES = {
     "데이터센터": {
         "stage": "FOLLOWER",
         "label": "후속 수혜",
-        "description": "AI 서버·데이터센터 증설에 따른 인프라 투자 확대",
+        "description": "AI 서버와 데이터센터 증설에 따른 인프라 투자 확대",
+        "keywords": [
+            "데이터센터",
+            "서버",
+            "AI인프라",
+        ],
         "etfs": [
             "471990",
             "487240",
@@ -176,7 +179,12 @@ THEMES = {
     "전력 인프라": {
         "stage": "FOLLOWER",
         "label": "후속 수혜",
-        "description": "AI 데이터센터 전력 수요 증가와 전력설비 투자 확대",
+        "description": "AI 데이터센터 전력 수요 증가에 따른 전력설비 투자 영역",
+        "keywords": [
+            "전력",
+            "전력인프라",
+            "원자력",
+        ],
         "etfs": [
             "471990",
             "445380",
@@ -187,7 +195,12 @@ THEMES = {
     "냉각·열관리": {
         "stage": "EARLY",
         "label": "선행 관심",
-        "description": "고집적 AI 서버의 전력밀도 증가에 따른 냉각·열관리 영역",
+        "description": "AI 서버 고집적화에 따른 냉각과 열관리 수요 증가 영역",
+        "keywords": [
+            "냉각",
+            "열관리",
+            "쿨링",
+        ],
         "etfs": [],
     },
 
@@ -195,6 +208,11 @@ THEMES = {
         "stage": "EARLY",
         "label": "선행 관심",
         "description": "AI 기술과 의료·바이오 산업의 결합 영역",
+        "keywords": [
+            "의료",
+            "바이오",
+            "헬스케어",
+        ],
         "etfs": [
             "329200",
             "266420",
@@ -206,6 +224,10 @@ THEMES = {
         "stage": "WATCH",
         "label": "관찰",
         "description": "AI와 자동화 기술의 산업 적용 확대 영역",
+        "keywords": [
+            "로봇",
+            "자동화",
+        ],
         "etfs": [
             "465610",
             "476250",
@@ -216,6 +238,11 @@ THEMES = {
         "stage": "WATCH",
         "label": "관찰",
         "description": "전기차·ESS·배터리 소재 및 장비 관련 영역",
+        "keywords": [
+            "2차전지",
+            "배터리",
+            "소부장",
+        ],
         "etfs": [
             "305540",
             "364980",
@@ -235,21 +262,50 @@ THEME_CHAIN = [
 
 
 # ============================================================
+# SESSION STATE
+# ============================================================
+
+if "page" not in st.session_state:
+    st.session_state.page = "내 ETF"
+
+if "selected_code" not in st.session_state:
+    st.session_state.selected_code = DEFAULT_WATCHLIST[0]
+
+if "search_query" not in st.session_state:
+    st.session_state.search_query = ""
+
+if "search_results" not in st.session_state:
+    st.session_state.search_results = {}
+
+if "search_selected_code" not in st.session_state:
+    st.session_state.search_selected_code = None
+
+
+# ============================================================
 # WATCHLIST
 # ============================================================
 
 def load_watchlist():
+
     if not os.path.exists(WATCHLIST_FILE):
         return DEFAULT_WATCHLIST.copy()
 
     try:
-        with open(WATCHLIST_FILE, "r", encoding="utf-8") as f:
+
+        with open(
+            WATCHLIST_FILE,
+            "r",
+            encoding="utf-8",
+        ) as f:
+
             data = json.load(f)
 
         if isinstance(data, list):
+
             result = []
 
             for code in data:
+
                 code = str(code)
 
                 if code in ETF_UNIVERSE:
@@ -265,13 +321,26 @@ def load_watchlist():
 
 
 def save_watchlist(items):
+
     try:
-        with open(WATCHLIST_FILE, "w", encoding="utf-8") as f:
-            json.dump(items, f, ensure_ascii=False, indent=2)
+
+        with open(
+            WATCHLIST_FILE,
+            "w",
+            encoding="utf-8",
+        ) as f:
+
+            json.dump(
+                items,
+                f,
+                ensure_ascii=False,
+                indent=2,
+            )
 
         return True
 
     except Exception:
+
         return False
 
 
@@ -279,8 +348,14 @@ def save_watchlist(items):
 # NAVER DATA
 # ============================================================
 
-@st.cache_data(ttl=300, show_spinner=False)
-def fetch_from_naver(code, count=500):
+@st.cache_data(
+    ttl=300,
+    show_spinner=False,
+)
+def fetch_from_naver(
+    code,
+    count=500,
+):
 
     url = (
         "https://fchart.stock.naver.com/sise.nhn?"
@@ -291,16 +366,17 @@ def fetch_from_naver(code, count=500):
     )
 
     try:
+
         request = urllib.request.Request(
             url,
             headers={
-                "User-Agent": "Mozilla/5.0"
+                "User-Agent": "Mozilla/5.0",
             },
         )
 
         with urllib.request.urlopen(
             request,
-            timeout=10
+            timeout=10,
         ) as response:
 
             data = response.read()
@@ -311,14 +387,24 @@ def fetch_from_naver(code, count=500):
 
         for item in root.findall(".//item"):
 
-            raw = item.attrib.get("data", "")
+            raw = item.attrib.get(
+                "data",
+                "",
+            )
 
             parts = raw.split("|")
 
             if len(parts) != 6:
                 continue
 
-            date_value, open_value, high_value, low_value, close_value, volume_value = parts
+            (
+                date_value,
+                open_value,
+                high_value,
+                low_value,
+                close_value,
+                volume_value,
+            ) = parts
 
             rows.append(
                 [
@@ -346,7 +432,9 @@ def fetch_from_naver(code, count=500):
             ],
         )
 
-        df["Date"] = pd.to_datetime(df["Date"])
+        df["Date"] = pd.to_datetime(
+            df["Date"]
+        )
 
         df = df.sort_values("Date")
 
@@ -355,6 +443,7 @@ def fetch_from_naver(code, count=500):
         return df
 
     except Exception:
+
         return pd.DataFrame()
 
 
@@ -362,12 +451,17 @@ def fetch_from_naver(code, count=500):
 # YAHOO FALLBACK
 # ============================================================
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(
+    ttl=300,
+    show_spinner=False,
+)
 def fetch_from_yahoo(code):
 
     try:
 
-        ticker = yf.Ticker(f"{code}.KS")
+        ticker = yf.Ticker(
+            f"{code}.KS"
+        )
 
         df = ticker.history(
             period="2y",
@@ -381,9 +475,16 @@ def fetch_from_yahoo(code):
         df = df.reset_index()
 
         if "Datetime" in df.columns:
-            df = df.rename(columns={"Datetime": "Date"})
 
-        df["Date"] = pd.to_datetime(df["Date"])
+            df = df.rename(
+                columns={
+                    "Datetime": "Date"
+                }
+            )
+
+        df["Date"] = pd.to_datetime(
+            df["Date"]
+        )
 
         df = df.set_index("Date")
 
@@ -395,27 +496,44 @@ def fetch_from_yahoo(code):
             "Volume",
         ]
 
-        df = df[[c for c in columns if c in df.columns]]
+        df = df[
+            [
+                c
+                for c in columns
+                if c in df.columns
+            ]
+        ]
 
         return df
 
     except Exception:
+
         return pd.DataFrame()
 
 
 # ============================================================
-# DATA LOADER
+# LOAD DATA
 # ============================================================
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(
+    ttl=300,
+    show_spinner=False,
+)
 def load_price_data(code):
 
-    df = fetch_from_naver(code, 500)
+    df = fetch_from_naver(
+        code,
+        500,
+    )
 
     if df.empty:
-        df = fetch_from_yahoo(code)
+
+        df = fetch_from_yahoo(
+            code
+        )
 
     if df.empty:
+
         return pd.DataFrame()
 
     df = df.copy()
@@ -431,12 +549,15 @@ def load_price_data(code):
     for column in numeric_columns:
 
         if column in df.columns:
+
             df[column] = pd.to_numeric(
                 df[column],
                 errors="coerce",
             )
 
-    df = df.dropna(subset=["Close"])
+    df = df.dropna(
+        subset=["Close"]
+    )
 
     return df
 
@@ -454,7 +575,6 @@ def calculate_indicators(df):
 
     close = df["Close"]
 
-    # Moving averages
     df["MA5"] = close.rolling(5).mean()
     df["MA20"] = close.rolling(20).mean()
     df["MA60"] = close.rolling(60).mean()
@@ -469,9 +589,18 @@ def calculate_indicators(df):
     avg_gain = gain.rolling(14).mean()
     avg_loss = loss.rolling(14).mean()
 
-    rs = avg_gain / avg_loss.replace(0, np.nan)
+    rs = avg_gain / avg_loss.replace(
+        0,
+        np.nan,
+    )
 
-    df["RSI14"] = 100 - (100 / (1 + rs))
+    df["RSI14"] = (
+        100 -
+        (
+            100 /
+            (1 + rs)
+        )
+    )
 
     # MACD
     ema12 = close.ewm(
@@ -484,12 +613,19 @@ def calculate_indicators(df):
         adjust=False,
     ).mean()
 
-    df["MACD"] = ema12 - ema26
+    df["MACD"] = (
+        ema12 -
+        ema26
+    )
 
-    df["MACD_SIGNAL"] = df["MACD"].ewm(
-        span=9,
-        adjust=False,
-    ).mean()
+    df["MACD_SIGNAL"] = (
+        df["MACD"]
+        .ewm(
+            span=9,
+            adjust=False,
+        )
+        .mean()
+    )
 
     df["MACD_HIST"] = (
         df["MACD"] -
@@ -501,11 +637,22 @@ def calculate_indicators(df):
     std = close.rolling(20).std()
 
     df["BB_MID"] = middle
-    df["BB_UPPER"] = middle + std * 2
-    df["BB_LOWER"] = middle - std * 2
+    df["BB_UPPER"] = (
+        middle +
+        std * 2
+    )
+
+    df["BB_LOWER"] = (
+        middle -
+        std * 2
+    )
 
     # Volume
-    df["VOL20"] = df["Volume"].rolling(20).mean()
+    df["VOL20"] = (
+        df["Volume"]
+        .rolling(20)
+        .mean()
+    )
 
     df["VOLUME_RATIO"] = (
         df["Volume"] /
@@ -513,13 +660,29 @@ def calculate_indicators(df):
     )
 
     # Returns
-    df["RET5"] = close.pct_change(5) * 100
-    df["RET20"] = close.pct_change(20) * 100
-    df["RET60"] = close.pct_change(60) * 100
+    df["RET5"] = (
+        close.pct_change(5) *
+        100
+    )
 
-    # Recent high/low
-    df["HIGH20"] = close.rolling(20).max()
-    df["LOW20"] = close.rolling(20).min()
+    df["RET20"] = (
+        close.pct_change(20) *
+        100
+    )
+
+    df["RET60"] = (
+        close.pct_change(60) *
+        100
+    )
+
+    # High / Low
+    df["HIGH20"] = (
+        close.rolling(20).max()
+    )
+
+    df["LOW20"] = (
+        close.rolling(20).min()
+    )
 
     return df
 
@@ -546,30 +709,106 @@ def calculate_support_resistance(df):
         value = latest.get(column)
 
         if pd.notna(value):
-            support_candidates.append(float(value))
 
-    resistance = latest.get("HIGH20")
+            support_candidates.append(
+                float(value)
+            )
 
     if support_candidates:
-        support = max(support_candidates)
+
+        support = max(
+            support_candidates
+        )
+
     else:
+
         support = np.nan
 
+    resistance = latest.get(
+        "HIGH20"
+    )
+
     if pd.notna(resistance):
-        resistance = float(resistance)
+
+        resistance = float(
+            resistance
+        )
+
     else:
+
         resistance = np.nan
 
     return support, resistance
 
 
 # ============================================================
-# JUDGMENT ENGINE
+# PRICE ZONES
+# ============================================================
+
+def calculate_price_zones(df):
+
+    if df.empty:
+        return {}
+
+    latest = df.iloc[-1]
+
+    ma20 = latest["MA20"]
+    ma60 = latest["MA60"]
+
+    support, resistance = (
+        calculate_support_resistance(df)
+    )
+
+    zones = {}
+
+    # 1차 접근
+    if pd.notna(ma20):
+
+        zones["primary_low"] = (
+            ma20 * 0.97
+        )
+
+        zones["primary_high"] = (
+            ma20 * 1.02
+        )
+
+    # 2차 접근
+    if pd.notna(ma60):
+
+        zones["secondary_low"] = (
+            ma60 * 0.97
+        )
+
+        zones["secondary_high"] = (
+            ma60 * 1.02
+        )
+
+    # 저항
+    if pd.notna(resistance):
+
+        zones["resistance_low"] = (
+            resistance * 0.97
+        )
+
+        zones["resistance_high"] = (
+            resistance * 1.02
+        )
+
+    zones["support"] = support
+
+    zones["resistance"] = resistance
+
+    return zones
+
+
+# ============================================================
+# JUDGMENT
 # ============================================================
 
 def get_judgment(df):
 
     if df.empty or len(df) < 60:
+
         return {
             "label": "데이터 부족",
             "type": "info",
@@ -579,8 +818,7 @@ def get_judgment(df):
 
     latest = df.iloc[-1]
 
-    close = float(latest["Close"])
-
+    close = latest["Close"]
     ma20 = latest["MA20"]
     ma60 = latest["MA60"]
     rsi = latest["RSI14"]
@@ -598,6 +836,7 @@ def get_judgment(df):
             signal,
         ]
     ):
+
         return {
             "label": "관망",
             "type": "info",
@@ -625,19 +864,22 @@ def get_judgment(df):
     )
 
     near_ma20 = (
-        abs(close - ma20) /
-        ma20 <= 0.035
+        abs(close - ma20)
+        / ma20
+        <= 0.035
     )
 
-    momentum_positive = macd > signal
+    momentum_positive = (
+        macd > signal
+    )
 
     if weak_trend:
 
         return {
             "label": "리스크 재검토",
             "type": "error",
-            "reason": "현재가가 MA20 아래에 있고 MA20도 MA60보다 낮아 추세가 약한 상태입니다.",
-            "trend": "하락/약세",
+            "reason": "현재가가 MA20 아래이고 MA20도 MA60보다 낮아 중기 추세가 약해진 상태입니다.",
+            "trend": "약세",
         }
 
     if positive_trend and extended:
@@ -645,7 +887,7 @@ def get_judgment(df):
         return {
             "label": "눌림목 대기",
             "type": "warning",
-            "reason": "중기 추세는 긍정적이지만 단기 상승폭 또는 RSI가 높아 추격보다는 조정을 확인하는 구간입니다.",
+            "reason": "중기 추세는 살아 있지만 단기 상승폭이 커졌습니다. 지금 추격하기보다 MA20 부근 조정 여부를 확인하는 편이 좋습니다.",
             "trend": "상승 추세",
         }
 
@@ -658,7 +900,7 @@ def get_judgment(df):
         return {
             "label": "매수 검토",
             "type": "success",
-            "reason": "MA20 부근의 눌림과 양호한 중기 추세가 함께 나타나는 구간입니다.",
+            "reason": "중기 상승 추세 안에서 MA20 부근까지 눌림이 나타났고 RSI도 과열권이 아닙니다.",
             "trend": "상승 추세",
         }
 
@@ -667,7 +909,7 @@ def get_judgment(df):
         return {
             "label": "보유 유지",
             "type": "success",
-            "reason": "현재가가 MA20과 MA60 위에 있어 중기 추세가 유지되고 있습니다.",
+            "reason": "현재가가 MA20과 MA60 위에 있어 중기 상승 구조가 유지되고 있습니다. 급등 여부만 확인하면 됩니다.",
             "trend": "상승 추세",
         }
 
@@ -679,16 +921,98 @@ def get_judgment(df):
         return {
             "label": "관망 후 확인",
             "type": "warning",
-            "reason": "모멘텀은 개선되고 있지만 추세 전환이 완전히 확인되지는 않았습니다.",
+            "reason": "MACD 모멘텀은 개선되고 있지만 아직 중기 추세 전환이 완전히 확인되지 않았습니다.",
             "trend": "전환 확인",
         }
 
     return {
         "label": "관망",
         "type": "info",
-        "reason": "현재 방향성이 뚜렷하지 않아 추세 확인 후 접근하는 편이 적절합니다.",
+        "reason": "현재 추세 방향이 뚜렷하지 않습니다. MA20과 MA60 방향을 확인한 뒤 접근하는 구간입니다.",
         "trend": "중립",
     }
+
+
+# ============================================================
+# EXPLANATION HELPERS
+# ============================================================
+
+def rsi_comment(rsi):
+
+    if pd.isna(rsi):
+        return "RSI 데이터를 확인할 수 없습니다."
+
+    if rsi >= 70:
+        return "단기 과열권입니다. 추격 매수는 주의가 필요합니다."
+
+    if rsi >= 60:
+        return "상승 모멘텀이 강한 편이지만 단기 추격은 가격 위치를 함께 봐야 합니다."
+
+    if rsi >= 45:
+        return "중립~양호한 구간입니다. 추세와 함께 보면 됩니다."
+
+    if rsi >= 30:
+        return "상대적으로 약한 구간입니다. 반등 여부를 확인할 필요가 있습니다."
+
+    return "과매도권에 가까워 기술적 반등 가능성을 함께 살펴볼 구간입니다."
+
+
+def volume_comment(ratio):
+
+    if pd.isna(ratio):
+        return "거래량 데이터를 확인할 수 없습니다."
+
+    if ratio >= 2:
+        return "평균보다 거래가 크게 증가해 현재 움직임에 시장 참여가 강하게 붙고 있습니다."
+
+    if ratio >= 1.2:
+        return "평균보다 거래량이 증가해 현재 방향의 신뢰도를 살펴볼 수 있습니다."
+
+    if ratio >= 0.8:
+        return "평균 수준의 거래량입니다. 방향성이 강하게 확인된 상태는 아닙니다."
+
+    return "거래량이 평균보다 적어 강한 추세 확인에는 시간이 필요합니다."
+
+
+def trend_comment(
+    price,
+    ma20,
+    ma60,
+):
+
+    if pd.isna(ma20) or pd.isna(ma60):
+
+        return "이동평균 데이터가 부족합니다."
+
+    if price > ma20 > ma60:
+
+        return "현재가가 MA20과 MA60 위에 있고 단기 평균도 중기 평균보다 높아 상승 구조가 유지되고 있습니다."
+
+    if price > ma60 and price < ma20:
+
+        return "중기 추세는 아직 유지되지만 단기적으로 MA20 아래에 있어 눌림 구간인지 확인이 필요합니다."
+
+    if price < ma20 < ma60:
+
+        return "현재가와 이동평균 구조가 모두 약해져 추세 회복 여부를 먼저 확인하는 구간입니다."
+
+    return "이동평균 구조가 혼재되어 방향성을 추가 확인할 필요가 있습니다."
+
+
+def macd_comment(
+    macd,
+    signal,
+):
+
+    if pd.isna(macd) or pd.isna(signal):
+
+        return "MACD 데이터를 확인할 수 없습니다."
+
+    if macd > signal:
+
+        return "MACD가 Signal 위에 있어 단기 모멘텀은 긍정적입니다."
+
+    return "MACD가 Signal 아래에 있어 단기 모멘텀이 약해지고 있습니다."
 
 
 # ============================================================
@@ -706,7 +1030,29 @@ def holding_scenario(
 
     latest = df.iloc[-1]
 
-    price = float(latest["Close"])
+    price = float(
+        latest["Close"]
+    )
+
+    support, resistance = (
+        calculate_support_resistance(df)
+    )
+
+    zones = calculate_price_zones(
+        df
+    )
+
+    profit = (
+        price -
+        average_price
+    ) * shares
+
+    profit_pct = (
+        (
+            price /
+            average_price
+        ) - 1
+    ) * 100
 
     ma20 = latest["MA20"]
     ma60 = latest["MA60"]
@@ -714,33 +1060,16 @@ def holding_scenario(
     macd = latest["MACD"]
     signal = latest["MACD_SIGNAL"]
 
-    support, resistance = calculate_support_resistance(df)
-
-    profit = (
-        price - average_price
-    ) * shares
-
-    profit_pct = (
-        (price / average_price) - 1
-    ) * 100
-
-    risk_condition = False
-
-    if pd.notna(ma20) and pd.notna(ma60):
-
-        if (
-            price < ma20
-            and ma20 < ma60
-        ):
-            risk_condition = True
-
-    if risk_condition:
+    if (
+        price < ma20
+        and ma20 < ma60
+    ):
 
         action = "리스크 재검토"
 
         explanation = (
-            "현재가가 MA20 아래로 내려가고 중기 이동평균 구조도 약해지고 있습니다. "
-            "추가매수보다는 추세 회복 여부를 확인하는 구간입니다."
+            "현재가가 MA20 아래로 내려가고 중기 이동평균도 약해지고 있습니다. "
+            "추가매수보다 추세 회복 여부를 먼저 확인하는 시나리오입니다."
         )
 
     elif (
@@ -753,13 +1082,15 @@ def holding_scenario(
         action = "일부 이익실현 검토"
 
         explanation = (
-            "최근 저항권에 접근했고 RSI도 높은 편입니다. "
-            "추가 상승 가능성을 열어두되 일부 이익실현 여부를 검토할 수 있는 구간입니다."
+            "최근 저항권에 접근했고 RSI도 높은 수준입니다. "
+            "추가 상승 가능성을 열어두되 일부 이익실현을 검토할 수 있는 가격대입니다."
         )
 
     elif (
         pd.notna(ma20)
-        and abs(price - ma20) / ma20 <= 0.035
+        and abs(price - ma20)
+        / ma20
+        <= 0.035
         and pd.notna(rsi)
         and 42 <= rsi <= 67
         and price > ma60
@@ -769,7 +1100,7 @@ def holding_scenario(
 
         explanation = (
             "중기 추세가 유지되는 가운데 MA20 부근까지 조정된 상태입니다. "
-            "지지 확인 시 분할 접근을 검토할 수 있습니다."
+            "1차 가격대에서 일부 접근하고 MA60 부근을 2차 확인 구간으로 볼 수 있습니다."
         )
 
     else:
@@ -778,7 +1109,8 @@ def holding_scenario(
 
         explanation = (
             "현재 추세가 크게 훼손되지 않았습니다. "
-            "MA20과 MA60의 방향을 중심으로 보유 여부를 점검하는 구간입니다."
+            "MA20 위에서 움직이는 동안 보유를 유지하고, "
+            "MA20 이탈 후 MA60까지 약해지는지를 확인하는 시나리오입니다."
         )
 
     return {
@@ -789,17 +1121,126 @@ def holding_scenario(
         "explanation": explanation,
         "support": support,
         "resistance": resistance,
+        "zones": zones,
     }
+
+
+# ============================================================
+# FORMAT
+# ============================================================
+
+def fmt_price(value):
+
+    if pd.isna(value):
+        return "-"
+
+    return f"{value:,.0f}원"
+
+
+def fmt_pct(value):
+
+    if pd.isna(value):
+        return "-"
+
+    return f"{value:+.2f}%"
+
+
+def fmt_ratio(value):
+
+    if pd.isna(value):
+        return "-"
+
+    return f"{value:.2f}배"
+
+
+def fmt_range(
+    low,
+    high,
+):
+
+    if pd.isna(low) or pd.isna(high):
+        return "-"
+
+    return (
+        f"{low:,.0f} ~ "
+        f"{high:,.0f}원"
+    )
+
+
+# ============================================================
+# SEARCH
+# ============================================================
+
+def search_etfs(
+    keyword,
+):
+
+    keyword = (
+        keyword
+        .strip()
+        .lower()
+    )
+
+    if not keyword:
+
+        return {}
+
+    results = {}
+
+    # ETF 검색
+    for code, name in ETF_UNIVERSE.items():
+
+        if (
+            keyword in code.lower()
+            or keyword in name.lower()
+        ):
+
+            results[code] = name
+
+    # 테마 검색
+    for theme_name, info in THEMES.items():
+
+        theme_words = [
+            theme_name
+        ] + info.get(
+            "keywords",
+            [],
+        )
+
+        theme_match = any(
+            keyword in word.lower()
+            or word.lower() in keyword
+            for word in theme_words
+        )
+
+        if theme_match:
+
+            for code in info["etfs"]:
+
+                if code in ETF_UNIVERSE:
+
+                    results[code] = (
+                        ETF_UNIVERSE[code]
+                    )
+
+    return results
 
 
 # ============================================================
 # CHART
 # ============================================================
 
-def draw_chart(df, period):
+def draw_chart(
+    df,
+    period,
+):
 
     if df.empty:
-        st.warning("차트 데이터가 없습니다.")
+
+        st.warning(
+            "차트 데이터가 없습니다."
+        )
+
         return
 
     period_days = {
@@ -809,66 +1250,69 @@ def draw_chart(df, period):
         "1Y": 252,
     }
 
-    days = period_days.get(period, 66)
+    days = period_days.get(
+        period,
+        66,
+    )
 
-    chart_df = df.tail(days).copy()
-
-    if chart_df.empty:
-        st.warning("선택한 기간의 데이터가 없습니다.")
-        return
+    chart_df = (
+        df.tail(days)
+        .copy()
+    )
 
     fig = make_subplots(
         rows=2,
         cols=1,
         shared_xaxes=True,
-        row_heights=[0.78, 0.22],
+        row_heights=[
+            0.78,
+            0.22,
+        ],
         vertical_spacing=0.04,
     )
 
-    # Price
     fig.add_trace(
         go.Scatter(
             x=chart_df.index,
             y=chart_df["Close"],
             name="가격",
             mode="lines",
-            line=dict(width=2),
+            line=dict(
+                width=2
+            ),
         ),
         row=1,
         col=1,
     )
 
-    # MA20
-    if "MA20" in chart_df.columns:
-
-        fig.add_trace(
-            go.Scatter(
-                x=chart_df.index,
-                y=chart_df["MA20"],
-                name="MA20",
-                mode="lines",
-                line=dict(width=1.5),
+    fig.add_trace(
+        go.Scatter(
+            x=chart_df.index,
+            y=chart_df["MA20"],
+            name="MA20",
+            mode="lines",
+            line=dict(
+                width=1.5
             ),
-            row=1,
-            col=1,
-        )
+        ),
+        row=1,
+        col=1,
+    )
 
-    # MA60
-    if "MA60" in chart_df.columns:
-
-        fig.add_trace(
-            go.Scatter(
-                x=chart_df.index,
-                y=chart_df["MA60"],
-                name="MA60",
-                mode="lines",
-                line=dict(width=1.5),
+    fig.add_trace(
+        go.Scatter(
+            x=chart_df.index,
+            y=chart_df["MA60"],
+            name="MA60",
+            mode="lines",
+            line=dict(
+                width=1.5
             ),
-            row=1,
-            col=1,
-        )
+        ),
+        row=1,
+        col=1,
+    )
 
-    # Volume
     fig.add_trace(
         go.Bar(
             x=chart_df.index,
@@ -927,55 +1371,122 @@ def draw_chart(df, period):
 
 
 # ============================================================
-# FORMAT FUNCTIONS
+# PRICE SCENARIO
 # ============================================================
 
-def fmt_price(value):
+def render_price_scenario(
+    df,
+    judgment,
+):
 
-    if pd.isna(value):
-        return "-"
+    latest = df.iloc[-1]
 
-    return f"{value:,.0f}원"
+    price = latest["Close"]
 
+    zones = calculate_price_zones(
+        df
+    )
 
-def fmt_pct(value):
+    st.markdown(
+        "### 가격 대응 구간"
+    )
 
-    if pd.isna(value):
-        return "-"
+    st.caption(
+        "이 가격대는 MA20·MA60·최근 고점/저점을 이용한 기술적 참고 구간입니다."
+    )
 
-    return f"{value:+.2f}%"
+    c1, c2 = st.columns(2)
 
+    with c1:
 
-def fmt_ratio(value):
+        st.metric(
+            "현재가",
+            fmt_price(price),
+        )
 
-    if pd.isna(value):
-        return "-"
+    with c2:
 
-    return f"{value:.2f}배"
+        st.metric(
+            "최근 저항",
+            fmt_price(
+                zones.get(
+                    "resistance"
+                )
+            ),
+        )
 
+    c3, c4 = st.columns(2)
 
-# ============================================================
-# ETF SEARCH
-# ============================================================
+    with c3:
 
-def search_etfs(keyword):
+        st.metric(
+            "1차 접근",
+            fmt_range(
+                zones.get(
+                    "primary_low",
+                    np.nan,
+                ),
+                zones.get(
+                    "primary_high",
+                    np.nan,
+                ),
+            ),
+        )
 
-    keyword = keyword.strip().lower()
+    with c4:
 
-    if not keyword:
-        return ETF_UNIVERSE
+        st.metric(
+            "2차 접근",
+            fmt_range(
+                zones.get(
+                    "secondary_low",
+                    np.nan,
+                ),
+                zones.get(
+                    "secondary_high",
+                    np.nan,
+                ),
+            ),
+        )
 
-    result = {}
+    if judgment["label"] == "매수 검토":
 
-    for code, name in ETF_UNIVERSE.items():
+        st.success(
+            "현재는 1차 접근 가격대가 핵심입니다. "
+            "1차 구간에서 한 번에 접근하기보다 분할 접근하고, "
+            "MA20이 유지되는지를 확인하는 시나리오입니다."
+        )
 
-        if (
-            keyword in code.lower()
-            or keyword in name.lower()
-        ):
-            result[code] = name
+    elif judgment["label"] == "눌림목 대기":
 
-    return result
+        st.warning(
+            "현재가는 단기적으로 올라온 상태입니다. "
+            "지금 추격하기보다 1차 접근 구간까지 내려오는지 확인하고, "
+            "추가 조정 시 2차 접근 구간을 확인하는 방식입니다."
+        )
+
+    elif judgment["label"] == "보유 유지":
+
+        st.info(
+            "현재 추세가 유지되는 동안에는 보유를 유지하는 시나리오입니다. "
+            "MA20 부근 조정 시 1차 대응, MA60 부근까지 내려오면 "
+            "중기 추세 훼손 여부를 다시 확인합니다."
+        )
+
+    elif judgment["label"] == "리스크 재검토":
+
+        st.error(
+            "현재는 가격을 낮춰 매수하기보다 추세 회복 여부를 먼저 확인하는 구간입니다. "
+            "MA20 회복 → MA60 회복 순서가 중요합니다."
+        )
+
+    else:
+
+        st.info(
+            "현재는 방향성이 명확하지 않습니다. "
+            "1차 접근 가격대에서 지지가 확인되거나 "
+            "저항을 돌파한 뒤 안착하는지를 확인하는 시나리오입니다."
+        )
 
 
 # ============================================================
@@ -987,26 +1498,31 @@ def render_etf_detail(
     name,
 ):
 
-    st.subheader(name)
+    with st.spinner(
+        "ETF 데이터를 불러오는 중입니다..."
+    ):
 
-    with st.spinner("ETF 데이터를 불러오는 중입니다..."):
-
-        df = load_price_data(code)
+        df = load_price_data(
+            code
+        )
 
     if df.empty:
 
         st.error(
-            "가격 데이터를 불러오지 못했습니다. "
-            "잠시 후 다시 시도해주세요."
+            "가격 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."
         )
 
         return
 
-    df = calculate_indicators(df)
+    df = calculate_indicators(
+        df
+    )
 
     latest = df.iloc[-1]
 
-    price = float(latest["Close"])
+    price = float(
+        latest["Close"]
+    )
 
     previous = (
         df["Close"].iloc[-2]
@@ -1014,31 +1530,38 @@ def render_etf_detail(
         else np.nan
     )
 
-    if pd.notna(previous) and previous != 0:
+    if (
+        pd.notna(previous)
+        and previous != 0
+    ):
 
         daily_change = (
-            (price / previous) - 1
+            price / previous - 1
         ) * 100
 
     else:
 
         daily_change = np.nan
 
-    judgment = get_judgment(df)
+    judgment = get_judgment(
+        df
+    )
 
-    support, resistance = calculate_support_resistance(df)
+    st.subheader(
+        name
+    )
+
+    st.caption(
+        f"{code} · 최근 데이터 {df.index[-1].strftime('%Y-%m-%d')}"
+    )
 
     # --------------------------------------------------------
     # PRICE
     # --------------------------------------------------------
 
-    st.caption(
-        f"최근 데이터: {df.index[-1].strftime('%Y-%m-%d')}"
-    )
+    p1, p2 = st.columns(2)
 
-    price_col1, price_col2 = st.columns(2)
-
-    with price_col1:
+    with p1:
 
         st.metric(
             "현재가",
@@ -1046,11 +1569,13 @@ def render_etf_detail(
             fmt_pct(daily_change),
         )
 
-    with price_col2:
+    with p2:
 
         st.metric(
             "20일 수익률",
-            fmt_pct(latest["RET20"]),
+            fmt_pct(
+                latest["RET20"]
+            ),
             f"60일 {fmt_pct(latest['RET60'])}",
         )
 
@@ -1058,7 +1583,9 @@ def render_etf_detail(
     # JUDGMENT
     # --------------------------------------------------------
 
-    st.markdown("### 오늘의 판단")
+    st.markdown(
+        "### 🎯 지금의 판단"
+    )
 
     if judgment["type"] == "success":
 
@@ -1092,101 +1619,146 @@ def render_etf_detail(
     # EVIDENCE
     # --------------------------------------------------------
 
-    st.markdown("### 판단 근거")
+    st.markdown(
+        "### 🔍 왜 이렇게 판단했나?"
+    )
 
-    c1, c2, c3 = st.columns(3)
+    trend_text = trend_comment(
+        price,
+        latest["MA20"],
+        latest["MA60"],
+    )
 
-    with c1:
+    rsi_text = rsi_comment(
+        latest["RSI14"]
+    )
+
+    volume_text = volume_comment(
+        latest["VOLUME_RATIO"]
+    )
+
+    macd_text = macd_comment(
+        latest["MACD"],
+        latest["MACD_SIGNAL"],
+    )
+
+    e1, e2 = st.columns(2)
+
+    with e1:
 
         st.metric(
             "추세",
             judgment["trend"],
         )
 
-    with c2:
-
-        st.metric(
-            "MA20",
-            fmt_price(latest["MA20"]),
+        st.caption(
+            trend_text
         )
 
-    with c3:
-
-        st.metric(
-            "MA60",
-            fmt_price(latest["MA60"]),
-        )
-
-    c4, c5, c6 = st.columns(3)
-
-    with c4:
+    with e2:
 
         st.metric(
             "RSI",
-            f"{latest['RSI14']:.1f}"
-            if pd.notna(latest["RSI14"])
-            else "-",
+            (
+                f"{latest['RSI14']:.1f}"
+                if pd.notna(
+                    latest["RSI14"]
+                )
+                else "-"
+            ),
         )
 
-    with c5:
+        st.caption(
+            rsi_text
+        )
+
+    e3, e4 = st.columns(2)
+
+    with e3:
 
         st.metric(
             "거래량",
-            fmt_ratio(latest["VOLUME_RATIO"]),
+            fmt_ratio(
+                latest["VOLUME_RATIO"]
+            ),
         )
 
-    with c6:
+        st.caption(
+            volume_text
+        )
+
+    with e4:
 
         st.metric(
             "MACD",
-            "긍정"
-            if latest["MACD"] > latest["MACD_SIGNAL"]
-            else "약화",
+            (
+                "긍정"
+                if latest["MACD"]
+                > latest["MACD_SIGNAL"]
+                else "약화"
+            ),
+        )
+
+        st.caption(
+            macd_text
         )
 
     # --------------------------------------------------------
-    # SUPPORT / RESISTANCE
+    # MA
     # --------------------------------------------------------
 
-    st.markdown("### 가격 구간")
+    ma1, ma2 = st.columns(2)
 
-    p1, p2 = st.columns(2)
-
-    with p1:
+    with ma1:
 
         st.metric(
-            "주요 지지",
-            fmt_price(support),
+            "MA20",
+            fmt_price(
+                latest["MA20"]
+            ),
         )
 
-    with p2:
+    with ma2:
 
         st.metric(
-            "주요 저항",
-            fmt_price(resistance),
+            "MA60",
+            fmt_price(
+                latest["MA60"]
+            ),
         )
+
+    # --------------------------------------------------------
+    # PRICE SCENARIO
+    # --------------------------------------------------------
+
+    render_price_scenario(
+        df,
+        judgment,
+    )
 
     # --------------------------------------------------------
     # HOLDING
     # --------------------------------------------------------
 
-    st.markdown("### 보유 여부")
+    st.markdown(
+        "### 💼 보유 중이라면"
+    )
 
     holding = st.radio(
-        "현재 보유하고 있습니까?",
+        "현재 보유 여부",
         [
-            "아니오",
-            "예",
+            "보유하지 않음",
+            "보유 중",
         ],
         horizontal=True,
         key=f"holding_{code}",
     )
 
-    if holding == "예":
+    if holding == "보유 중":
 
-        input1, input2 = st.columns(2)
+        h1, h2 = st.columns(2)
 
-        with input1:
+        with h1:
 
             average_price = st.number_input(
                 "평균 매수가",
@@ -1196,7 +1768,7 @@ def render_etf_detail(
                 key=f"avg_{code}",
             )
 
-        with input2:
+        with h2:
 
             shares = st.number_input(
                 "보유 수량",
@@ -1214,32 +1786,38 @@ def render_etf_detail(
 
         if scenario:
 
-            st.markdown("### 보유 포지션")
+            st.markdown(
+                "#### 현재 포지션"
+            )
 
-            h1, h2, h3 = st.columns(3)
+            h3, h4, h5 = st.columns(3)
 
-            with h1:
+            with h3:
 
                 st.metric(
                     "평가손익",
                     f"{scenario['profit']:+,.0f}원",
                 )
 
-            with h2:
+            with h4:
 
                 st.metric(
                     "수익률",
                     f"{scenario['profit_pct']:+.2f}%",
                 )
 
-            with h3:
+            with h5:
 
                 st.metric(
                     "현재가",
-                    fmt_price(scenario["price"]),
+                    fmt_price(
+                        scenario["price"]
+                    ),
                 )
 
-            st.markdown("### 대응 시나리오")
+            st.markdown(
+                "#### 대응 시나리오"
+            )
 
             if scenario["action"] == "추가매수 검토":
 
@@ -1269,23 +1847,76 @@ def render_etf_detail(
                     f"{scenario['explanation']}"
                 )
 
+            zones = scenario["zones"]
+
+            z1, z2, z3 = st.columns(3)
+
+            with z1:
+
+                st.metric(
+                    "1차 가격대",
+                    fmt_range(
+                        zones.get(
+                            "primary_low",
+                            np.nan,
+                        ),
+                        zones.get(
+                            "primary_high",
+                            np.nan,
+                        ),
+                    ),
+                )
+
+            with z2:
+
+                st.metric(
+                    "2차 가격대",
+                    fmt_range(
+                        zones.get(
+                            "secondary_low",
+                            np.nan,
+                        ),
+                        zones.get(
+                            "secondary_high",
+                            np.nan,
+                        ),
+                    ),
+                )
+
+            with z3:
+
+                st.metric(
+                    "저항 가격대",
+                    fmt_range(
+                        zones.get(
+                            "resistance_low",
+                            np.nan,
+                        ),
+                        zones.get(
+                            "resistance_high",
+                            np.nan,
+                        ),
+                    ),
+                )
+
     else:
 
         st.info(
-            "보유하지 않은 ETF입니다.\n\n"
-            "현재 추세가 유지되고 있고 MA20 부근에서 눌림이 확인되면 "
-            "매수 검토 대상으로 볼 수 있습니다. "
-            "단기 급등 구간에서는 추격보다 눌림을 기다리는 방식으로 접근합니다."
+            "보유하지 않은 경우에는 현재가를 추격하기보다 "
+            "1차 접근 가격대에서 지지가 확인되는지 보고, "
+            "더 깊은 조정이 발생하면 2차 가격대를 확인하는 방식으로 접근할 수 있습니다."
         )
 
     # --------------------------------------------------------
     # CHART
     # --------------------------------------------------------
 
-    st.markdown("### 차트")
+    st.markdown(
+        "### 📈 가격 흐름"
+    )
 
     period = st.radio(
-        "차트 기간",
+        "기간",
         [
             "1M",
             "3M",
@@ -1304,358 +1935,314 @@ def render_etf_detail(
     )
 
     # --------------------------------------------------------
-    # NEXT WATCH
+    # FINAL SUMMARY
     # --------------------------------------------------------
 
-    st.markdown("### 다음에 볼 것")
-
-    watch_items = []
-
-    if pd.notna(latest["MA20"]):
-
-        if price > latest["MA20"]:
-
-            watch_items.append(
-                "현재가는 MA20 위에 있습니다."
-            )
-
-        else:
-
-            watch_items.append(
-                "현재가가 MA20 아래인지 확인하세요."
-            )
-
-    if pd.notna(latest["MA60"]):
-
-        if price > latest["MA60"]:
-
-            watch_items.append(
-                "MA60 위에서 추세가 유지되는지 확인하세요."
-            )
-
-        else:
-
-            watch_items.append(
-                "MA60 회복 여부를 확인하세요."
-            )
-
-    if pd.notna(latest["RSI14"]):
-
-        if latest["RSI14"] >= 70:
-
-            watch_items.append(
-                "RSI가 높아 단기 추격 위험을 확인하세요."
-            )
-
-        elif latest["RSI14"] <= 40:
-
-            watch_items.append(
-                "RSI가 낮아 반등 여부를 확인하세요."
-            )
-
-        else:
-
-            watch_items.append(
-                "RSI가 극단적이지 않아 추세를 함께 확인하세요."
-            )
-
-    for item in watch_items:
-
-        st.write(
-            f"• {item}"
-        )
-
-    # --------------------------------------------------------
-    # TECHNICAL DETAIL
-    # --------------------------------------------------------
-
-    with st.expander("상세 기술지표 보기"):
-
-        t1, t2, t3 = st.columns(3)
-
-        with t1:
-
-            st.metric(
-                "MA5",
-                fmt_price(latest["MA5"]),
-            )
-
-        with t2:
-
-            st.metric(
-                "MA20",
-                fmt_price(latest["MA20"]),
-            )
-
-        with t3:
-
-            st.metric(
-                "MA60",
-                fmt_price(latest["MA60"]),
-            )
-
-        t4, t5, t6 = st.columns(3)
-
-        with t4:
-
-            st.metric(
-                "MA120",
-                fmt_price(latest["MA120"]),
-            )
-
-        with t5:
-
-            st.metric(
-                "BB 상단",
-                fmt_price(latest["BB_UPPER"]),
-            )
-
-        with t6:
-
-            st.metric(
-                "BB 하단",
-                fmt_price(latest["BB_LOWER"]),
-            )
-
-        t7, t8, t9 = st.columns(3)
-
-        with t7:
-
-            st.metric(
-                "RSI14",
-                f"{latest['RSI14']:.1f}"
-                if pd.notna(latest["RSI14"])
-                else "-",
-            )
-
-        with t8:
-
-            st.metric(
-                "MACD",
-                f"{latest['MACD']:.2f}"
-                if pd.notna(latest["MACD"])
-                else "-",
-            )
-
-        with t9:
-
-            st.metric(
-                "MACD Signal",
-                f"{latest['MACD_SIGNAL']:.2f}"
-                if pd.notna(latest["MACD_SIGNAL"])
-                else "-",
-            )
-
-        st.markdown("#### 최근 데이터")
-
-        technical_columns = [
-            "Close",
-            "MA20",
-            "MA60",
-            "RSI14",
-            "MACD",
-            "VOLUME_RATIO",
-            "RET5",
-            "RET20",
-            "RET60",
-        ]
-
-        available_columns = [
-            c
-            for c in technical_columns
-            if c in df.columns
-        ]
-
-        recent = df[
-            available_columns
-        ].tail(10).copy()
-
-        st.dataframe(
-            recent,
-            use_container_width=True,
-        )
-
-
-# ============================================================
-# MY ETF TAB
-# ============================================================
-
-def render_my_etf():
-
-    st.title("📊 ETF RADAR")
-
-    st.caption(
-        "내 ETF를 한눈에 보고, 지금은 매수·보유·눌림·관망 중 어디에 가까운지 확인합니다."
+    st.markdown(
+        "### 한 줄 정리"
     )
 
-    # --------------------------------------------------------
-    # WATCHLIST
-    # --------------------------------------------------------
+    if judgment["label"] == "매수 검토":
 
-    watchlist = load_watchlist()
-
-    if "selected_code" not in st.session_state:
-
-        if watchlist:
-            st.session_state.selected_code = watchlist[0]
-
-        else:
-            st.session_state.selected_code = list(
-                ETF_UNIVERSE.keys()
-            )[0]
-
-    st.markdown("### 내 ETF")
-
-    if watchlist:
-
-        watch_names = [
-            ETF_UNIVERSE.get(
-                code,
-                code,
-            )
-            for code in watchlist
-        ]
-
-        selected_index = 0
-
-        if st.session_state.selected_code in watchlist:
-
-            selected_index = watchlist.index(
-                st.session_state.selected_code
-            )
-
-        selected_name = st.selectbox(
-            "관심 ETF",
-            watch_names,
-            index=selected_index,
-            label_visibility="collapsed",
+        st.success(
+            "상승 추세 안에서 눌림이 확인되는지가 핵심입니다. "
+            "현재가 추격보다 1차 가격대의 반응을 확인하세요."
         )
 
-        for code, name in ETF_UNIVERSE.items():
+    elif judgment["label"] == "눌림목 대기":
 
-            if name == selected_name:
+        st.warning(
+            "방향은 좋지만 가격이 앞서 있습니다. "
+            "MA20 부근 조정을 기다리는 쪽이 핵심입니다."
+        )
 
-                st.session_state.selected_code = code
-                break
+    elif judgment["label"] == "보유 유지":
+
+        st.success(
+            "추세는 유지되고 있습니다. "
+            "MA20 이탈 후 MA60까지 약해지는지만 집중해서 보시면 됩니다."
+        )
+
+    elif judgment["label"] == "리스크 재검토":
+
+        st.error(
+            "지금은 가격보다 추세 회복 여부가 중요합니다. "
+            "MA20 → MA60 회복 순서를 확인하세요."
+        )
 
     else:
 
         st.info(
-            "관심 ETF가 없습니다. 아래 검색에서 ETF를 추가해주세요."
+            "현재 방향성이 명확하지 않습니다. "
+            "가격대와 이동평균 방향을 함께 확인하세요."
         )
 
-    # --------------------------------------------------------
-    # SEARCH
-    # --------------------------------------------------------
 
-    st.markdown("### ETF 찾기")
+# ============================================================
+# SEARCH UI
+# ============================================================
 
-    keyword = st.text_input(
-        "ETF 검색",
-        placeholder="예: AI, 반도체, 나스닥, 전력",
-        label_visibility="collapsed",
+def render_search():
+
+    st.markdown(
+        "### 🔎 ETF 찾기"
     )
 
-    search_result = search_etfs(keyword)
+    st.caption(
+        "ETF 이름·종목코드뿐 아니라 AI·전력·반도체·로봇·2차전지 같은 테마명도 검색할 수 있습니다."
+    )
 
-    if search_result:
+    with st.form(
+        "etf_search_form",
+        clear_on_submit=False,
+    ):
 
-        search_names = list(
-            search_result.values()
+        query = st.text_input(
+            "검색어",
+            value=st.session_state.search_query,
+            placeholder="예: AI 반도체 / 전력 / 나스닥 / 395160",
         )
 
-        search_selected = st.selectbox(
-            "검색 결과",
-            search_names,
+        submitted = st.form_submit_button(
+            "🔎 검색",
+            type="primary",
+            use_container_width=True,
         )
 
-        selected_search_code = next(
-            (
-                code
-                for code, name in search_result.items()
-                if name == search_selected
-            ),
-            None,
+    if submitted:
+
+        st.session_state.search_query = (
+            query.strip()
         )
 
-        b1, b2 = st.columns(2)
+        st.session_state.search_results = (
+            search_etfs(
+                query
+            )
+        )
 
-        with b1:
+        st.session_state.search_selected_code = None
 
-            if st.button(
-                "관심종목에 추가",
-                use_container_width=True,
-            ):
+    results = (
+        st.session_state.search_results
+    )
 
-                if selected_search_code:
+    if not results:
 
-                    if selected_search_code not in watchlist:
+        if st.session_state.search_query:
 
-                        watchlist.append(
-                            selected_search_code
-                        )
+            st.warning(
+                f"'{st.session_state.search_query}'에 해당하는 ETF를 찾지 못했습니다."
+            )
 
-                        if save_watchlist(watchlist):
+        return
 
-                            st.session_state.selected_code = (
-                                selected_search_code
-                            )
+    st.markdown(
+        f"**검색 결과 {len(results)}개**"
+    )
 
-                            st.success(
-                                f"{search_selected} 추가 완료"
-                            )
+    result_codes = list(
+        results.keys()
+    )
 
-                            st.rerun()
+    result_labels = [
+        f"{code} · {results[code]}"
+        for code in result_codes
+    ]
 
-                    else:
+    selected_label = st.selectbox(
+        "분석할 ETF",
+        result_labels,
+        key="search_result_select",
+    )
 
-                        st.info(
-                            "이미 관심종목에 있습니다."
-                        )
+    selected_code = result_codes[
+        result_labels.index(
+            selected_label
+        )
+    ]
 
-        with b2:
+    c1, c2 = st.columns(2)
 
-            if st.button(
-                "현재 ETF 삭제",
-                use_container_width=True,
-            ):
+    with c1:
 
-                current_code = (
-                    st.session_state.selected_code
+        if st.button(
+            "📊 이 ETF 분석하기",
+            type="primary",
+            use_container_width=True,
+        ):
+
+            st.session_state.selected_code = (
+                selected_code
+            )
+
+            st.success(
+                f"{ETF_UNIVERSE[selected_code]}를 분석합니다."
+            )
+
+            st.rerun()
+
+    with c2:
+
+        if st.button(
+            "⭐ 관심 ETF 추가",
+            use_container_width=True,
+        ):
+
+            watchlist = load_watchlist()
+
+            if selected_code not in watchlist:
+
+                watchlist.append(
+                    selected_code
                 )
 
-                if current_code in watchlist:
+                save_watchlist(
+                    watchlist
+                )
 
-                    watchlist.remove(
-                        current_code
-                    )
+                st.success(
+                    "관심 ETF에 추가했습니다."
+                )
 
-                    save_watchlist(
-                        watchlist
-                    )
+            else:
 
-                    if watchlist:
+                st.info(
+                    "이미 관심 ETF에 있습니다."
+                )
 
-                        st.session_state.selected_code = watchlist[0]
 
-                    st.success(
-                        "관심종목에서 삭제했습니다."
-                    )
+# ============================================================
+# WATCHLIST UI
+# ============================================================
 
-                    st.rerun()
+def render_watchlist_selector():
 
-    # --------------------------------------------------------
-    # DETAIL
-    # --------------------------------------------------------
+    watchlist = load_watchlist()
 
-    code = st.session_state.selected_code
+    st.markdown(
+        "### ⭐ 내 ETF"
+    )
+
+    if not watchlist:
+
+        st.info(
+            "관심 ETF가 없습니다."
+        )
+
+        return
+
+    labels = [
+        f"{code} · {ETF_UNIVERSE.get(code, code)}"
+        for code in watchlist
+    ]
+
+    current_code = (
+        st.session_state.selected_code
+    )
+
+    if current_code in watchlist:
+
+        current_index = (
+            watchlist.index(
+                current_code
+            )
+        )
+
+    else:
+
+        current_index = 0
+
+        st.session_state.selected_code = (
+            watchlist[0]
+        )
+
+    selected_label = st.selectbox(
+        "내 ETF 선택",
+        labels,
+        index=current_index,
+        key="watchlist_select",
+    )
+
+    selected_code = watchlist[
+        labels.index(
+            selected_label
+        )
+    ]
+
+    st.session_state.selected_code = (
+        selected_code
+    )
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+
+        if st.button(
+            "📊 분석",
+            use_container_width=True,
+        ):
+
+            st.session_state.selected_code = (
+                selected_code
+            )
+
+            st.rerun()
+
+    with c2:
+
+        if st.button(
+            "🗑 관심종목 삭제",
+            use_container_width=True,
+        ):
+
+            watchlist.remove(
+                selected_code
+            )
+
+            save_watchlist(
+                watchlist
+            )
+
+            if watchlist:
+
+                st.session_state.selected_code = (
+                    watchlist[0]
+                )
+
+            st.rerun()
+
+
+# ============================================================
+# MY ETF
+# ============================================================
+
+def render_my_etf():
+
+    st.title(
+        "📊 ETF RADAR"
+    )
+
+    st.caption(
+        "내 ETF의 현재 위치와 대응 가격대를 한눈에 확인합니다."
+    )
+
+    render_search()
+
+    st.divider()
+
+    render_watchlist_selector()
+
+    st.divider()
+
+    code = (
+        st.session_state.selected_code
+    )
 
     name = ETF_UNIVERSE.get(
         code,
         code,
     )
-
-    st.divider()
 
     render_etf_detail(
         code,
@@ -1664,99 +2251,172 @@ def render_my_etf():
 
 
 # ============================================================
-# THEME TAB
+# THEME ETF ANALYSIS
 # ============================================================
 
-def render_theme_etf(code):
+def theme_etf_summary(
+    code,
+):
 
-    name = ETF_UNIVERSE.get(
-        code,
-        code,
+    df = load_price_data(
+        code
     )
-
-    with st.spinner(
-        f"{name} 분석 중..."
-    ):
-
-        df = load_price_data(code)
 
     if df.empty:
         return None
 
-    df = calculate_indicators(df)
+    df = calculate_indicators(
+        df
+    )
 
     latest = df.iloc[-1]
 
-    judgment = get_judgment(df)
+    judgment = get_judgment(
+        df
+    )
 
     return {
         "code": code,
-        "name": name,
+        "name": ETF_UNIVERSE.get(
+            code,
+            code,
+        ),
         "price": latest["Close"],
         "ret20": latest["RET20"],
         "rsi": latest["RSI14"],
         "judgment": judgment["label"],
+        "trend": judgment["trend"],
     }
 
 
+# ============================================================
+# FUTURE THEME
+# ============================================================
+
 def render_future_theme():
 
-    st.title("🚀 미래테마")
+    st.title(
+        "🚀 미래테마"
+    )
 
     st.caption(
-        "현재 주도 → 후속 수혜 → 선행 관심 순서로 테마의 연결고리를 살펴봅니다."
+        "현재 주도 → 후속 수혜 → 선행 관심 순서로 다음 투자 후보군을 살펴봅니다."
     )
 
     st.info(
-        "테마의 단계는 투자 확정 신호가 아니라 리서치용 분류입니다. "
-        "ETF 가격 추세와 실제 투자 흐름을 함께 확인하세요."
+        "테마 단계는 미래를 확정적으로 예측하는 신호가 아니라 "
+        "ETF를 조사하기 위한 연구용 분류입니다."
     )
 
     # --------------------------------------------------------
-    # REFRESH
+    # THEME FLOW
     # --------------------------------------------------------
 
-    if st.button(
-        "🔄 테마 데이터 새로고침",
-        use_container_width=True,
-    ):
+    st.markdown(
+        "### 🔄 테마 흐름"
+    )
 
-        st.cache_data.clear()
-
-        st.rerun()
-
-    # --------------------------------------------------------
-    # THEME CHAIN
-    # --------------------------------------------------------
-
-    st.markdown("### 테마 순환 구조")
-
-    chain_cols = st.columns(
+    flow_cols = st.columns(
         len(THEME_CHAIN)
     )
 
-    for index, (
-        theme_name,
+    for i, (
+        theme,
         label,
-    ) in enumerate(THEME_CHAIN):
+    ) in enumerate(
+        THEME_CHAIN
+    ):
 
-        with chain_cols[index]:
+        with flow_cols[i]:
 
             st.caption(
                 label
             )
 
-            st.markdown(
-                f"**{theme_name}**"
+            st.write(
+                f"**{theme}**"
             )
 
     st.divider()
 
     # --------------------------------------------------------
-    # THEME CARDS
+    # CURRENT LEADER
     # --------------------------------------------------------
 
-    for theme_name, info in THEMES.items():
+    st.markdown(
+        "### 🔥 현재 주도"
+    )
+
+    leader_themes = [
+        (
+            name,
+            info,
+        )
+        for name, info in THEMES.items()
+        if info["stage"] == "LEADER"
+    ]
+
+    for theme_name, info in leader_themes:
+
+        st.success(
+            f"**{theme_name}**\n\n"
+            f"{info['description']}"
+        )
+
+        for code in info["etfs"]:
+
+            result = theme_etf_summary(
+                code
+            )
+
+            if result:
+
+                c1, c2, c3 = st.columns(3)
+
+                with c1:
+
+                    st.write(
+                        f"**{result['name']}**"
+                    )
+
+                    st.caption(
+                        result["code"]
+                    )
+
+                with c2:
+
+                    st.metric(
+                        "20일",
+                        fmt_pct(
+                            result["ret20"]
+                        ),
+                    )
+
+                with c3:
+
+                    st.metric(
+                        "판단",
+                        result["judgment"],
+                    )
+
+    # --------------------------------------------------------
+    # FOLLOWERS
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### ➡️ 후속 수혜"
+    )
+
+    follower_themes = [
+        (
+            name,
+            info,
+        )
+        for name, info in THEMES.items()
+        if info["stage"] == "FOLLOWER"
+    ]
+
+    for theme_name, info in follower_themes:
 
         with st.container():
 
@@ -1764,73 +2424,27 @@ def render_future_theme():
                 theme_name
             )
 
-            if info["stage"] == "LEADER":
+            st.info(
+                info["description"]
+            )
 
-                st.success(
-                    f"현재 주도 · {info['description']}"
-                )
+            for code in info["etfs"]:
 
-            elif info["stage"] == "FOLLOWER":
-
-                st.info(
-                    f"후속 수혜 · {info['description']}"
-                )
-
-            elif info["stage"] == "EARLY":
-
-                st.warning(
-                    f"선행 관심 · {info['description']}"
-                )
-
-            else:
-
-                st.caption(
-                    f"관찰 · {info['description']}"
-                )
-
-            codes = info["etfs"]
-
-            if not codes:
-
-                st.caption(
-                    "현재 앱의 ETF 목록에서는 전용 ETF를 별도로 연결하지 않았습니다."
-                )
-
-                st.divider()
-
-                continue
-
-            results = []
-
-            for code in codes:
-
-                result = render_theme_etf(
+                result = theme_etf_summary(
                     code
                 )
 
                 if result:
 
-                    results.append(
-                        result
-                    )
+                    c1, c2, c3 = st.columns(3)
 
-            if results:
-
-                for result in results:
-
-                    col1, col2, col3 = st.columns(3)
-
-                    with col1:
+                    with c1:
 
                         st.write(
                             f"**{result['name']}**"
                         )
 
-                        st.caption(
-                            result["code"]
-                        )
-
-                    with col2:
+                    with c2:
 
                         st.metric(
                             "20일",
@@ -1839,93 +2453,169 @@ def render_future_theme():
                             ),
                         )
 
-                    with col3:
+                    with c3:
+
+                        st.metric(
+                            "상태",
+                            result["judgment"],
+                        )
+
+    # --------------------------------------------------------
+    # EARLY
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### 💎 선행 관심 / 원석"
+    )
+
+    early_themes = [
+        (
+            name,
+            info,
+        )
+        for name, info in THEMES.items()
+        if info["stage"] == "EARLY"
+    ]
+
+    for theme_name, info in early_themes:
+
+        st.warning(
+            f"**{theme_name}**\n\n"
+            f"{info['description']}"
+        )
+
+        if info["etfs"]:
+
+            for code in info["etfs"]:
+
+                result = theme_etf_summary(
+                    code
+                )
+
+                if result:
+
+                    c1, c2, c3 = st.columns(3)
+
+                    with c1:
+
+                        st.write(
+                            f"**{result['name']}**"
+                        )
+
+                    with c2:
+
+                        st.metric(
+                            "20일",
+                            fmt_pct(
+                                result["ret20"]
+                            ),
+                        )
+
+                    with c3:
 
                         st.metric(
                             "판단",
                             result["judgment"],
                         )
 
-            st.divider()
+        else:
 
-    # --------------------------------------------------------
-    # EARLY / GEM
-    # --------------------------------------------------------
-
-    st.markdown("### 🔎 원석 후보")
-
-    early_themes = [
-        theme
-        for theme, info in THEMES.items()
-        if info["stage"] == "EARLY"
-    ]
-
-    if early_themes:
-
-        for theme in early_themes:
-
-            info = THEMES[theme]
-
-            st.warning(
-                f"**{theme}**\n\n"
-                f"{info['description']}"
+            st.caption(
+                "현재 등록된 국내 ETF 중 이 테마를 직접 추종하는 전용 ETF가 없습니다."
             )
 
-            if info["etfs"]:
-
-                for code in info["etfs"]:
-
-                    st.write(
-                        f"• {ETF_UNIVERSE.get(code, code)}"
-                    )
-
-            else:
-
-                st.caption(
-                    "현재 등록된 국내 ETF 중 직접 연결할 전용 상품이 없습니다."
-                )
-
     # --------------------------------------------------------
-    # RESEARCH LOGIC
+    # WATCH
     # --------------------------------------------------------
 
-    st.markdown("### 테마를 보는 방법")
+    st.markdown(
+        "### 👀 관찰 테마"
+    )
 
-    st.write(
-        "• LEADER : 현재 시장의 관심이 집중되는 주도 영역"
+    watch_themes = [
+        (
+            name,
+            info,
+        )
+        for name, info in THEMES.items()
+        if info["stage"] == "WATCH"
+    ]
+
+    for theme_name, info in watch_themes:
+
+        st.info(
+            f"**{theme_name}** · {info['description']}"
+        )
+
+        names = [
+            ETF_UNIVERSE.get(
+                code,
+                code,
+            )
+            for code in info["etfs"]
+        ]
+
+        if names:
+
+            st.write(
+                " · ".join(names)
+            )
+
+    # --------------------------------------------------------
+    # HOW TO USE
+    # --------------------------------------------------------
+
+    st.markdown(
+        "### 📌 미래테마 활용법"
     )
 
     st.write(
-        "• FOLLOWER : 주도 영역의 투자 확대에 따라 후속 수혜를 받을 수 있는 영역"
+        "① 현재 주도 테마의 추세가 유지되는지 확인"
     )
 
     st.write(
-        "• EARLY : 아직 시장 관심이 상대적으로 낮지만 구조적인 성장 가능성을 관찰하는 영역"
+        "② 그 다음 단계의 후속 수혜 테마를 미리 관찰"
     )
 
     st.write(
-        "• WATCH : 방향성이 확인될 때까지 관찰하는 영역"
+        "③ 선행 관심 테마는 가격보다 거래량과 추세 전환을 먼저 확인"
+    )
+
+    st.write(
+        "④ 실제 매수는 미래테마 판단보다 개별 ETF의 가격 구간과 추세를 함께 확인"
     )
 
 
 # ============================================================
-# MAIN
+# MAIN NAVIGATION
 # ============================================================
 
-tab1, tab2 = st.tabs(
+st.divider()
+
+nav = st.radio(
+    "메인 메뉴",
     [
         "📌 내 ETF",
         "🚀 미래테마",
-    ]
+    ],
+    index=(
+        0
+        if st.session_state.page == "내 ETF"
+        else 1
+    ),
+    horizontal=True,
+    label_visibility="collapsed",
 )
 
+if nav == "📌 내 ETF":
 
-with tab1:
+    st.session_state.page = "내 ETF"
 
     render_my_etf()
 
+else:
 
-with tab2:
+    st.session_state.page = "미래테마"
 
     render_future_theme()
 
@@ -1937,5 +2627,5 @@ with tab2:
 st.divider()
 
 st.caption(
-    "ETF RADAR · 시장 데이터 기반 리서치 보조 도구 · 투자 판단은 사용자가 최종 결정"
+    "ETF RADAR · 시장 데이터 기반 리서치 보조 도구 · 최종 투자 판단은 사용자가 결정"
 )
