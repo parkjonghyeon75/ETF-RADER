@@ -1,0 +1,9 @@
+streamlit>=1.36,<2.0
+yfinance
+pandas>=2.0,<3.0
+numpy
+plotly
+requests
+streamlit-autorefresh
+scikit-learn
+git+https://github.com/beaten-by-the-market/krx-data-api.git
