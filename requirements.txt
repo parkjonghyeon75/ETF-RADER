@@ -1,0 +1,10 @@
+streamlit
+yfinance
+pandas
+numpy
+plotly
+requests
+Pillow
+pytesseract
+pillow-heif
+streamlit-autorefresh
